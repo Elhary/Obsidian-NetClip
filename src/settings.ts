@@ -120,10 +120,10 @@ export class NetClipSettingTab extends PluginSettingTab {
                     .addOption('kagi', 'Kagi')
 
 
-                    .setValue(this.plugin.settings.searchEngine) // Set the initial value
+                    .setValue(this.plugin.settings.searchEngine) 
                     .onChange(async (value: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi') => {
-                        console.log('Selected Search Engine:', value); // Debug log
-                        this.plugin.settings.searchEngine = value; // Update the settings object
+                        console.log('Selected Search Engine:', value);
+                        this.plugin.settings.searchEngine = value; 
                         await this.plugin.saveSettings();
                     })
             );
