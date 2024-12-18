@@ -1,7 +1,7 @@
 {
-	"name": "quick-clip",
+	"name": "netClip",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Clip, save, search, and browse web pages within Obsidian",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
