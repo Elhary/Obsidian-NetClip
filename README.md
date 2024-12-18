@@ -2,7 +2,7 @@
 
 this plugin is for Obsidian that allows you to browse the web and clip webpages directly into your vault.
 
-![preview_img_1](./assets/Screenshot.png)
+![preview_img_1](./assets/screenshot.png)
 
 ## Features
 
