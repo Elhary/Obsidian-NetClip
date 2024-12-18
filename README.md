@@ -47,7 +47,7 @@ This plugin is licensed under the MIT License.
 
 If you find the plugin helpful and would like to support its development, you can make a donation to help fund future updates, improvements, and new features.
 
-- [Ko-fi]()
-- [Buy Me a Coffee](buymeacoffee.com/el_haris)
+- [Ko-fi](https://ko-fi.com/elharis)
+- [Buy Me a Coffee](https://buymeacoffee.com/el_haris)
 
 
