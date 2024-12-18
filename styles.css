@@ -1,0 +1,316 @@
+.net_clipper_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.net_clipper_header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.netopen_Web, .netopen_settings {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.netopen_Web, .netopen_settings svg {
+    color: var(--text-muted);
+}
+
+.netclip_input_container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.netclip_input_container input {
+    flex: 1;
+    padding: 14px;
+    height: 40px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid var(--background-modifier-border);
+}
+
+.netclip_input_container button {
+    margin-left: 6px;
+    padding: 14px;
+    height: 40px;
+    color: var(--text-normal);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.netclip_saved_container {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+}
+
+.netClip_card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 220px;
+    height: 280px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.netClip_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.netClip_card img {
+    max-width: 100%;
+    height: 180px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.netClip_card h6 {
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 0 6px;
+    text-decoration: none;
+    color: var(--text-normal);
+    width: 100%;
+    height: 5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+}
+
+.netclip_card_bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-accent);
+}
+
+.domain {
+    text-decoration: none;
+    color: var(--text-accent);
+    font-weight: bold;
+}
+
+.domain:hover {
+    text-decoration: underline;
+}
+
+.menu-button {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    fill: var(--text-muted);
+}
+
+.menu-button svg {
+    fill: var(--text-muted);
+    height: 20px;
+    width: 20px;
+}
+
+.empty_box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.empty_icon svg {
+    stroke: #666;
+    opacity: 80%;
+}
+
+.empty_box p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.netclip_button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.mod-warning {
+    background-color: var(--background-modifier-error);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mod-warning:hover {
+    background-color: #c9302c;
+}
+
+.netClip_webview_container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: var(--background-secondary);
+}
+
+.netClip_webview_container .netClip_frame-container {
+    height: 100%;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.netClip_webview_container .netClip_web_controls {
+    display: flex;
+    padding: 10px;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.netClip_webview_container .netClip_btn {
+    box-shadow: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.netClip_webview_container .netClip_nav_left .netClip_btn svg {
+    height: 18px;
+    width: 18px;
+    stroke: var(--text-muted);
+}
+
+.netClip_webview_container .netClip_web_controls .netClip_nav_left {
+    display: flex;
+}
+
+.netClip_webview_container .netClip_web_controls .netClip_search_container {
+    position: relative;
+    width: 100%;
+}
+
+.netClip_webview_container .netClip_web_controls .netClip_search_container input {
+    width: 100%;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.netClip_query_box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    max-height: 320px;
+    overflow: hidden;
+    overflow-y: scroll;
+    background-color: var(--background-primary);
+    border-radius: 10px;
+    border: 1px solid var(--background-modifier-border);
+}
+
+.netClip_suggestions {
+    display: flex;
+    flex-direction: column;
+}
+
+.netClip-suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    gap: 8px;
+}
+
+.netClip-suggestion-item svg {
+    stroke: var(--text-muted);
+    height: 16px;
+    width: 16px;
+}
+
+.netClip-suggestion-item:hover {
+    background-color: var(--background-secondary);
+}
+
+.netClip-suggestion-item.selected {
+    background-color:   var(--background-modifier-hover);
+}
+
+.netClip_btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 5px solid var(--background-modifier-border);
+    border-top: 5px solid var(--interactive-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .netClip_card {
+        max-width: 200px;
+        height: 260px;
+    }
+
+    .netclip_saved_container {
+        justify-content: center;
+    }
+
+    .netclip_input_container input,
+    .netclip_input_container button {
+        width: 100%;
+        padding: 12px;
+    }
+}
