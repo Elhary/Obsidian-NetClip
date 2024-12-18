@@ -1,6 +1,6 @@
-import { baseSearchUrls } from './searchUrls';  // Import base search URLs
+import { baseSearchUrls } from './searchUrls';  
 import { requestUrl } from 'obsidian';
-import { fetchSuggestions } from './fetchSuggestions'; // Import the fetchSuggestions function
+import { fetchSuggestions } from './fetchSuggestions'; 
 
 export interface WebSearchSettings {
     searchEngine?: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
@@ -14,7 +14,7 @@ export class WebSearch {
     private currentSuggestionIndex: number = -1;
     private settings: WebSearchSettings;
 
-    // Use the imported baseSearchUrls
+
     private baseSearchUrls: Record<string, string> = baseSearchUrls;
 
     constructor(
@@ -35,7 +35,7 @@ export class WebSearch {
     }
 
     private setupEventListeners(): void {
-        // Input event for suggestions
+
         this.searchInput.addEventListener('input', () => {
             const query = this.searchInput.value.trim();
             if (query === '') {
@@ -50,7 +50,7 @@ export class WebSearch {
             }
         });
 
-        // Keyboard navigation for suggestions
+
         this.searchInput.addEventListener("keydown", (event) => {
             const suggestions = this.suggestionsBox.children;
             switch (event.key) {
@@ -72,7 +72,6 @@ export class WebSearch {
             }
         });
 
-        // Click outside handler to hide suggestions
         document.addEventListener('click', (event) => {
             if (!this.searchInput.contains(event.target as Node) &&
                 !this.suggestionContainer.contains(event.target as Node)) {
