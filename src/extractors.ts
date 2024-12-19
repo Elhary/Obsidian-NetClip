@@ -15,7 +15,7 @@ export class ContentExtractors {
 
     const mainSelectors = [
       'main', 'article', '.main-content', '#main-content',
-      '.entry-content', '#productDescription', '#feature-bullets', '.markdown','[class*="blog"]',
+      '.entry-content', '#productDescription', '#feature-bullets', '.markdown', '[class*="blog"]',
       '#centerCol', '.a-section.a-spacing-none', '.Blog', '[class*="blog"]'
     ];
 
@@ -44,21 +44,21 @@ export class ContentExtractors {
         el.remove();
       }
     });
-const elementsToRemove = [
-  'script', 'style', 'svg', 'nav', 'footer', 'header', 'aside', 
-  '[class*="footer"]', '[class*="nav"]', '[class*="sidebar"]', '[class*="sticky"]',
-  '.ad-container', '.advertisement', '.cookie-consent', '.menu', '[class*="menu"]',
-  '.tags', '[class*="tags"]', '[class*="popup"]', '[class*="related"]', '.related',
-  '[class*="header"]', '[class*="newsletter"]', '[class*="form"]', '[aria-label="Navigation"]',
-  '[class*="share"]', '[class*="author"]', '.read-next', '[class*="read-next"]',
-  '[data-module="newsletter"]', '[data-component="navigation"]', '[class*="icon"]', '.flex-col'
-].join(',');
+    const elementsToRemove = [
+      'script', 'style', 'svg', 'nav', 'footer', 'header', 'aside',
+      '[class*="footer"]', '[class*="nav"]', '[class*="sidebar"]', '[class*="sticky"]',
+      '.ad-container', '.advertisement', '.cookie-consent', '.menu', '[class*="menu"]',
+      '.tags', '[class*="tags"]', '[class*="popup"]', '[class*="related"]', '.related',
+      '[class*="header"]', '[class*="newsletter"]', '[class*="form"]', '[aria-label="Navigation"]',
+      '[class*="share"]', '[class*="author"]', '.read-next', '[class*="read-next"]',
+      '[data-module="newsletter"]', '[data-component="navigation"]', '[class*="icon"]', '.flex-col'
+    ].join(',');
 
-const preservedTags = [
-  'main', 'article', '[class*="article"]', '[class*="main"]', '.article',
-  'p', 'img', 'ul', 'ol', '[class*="blog"]', '.entry-content', '.Blog',
-  'header'
-];
+    const preservedTags = [
+      'main', 'article', '[class*="article"]', '[class*="main"]', '.article',
+      'p', 'img', 'ul', 'ol', '[class*="blog"]', '.entry-content', '.Blog',
+      'header'
+    ];
 
 
     // Remove elements
@@ -104,7 +104,7 @@ const preservedTags = [
 
 
 
-  
+
   extractPublishTime(doc: Document): string {
     const publishDate = doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content');
     return publishDate || '';
@@ -129,7 +129,7 @@ const preservedTags = [
 
 
 
-  
+
   extractPrice(doc: Document): string | null {
     const priceSelectors = [
       '.price', 'meta[itemprop="price"]', '.current-price',
@@ -145,7 +145,7 @@ const preservedTags = [
     return null;
   }
 
-  
+
 
 
 
@@ -176,55 +176,55 @@ const preservedTags = [
 
   extractRating(doc: Document): string | null {
     const ratingSelectors = [
-        '#acrPopover',                    
-        'meta[itemprop="rating"]',        
-        'meta[itemprop="review"]',      
-        '.average-rating',               
-        '.star-rating',                 
-        '[class*="rating"]',               
+      '#acrPopover',
+      'meta[itemprop="rating"]',
+      'meta[itemprop="review"]',
+      '.average-rating',
+      '.star-rating',
+      '[class*="rating"]',
     ];
 
     let ratingText: string | null = null;
 
 
     for (const selector of ratingSelectors) {
-        const ratingElement = doc.querySelector(selector);
-        if (ratingElement) {
-            const text = ratingElement.textContent?.trim();
-            if (text) {
-                ratingText = text;
-                break;
-            }
+      const ratingElement = doc.querySelector(selector);
+      if (ratingElement) {
+        const text = ratingElement.textContent?.trim();
+        if (text) {
+          ratingText = text;
+          break;
         }
+      }
     }
 
-  
+
     if (!ratingText) {
-        const starIcons = Array.from(doc.querySelectorAll('span, div')).find(
-            el => el.textContent?.trim().match(/^★+$/)
-        );
-        if (starIcons) {
-            const starCount = starIcons.textContent!.length;
-            ratingText = `${starCount} out of 5 stars`;
-        }
+      const starIcons = Array.from(doc.querySelectorAll('span, div')).find(
+        el => el.textContent?.trim().match(/^★+$/)
+      );
+      if (starIcons) {
+        const starCount = starIcons.textContent!.length;
+        ratingText = `${starCount} out of 5 stars`;
+      }
     }
 
     if (ratingText) {
 
-        const numericMatch = ratingText.match(/(\d+(\.\d+)?)\s*out\s*of\s*5/i);
-        if (numericMatch) {
-            const numericRating = parseFloat(numericMatch[1]);
-            const roundedStars = Math.round(numericRating);
-            const stars = '★'.repeat(roundedStars) + '☆'.repeat(5 - roundedStars);
-            return `${numericRating} out of 5 stars (${stars})`;
-        }
+      const numericMatch = ratingText.match(/(\d+(\.\d+)?)\s*out\s*of\s*5/i);
+      if (numericMatch) {
+        const numericRating = parseFloat(numericMatch[1]);
+        const roundedStars = Math.round(numericRating);
+        const stars = '★'.repeat(roundedStars) + '☆'.repeat(5 - roundedStars);
+        return `${numericRating} out of 5 stars (${stars})`;
+      }
 
-        const starMatch = ratingText.match(/★+/);
-        if (starMatch) {
-            const starRating = starMatch[0].length;
-            const stars = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
-            return `${starRating} out of 5 stars (${stars})`;
-        }
+      const starMatch = ratingText.match(/★+/);
+      if (starMatch) {
+        const starRating = starMatch[0].length;
+        const stars = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
+        return `${starRating} out of 5 stars (${stars})`;
+      }
     }
 
     return null;
@@ -246,5 +246,5 @@ const preservedTags = [
 
 
 
-  
+
 }
