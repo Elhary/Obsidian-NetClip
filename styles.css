@@ -203,6 +203,8 @@
     background-color: #fff;
 }
 
+
+
 .webview {
     width: 100%;
     height: 100%;
@@ -210,6 +212,7 @@
     background-color: #f0f0f0;
     object-fit: contain;
 }
+
 .netClip_webview_container .netClip_web_controls {
     display: flex;
     padding: 10px;
@@ -218,6 +221,7 @@
     justify-content: center;
     width: 100%;
 }
+
 
 .netClip_webview_container .netClip_btn {
     box-shadow: none;
