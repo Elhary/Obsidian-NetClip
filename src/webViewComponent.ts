@@ -12,15 +12,11 @@ export interface WebviewTag extends HTMLElement {
     canGoForward?: () => boolean;
 }
 
-
 interface WebViewComponentSettings extends WebSearchSettings {
     defaultWidth?: string;
     defaultHeight?: string;
     fitToContainer?: boolean;
 }
-
-
-
 
 export class WebViewComponent {
     private frame: HTMLIFrameElement | WebviewTag;
@@ -36,7 +32,6 @@ export class WebViewComponent {
     private loadingSpinner: HTMLElement;
     private searchInput: HTMLInputElement;
     private search: WebSearch;
-
     private onClipCallback?: (url: string) => Promise<void>;
 
     constructor(
@@ -57,25 +52,19 @@ export class WebViewComponent {
     }
 
 
+    
     createContainer(): HTMLElement {
-
         const containerEl = document.createElement('div');
         containerEl.classList.add('netClip_webview_container');
         const controlsEl = containerEl.createDiv('netClip_web_controls');
-
         this.setupNavigationBtns(controlsEl);
         this.setupSearchInput(controlsEl);
         this.setupClipBtn(controlsEl);
         this.setupFrameContainer(containerEl);
-
         this.navigationHistory.push(this.url);
         this.currentHistoryIndex = 0;
-
         return containerEl;
-
     }
-
-
 
 
 
@@ -83,25 +72,21 @@ export class WebViewComponent {
     private setupSearchInput(container: HTMLElement): void {
         const searchContainer = container.createDiv('netClip_search_container');
         this.searchInput = searchContainer.createEl('input', { type: 'text', placeholder: 'Search...', value: this.url });
-
         const suggestionContainer = searchContainer.createDiv('netClip_query_box');
         const suggestionsBox = suggestionContainer.createDiv('netClip_suggestions');
-
-
         this.search = new WebSearch(
             this.searchInput,
             suggestionContainer,
             suggestionsBox,
             { searchEngine: this.settings.searchEngine }
         );
-
-
         this.searchInput.addEventListener('search-query', (event: CustomEvent) => {
             const { url } = event.detail;
             this.navigateTo(url);
         });
-
     }
+
+
 
 
     private setupClipBtn(container: HTMLElement): void {
@@ -115,45 +100,40 @@ export class WebViewComponent {
     }
 
 
+
     private setupNavigationBtns(container: HTMLElement): void {
         const leftContainer = container.createDiv('netClip_nav_left');
-
         this.backBtn = leftContainer.createEl('button', { cls: 'netClip_back_btn netClip_btn' });
         setIcon(this.backBtn, 'chevron-left');
-
         this.backBtn.onclick = () => this.goBack();
         this.backBtn.disabled = true;
 
-
         this.forwardBtn = leftContainer.createEl('button', { cls: 'netClip_forward_btn netClip_btn' });
         setIcon(this.forwardBtn, 'chevron-right');
-
         this.forwardBtn.onclick = () => this.goForward();
         this.forwardBtn.disabled = true;
-
 
         this.refreshBtn = leftContainer.createEl('button', { cls: 'netClip_refresh_btn netClip_btn' });
         setIcon(this.refreshBtn, 'rotate-ccw');
         this.refreshBtn.onclick = () => this.refresh();
-
     }
 
 
-    
+
     private setupFrameContainer(containerEl: HTMLElement): HTMLElement {
         const frameContainer = containerEl.createDiv('netClip_frame-container');
         this.loadingSpinner = frameContainer.createDiv('loading-spinner');
-
-
         this.frame = this.createFrame();
         frameContainer.appendChild(this.frame);
         return frameContainer;
     }
 
 
+
     private createFrame(): HTMLIFrameElement | WebviewTag {
         return Platform.isMobileApp ? this.createIframe() : this.createWebview();
-      }
+    }
+
 
 
     private createIframe(): HTMLIFrameElement {
@@ -165,61 +145,58 @@ export class WebViewComponent {
         iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
         iframe.addEventListener('load', () => {
-          this.onFrameLoad();
+            this.onFrameLoad();
         });
         return iframe;
-      }
-    
-      // Create webview for desktop
-      private createWebview(): WebviewTag {
+    }
+
+
+    private createWebview(): WebviewTag {
         const webview = document.createElement('webview') as WebviewTag;
         webview.classList.add('webview');
         webview.allowpopups = true;
         webview.src = this.url;
-    
-        webview.addEventListener('dom-ready', () => {
-          this.isFrameReady = true;
-          this.updateUrlDisplay();
-          this.loadingSpinner.classList.add('loading-spinner-visible'); 
-        });
-    
-        webview.addEventListener('did-start-loading', () => {
-            this.loadingSpinner.classList.add('loading-spinner-visible'); 
-        });
-    
-        webview.addEventListener('did-stop-loading', () => {
-            this.loadingSpinner.classList.add('loading-spinner-visible'); 
-        });
-    
-        webview.addEventListener('did-navigate', () => {
-          this.updateUrlDisplay();
-          this.updateNavigationButtons();
-        });
-    
-        webview.addEventListener('did-navigate-in-page', () => {
-          this.updateUrlDisplay();
-          this.updateNavigationButtons();
-        });
-    
-        return webview;
-      }
 
+        webview.addEventListener('dom-ready', () => {
+            this.isFrameReady = true;
+            this.updateUrlDisplay();
+            this.loadingSpinner.classList.remove('loading-spinner-visible');
+        });
+
+        webview.addEventListener('did-start-loading', () => {
+            this.loadingSpinner.classList.add('loading-spinner-visible');
+        });
+
+        webview.addEventListener('did-stop-loading', () => {
+            this.loadingSpinner.classList.remove('loading-spinner-visible');
+        });
+
+        webview.addEventListener('did-navigate', () => {
+            this.updateUrlDisplay();
+            this.updateNavigationButtons();
+        });
+
+        webview.addEventListener('did-navigate-in-page', () => {
+            this.updateUrlDisplay();
+            this.updateNavigationButtons();
+        });
+
+        return webview;
+    }
 
 
 
     private onFrameLoad(): void {
         this.isFrameReady = true;
         this.updateUrlDisplay();
-    
         const currentUrl = this.getCurrentUrl();
         if (currentUrl !== this.navigationHistory[this.currentHistoryIndex]) {
-          this.navigationHistory = this.navigationHistory.slice(0, this.currentHistoryIndex + 1);
-          this.navigationHistory.push(currentUrl);
-          this.currentHistoryIndex++;
-          this.updateNavigationButtons();
+            this.navigationHistory = this.navigationHistory.slice(0, this.currentHistoryIndex + 1);
+            this.navigationHistory.push(currentUrl);
+            this.currentHistoryIndex++;
+            this.updateNavigationButtons();
         }
-      }
-
+    }
 
 
 
@@ -231,9 +208,7 @@ export class WebViewComponent {
         this.frame.src = this.url;
         this.updateUrlDisplay();
     }
-
-
-
+    
 
 
     private getCurrentUrl(): string {
@@ -247,16 +222,13 @@ export class WebViewComponent {
 
 
 
-
     private updateUrlDisplay(): void {
         const currentUrl = this.getCurrentUrl();
         this.url = currentUrl;
-
         if (this.searchInput) {
             this.searchInput.value = currentUrl;
         }
     }
-
 
 
 
@@ -274,11 +246,9 @@ export class WebViewComponent {
 
 
 
-
     private goBack(): void {
         if (this.isFrameReady) {
             this.loadingSpinner.classList.add('loading-spinner-visible');
-
             if (this.frame instanceof HTMLIFrameElement) {
                 if (this.currentHistoryIndex > 0) {
                     this.currentHistoryIndex--;
@@ -295,11 +265,9 @@ export class WebViewComponent {
 
 
 
-
     private goForward(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.classList.add('loading-spinner-visible'); 
-
+            this.loadingSpinner.classList.add('loading-spinner-visible');
             if (this.frame instanceof HTMLIFrameElement) {
                 if (this.currentHistoryIndex < this.navigationHistory.length - 1) {
                     this.currentHistoryIndex++;
@@ -318,7 +286,7 @@ export class WebViewComponent {
 
     private refresh(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.classList.add('loading-spinner-visible'); 
+            this.loadingSpinner.classList.add('loading-spinner-visible');
             if (this.frame instanceof HTMLIFrameElement) {
                 this.frame.contentWindow?.location.reload();
             } else {
@@ -326,7 +294,4 @@ export class WebViewComponent {
             }
         }
     }
-
-
-
 }
