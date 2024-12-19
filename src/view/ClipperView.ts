@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, Setting } from 'obsidian'
+import { ItemView, WorkspaceLeaf, TFile, Setting, setIcon } from 'obsidian'
 import NetClipPlugin from '../main'
 import { NetClipSettingTab } from '../settings'
 import { getDomain, normalizeUrl } from '../utils'
@@ -33,14 +33,10 @@ async onOpen() {
         const clipperContainer = this.containerEl.createEl('div', { cls: 'net_clipper_container' })
         const clipperHeader = clipperContainer.createEl('div', { cls: 'net_clipper_header' })
         const openWeb = clipperHeader.createEl('span', { cls: 'netopen_Web' });
-
-        openWeb.innerHTML = `
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe">
-           <circle cx="12" cy="12" r="10"/>
-           <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-           <path d="M2 12h20"/>
-         </svg>
-         `
+        const openSettings = clipperHeader.createEl('span', {cls: 'netopen_settings'});
+        setIcon(openWeb, 'globe')
+        setIcon(openSettings, 'lucide-bolt');
+ 
          
          const clipInputContainer = clipperContainer.createEl('div', {cls: 'netclip_input_container'});
 
@@ -63,6 +59,10 @@ async onOpen() {
                 
                 this.app.workspace.setActiveLeaf(leaf, { focus: true });
             }
+        });
+        openSettings.addEventListener('click', () => {
+            this.app.setting.open();
+            this.app.setting.openTabById('net-clip-settings');
         });
          const clipInput = clipInputContainer.createEl('input', 
         {
@@ -100,7 +100,7 @@ async onOpen() {
         if(clippedFiles.length === 0){
             const emptyContainer = container.createEl('div', { cls: 'empty_box' })
             const emptyIcon = emptyContainer.createEl("span", { cls: 'empty_icon' })
-            emptyIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>`;
+            setIcon(emptyIcon, 'lucide-book-open');
             emptyContainer.createEl("p", { text: "No articles saved yet." });
             return;        
         }
@@ -146,10 +146,7 @@ async onOpen() {
     
     private createMenuButton(bottomContent: HTMLElement, file: TFile, url?: string) {
         const menuButton = bottomContent.createEl("span", { cls: "menu-button" });
-        menuButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" viewBox="0 0 256 256">
-                <path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z"></path>
-            </svg>`;
+        setIcon(menuButton, 'more-vertical');
 
         menuButton.addEventListener("click", (event) => {
             event.preventDefault();
@@ -173,7 +170,8 @@ async onOpen() {
             this.app, 
             file, 
             async () => {
-                await this.app.vault.delete(file);
+                //changed
+                await this.app.fileManager.trashFile(file);
                 const savedContainer = this.containerEl.querySelector(".netclip_saved_container") as HTMLElement;
                 await this.renderSavedContent(savedContainer);
             }
