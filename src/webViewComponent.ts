@@ -33,8 +33,6 @@ export class WebViewComponent {
     private clipBtn?: HTMLButtonElement;
     private navigationHistory: string[] = [];
     private currentHistoryIndex: number = -1;
-
-
     private loadingSpinner: HTMLElement;
     private searchInput: HTMLInputElement;
     private search: WebSearch;
@@ -68,10 +66,6 @@ export class WebViewComponent {
         this.setupNavigationBtns(controlsEl);
         this.setupSearchInput(controlsEl);
         this.setupClipBtn(controlsEl);
-
-
-
-
         this.setupFrameContainer(containerEl);
 
         this.navigationHistory.push(this.url);
@@ -319,7 +313,6 @@ export class WebViewComponent {
             }
         }
     }
-
 
 
 
