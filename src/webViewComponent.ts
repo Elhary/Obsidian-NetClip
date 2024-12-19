@@ -181,6 +181,7 @@ export class WebViewComponent {
         const webview = document.createElement('webview') as WebviewTag;
         webview.allowpopups = true;
         webview.src = this.url;
+        webview.classList.add('webview');
 
     
         webview.addEventListener('dom-ready', () => {
