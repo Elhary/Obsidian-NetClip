@@ -38,8 +38,8 @@ export default class NetClipPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'open-net-clip',
-      name: 'OpenNetClip',
+      id: 'open-clipper',
+      name: 'Open View Clipper',
       callback: () => {
         this.activateView();
       }
@@ -47,8 +47,8 @@ export default class NetClipPlugin extends Plugin {
 
     
     this.addCommand({
-      id: 'open-workspace-webview',
-      name: 'Open Web View on Workspace',
+      id: 'open-web-editor',
+      name: 'Open Web on editor',
       callback: async () => {
         const leaf = this.app.workspace.getLeaf(true);
         await leaf.setViewState({
@@ -56,22 +56,20 @@ export default class NetClipPlugin extends Plugin {
           active: true
         });
         this.app.workspace.revealLeaf(leaf);
-      },
-      hotkeys: [{ modifiers: ['Ctrl', 'Alt'], key: 'x' }],
+      }
     });
 
     
     this.addCommand({
       id: 'open-web-modal',
-      name: 'Open Web view on Modal',
+      name: 'Open Web on Modal',
       checkCallback: (checking) => {
         if (checking) {
           return true;
         }
         const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
         new WebViewModal(this.app, defaultUrl, undefined, this).open();
-      },
-      hotkeys: [{ modifiers: ['Ctrl', 'Alt'], key: 'z' }]
+      }
     });
 
 
