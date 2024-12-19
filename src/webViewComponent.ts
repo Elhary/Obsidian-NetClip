@@ -27,9 +27,9 @@ export class WebViewComponent {
     private url: string;
     private isFrameReady: boolean = false;
     private settings: WebViewComponentSettings;
-    private refreshBtn: HTMLButtonElement
     private backBtn: HTMLButtonElement;
     private forwardBtn: HTMLButtonElement;
+    private refreshBtn: HTMLButtonElement;
     private clipBtn?: HTMLButtonElement;
     private navigationHistory: string[] = [];
     private currentHistoryIndex: number = -1;
@@ -83,6 +83,9 @@ export class WebViewComponent {
 
 
 
+
+
+
     private setupSearchInput(container: HTMLElement): void {
         const searchContainer = container.createDiv('netClip_search_container');
         this.searchInput = searchContainer.createEl('input', { type: 'text', placeholder: 'Search...', value: this.url });
@@ -124,7 +127,6 @@ export class WebViewComponent {
         this.backBtn = leftContainer.createEl('button', { cls: 'netClip_back_btn netClip_btn' });
         setIcon(this.backBtn, 'chevron-left');
 
-
         this.backBtn.onclick = () => this.goBack();
         this.backBtn.disabled = true;
 
@@ -132,7 +134,6 @@ export class WebViewComponent {
         this.forwardBtn = leftContainer.createEl('button', { cls: 'netClip_forward_btn netClip_btn' });
         setIcon(this.forwardBtn, 'chevron-right');
 
- 
         this.forwardBtn.onclick = () => this.goForward();
         this.forwardBtn.disabled = true;
 
@@ -147,11 +148,11 @@ export class WebViewComponent {
     
     private setupFrameContainer(containerEl: HTMLElement): HTMLElement {
         const frameContainer = containerEl.createDiv('netClip_frame-container');
-        this.loadingSpinner = frameContainer.createDiv('loading-spinner')
+        this.loadingSpinner = frameContainer.createDiv('loading-spinner');
+
 
         this.frame = this.createFrame();
         frameContainer.appendChild(this.frame);
-
         return frameContainer;
     }
 
@@ -169,7 +170,6 @@ export class WebViewComponent {
         iframe.setAttribute('src', this.url);
         iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
-        
         iframe.addEventListener('load', () => {
           this.onFrameLoad();
         });
@@ -179,10 +179,9 @@ export class WebViewComponent {
       // Create webview for desktop
       private createWebview(): WebviewTag {
         const webview = document.createElement('webview') as WebviewTag;
+        webview.classList.add('webview');
         webview.allowpopups = true;
         webview.src = this.url;
-        webview.classList.add('webview');
-
     
         webview.addEventListener('dom-ready', () => {
           this.isFrameReady = true;
@@ -217,9 +216,7 @@ export class WebViewComponent {
     private onFrameLoad(): void {
         this.isFrameReady = true;
         this.updateUrlDisplay();
-        this.loadingSpinner.classList.add('loading-spinner-visible'); 
     
-        // Update navigation history when iframe loads new page
         const currentUrl = this.getCurrentUrl();
         if (currentUrl !== this.navigationHistory[this.currentHistoryIndex]) {
           this.navigationHistory = this.navigationHistory.slice(0, this.currentHistoryIndex + 1);
@@ -286,7 +283,7 @@ export class WebViewComponent {
 
     private goBack(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.classList.add('loading-spinner-visible'); 
+            this.loadingSpinner.classList.add('loading-spinner-visible');
 
             if (this.frame instanceof HTMLIFrameElement) {
                 if (this.currentHistoryIndex > 0) {
@@ -329,7 +326,6 @@ export class WebViewComponent {
     private refresh(): void {
         if (this.isFrameReady) {
             this.loadingSpinner.classList.add('loading-spinner-visible'); 
-
             if (this.frame instanceof HTMLIFrameElement) {
                 this.frame.contentWindow?.location.reload();
             } else {
