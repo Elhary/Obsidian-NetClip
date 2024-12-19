@@ -1,4 +1,4 @@
-import { App, Platform } from 'obsidian';
+import { App, Platform, setIcon } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
 
 export interface WebviewTag extends HTMLElement {
@@ -27,7 +27,7 @@ export class WebViewComponent {
     private url: string;
     private isFrameReady: boolean = false;
     private settings: WebViewComponentSettings;
-
+    private refreshBtn: HTMLButtonElement
     private backBtn: HTMLButtonElement;
     private forwardBtn: HTMLButtonElement;
     private clipBtn?: HTMLButtonElement;
@@ -83,13 +83,6 @@ export class WebViewComponent {
 
 
 
-
-
-
-
-
-
-
     private setupSearchInput(container: HTMLElement): void {
         const searchContainer = container.createDiv('netClip_search_container');
         this.searchInput = searchContainer.createEl('input', { type: 'text', placeholder: 'Search...', value: this.url });
@@ -129,26 +122,24 @@ export class WebViewComponent {
         const leftContainer = container.createDiv('netClip_nav_left');
 
         this.backBtn = leftContainer.createEl('button', { cls: 'netClip_back_btn netClip_btn' });
-        this.backBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
-        `
+        setIcon(this.backBtn, 'chevron-left');
+
+
         this.backBtn.onclick = () => this.goBack();
         this.backBtn.disabled = true;
 
 
         this.forwardBtn = leftContainer.createEl('button', { cls: 'netClip_forward_btn netClip_btn' });
-        this.forwardBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
-        `
+        setIcon(this.forwardBtn, 'chevron-right');
+
+ 
         this.forwardBtn.onclick = () => this.goForward();
         this.forwardBtn.disabled = true;
 
 
-        const refreshBtn = leftContainer.createEl('button', { cls: 'netClip_refresh_btn netClip_btn' });
-        refreshBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-        `
-        refreshBtn.onclick = () => this.refresh();
+        this.refreshBtn = leftContainer.createEl('button', { cls: 'netClip_refresh_btn netClip_btn' });
+        setIcon(this.refreshBtn, 'rotate-ccw');
+        this.refreshBtn.onclick = () => this.refresh();
 
     }
 
@@ -156,15 +147,7 @@ export class WebViewComponent {
     
     private setupFrameContainer(containerEl: HTMLElement): HTMLElement {
         const frameContainer = containerEl.createDiv('netClip_frame-container');
-        frameContainer.style.flexGrow = '1';
-        frameContainer.style.position = 'relative';
-        frameContainer.style.overflow = 'hidden';
-
-
-        this.loadingSpinner = frameContainer.createDiv('loading-spinner');
-        this.loadingSpinner.style.position = 'absolute';
-        this.loadingSpinner.style.display = 'none';
-
+        this.loadingSpinner = frameContainer.createDiv('loading-spinner')
 
         this.frame = this.createFrame();
         frameContainer.appendChild(this.frame);
@@ -187,12 +170,6 @@ export class WebViewComponent {
         iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
         
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.objectFit = 'contain';
-        iframe.style.backgroundColor = '#f0f0f0';
-    
         iframe.addEventListener('load', () => {
           this.onFrameLoad();
         });
@@ -204,24 +181,20 @@ export class WebViewComponent {
         const webview = document.createElement('webview') as WebviewTag;
         webview.allowpopups = true;
         webview.src = this.url;
-        webview.style.width = '100%';
-        webview.style.height = '100%';
-        webview.style.border = 'none';
-        webview.style.backgroundColor = '#f0f0f0';
-        webview.style.objectFit = 'contain';
+
     
         webview.addEventListener('dom-ready', () => {
           this.isFrameReady = true;
           this.updateUrlDisplay();
-          this.loadingSpinner.style.display = 'none';
+          this.loadingSpinner.classList.add('loading-spinner-visible'); 
         });
     
         webview.addEventListener('did-start-loading', () => {
-          this.loadingSpinner.style.display = 'block';
+            this.loadingSpinner.classList.add('loading-spinner-visible'); 
         });
     
         webview.addEventListener('did-stop-loading', () => {
-          this.loadingSpinner.style.display = 'none';
+            this.loadingSpinner.classList.add('loading-spinner-visible'); 
         });
     
         webview.addEventListener('did-navigate', () => {
@@ -243,7 +216,7 @@ export class WebViewComponent {
     private onFrameLoad(): void {
         this.isFrameReady = true;
         this.updateUrlDisplay();
-        this.loadingSpinner.style.display = 'none';
+        this.loadingSpinner.classList.add('loading-spinner-visible'); 
     
         // Update navigation history when iframe loads new page
         const currentUrl = this.getCurrentUrl();
@@ -312,7 +285,7 @@ export class WebViewComponent {
 
     private goBack(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.style.display = 'block';
+            this.loadingSpinner.classList.add('loading-spinner-visible'); 
 
             if (this.frame instanceof HTMLIFrameElement) {
                 if (this.currentHistoryIndex > 0) {
@@ -333,7 +306,7 @@ export class WebViewComponent {
 
     private goForward(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.style.display = 'block';
+            this.loadingSpinner.classList.add('loading-spinner-visible'); 
 
             if (this.frame instanceof HTMLIFrameElement) {
                 if (this.currentHistoryIndex < this.navigationHistory.length - 1) {
@@ -354,7 +327,7 @@ export class WebViewComponent {
 
     private refresh(): void {
         if (this.isFrameReady) {
-            this.loadingSpinner.style.display = 'block';
+            this.loadingSpinner.classList.add('loading-spinner-visible'); 
 
             if (this.frame instanceof HTMLIFrameElement) {
                 this.frame.contentWindow?.location.reload();
