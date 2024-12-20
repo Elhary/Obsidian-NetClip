@@ -290,6 +290,14 @@
     background-color:   var(--background-modifier-hover);
 }
 
+.suggestion-container[data-visible="false"] {
+    display: none;
+}
+
+.suggestion-container[data-visible="true"] {
+    display: block;
+}
+
 .netClip_btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -335,4 +343,12 @@
         width: 100%;
         padding: 12px;
     }
+}
+
+
+.netclip_modal {
+    width: 80vw;
+    height: 80vh;
+    max-width: 1200px;
+    max-height: 800px;
 }

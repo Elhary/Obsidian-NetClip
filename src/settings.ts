@@ -6,8 +6,6 @@ export interface NetClipSettings {
     viewPosition: 'left' | 'right' | 'default';
     defaultFolderName: string;
     defaultWebUrl: string;
-    modalWidth: string;
-    modalHeight: string;
     searchEngine: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
 }
 
@@ -15,8 +13,6 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     viewPosition: 'default',
     defaultFolderName: 'Saved Articles',
     defaultWebUrl: 'https://google.com',
-    modalWidth: '80vw',
-    modalHeight: '80vh',
     searchEngine: 'google'
 };
 
@@ -31,18 +27,17 @@ export class NetClipSettingTab extends PluginSettingTab {
     webViewControls: any;
     id: string;
 
-
     constructor(app: App, plugin: NetClipPlugin) {
         super(app, plugin);
         this.plugin = plugin;
         this.id = 'net-clip-settings';
-
     }
 
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
-        containerEl.createEl('h2', { text: 'NetClip Settings' });
+        
+        const header = containerEl.createEl('h2', { text: 'NetClip Settings' });
 
         new Setting(containerEl)
             .setName('View Position')
@@ -66,7 +61,6 @@ export class NetClipSettingTab extends PluginSettingTab {
                     })
             );
 
-
         new Setting(containerEl)
             .setName('Default Folder Name')
             .setDesc('Set the default folder where clipped articles are saved')
@@ -85,28 +79,6 @@ export class NetClipSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Modal Height')
-            .setDesc('Set the default height for the web modal (use CSS units like vh, %, px)')
-            .addText(text => text
-                .setPlaceholder('80vh')
-                .setValue(this.plugin.settings.modalHeight)
-                .onChange(async (value) => {
-                    this.plugin.settings.modalHeight = value || '80vh';
-                    await this.plugin.saveSettings();
-                }));
-
-        new Setting(containerEl)
-            .setName('Modal Width')
-            .setDesc('Set the default height for the web modal (use CSS units like vh, %, px)')
-            .addText(text => text
-                .setPlaceholder('80vh')
-                .setValue(this.plugin.settings.modalWidth)
-                .onChange(async (value) => {
-                    this.plugin.settings.modalWidth = value || '80vh';
-                    await this.plugin.saveSettings();
-
-                }))
-        new Setting(containerEl)
             .setName('Search Engine')
             .setDesc('Choose the default search engine for search queries')
             .addDropdown(dropdown =>
@@ -118,16 +90,12 @@ export class NetClipSettingTab extends PluginSettingTab {
                     .addOption('duckduckgo', 'Duckduckgo')
                     .addOption('genspark', 'Genspark')
                     .addOption('kagi', 'Kagi')
-
-
-                    .setValue(this.plugin.settings.searchEngine) 
+                    .setValue(this.plugin.settings.searchEngine)
                     .onChange(async (value: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi') => {
-                        console.log('Selected Search Engine:', value);
-                        this.plugin.settings.searchEngine = value; 
+                        this.plugin.settings.searchEngine = value;
                         await this.plugin.saveSettings();
                     })
             );
-
 
         new Setting(containerEl)
             .setName('Default Web Modal URL')
@@ -148,5 +116,3 @@ export class NetClipSettingTab extends PluginSettingTab {
             );
     }
 }
-
-

@@ -1,5 +1,4 @@
 import { baseSearchUrls } from './searchUrls';  
-import { requestUrl } from 'obsidian';
 import { fetchSuggestions } from './fetchSuggestions'; 
 
 export interface WebSearchSettings {
@@ -119,17 +118,19 @@ export class WebSearch {
         if (suggestions.length === 0) return;
 
         if (this.currentSuggestionIndex !== -1) {
-            suggestions[this.currentSuggestionIndex].classList.remove('selected');
+            (suggestions[this.currentSuggestionIndex] as HTMLElement).classList.remove('selected');
         }
 
         if (direction === 'down') {
-            this.currentSuggestionIndex = this.currentSuggestionIndex < suggestions.length - 1
-                ? this.currentSuggestionIndex + 1
-                : -1;
+            this.currentSuggestionIndex =
+                this.currentSuggestionIndex < suggestions.length - 1
+                    ? this.currentSuggestionIndex + 1
+                    : -1;
         } else {
-            this.currentSuggestionIndex = this.currentSuggestionIndex > -1
-                ? this.currentSuggestionIndex - 1
-                : suggestions.length - 1;
+            this.currentSuggestionIndex =
+                this.currentSuggestionIndex > -1
+                    ? this.currentSuggestionIndex - 1
+                    : suggestions.length - 1;
         }
         if (this.currentSuggestionIndex === -1) {
             this.searchInput.value = this.searchInput.getAttribute('data-original-value') || '';
@@ -139,6 +140,7 @@ export class WebSearch {
             this.searchInput.value = selectedSuggestion.textContent || '';
         }
     }
+
 
     private handleEnterKey(suggestions: HTMLCollection): void {
         if (this.currentSuggestionIndex !== -1 && suggestions[this.currentSuggestionIndex]) {
@@ -152,9 +154,12 @@ export class WebSearch {
         this.hideSuggestions();
     }
 
+
     private hideSuggestions(): void {
-        this.suggestionContainer.style.display = 'none';
-        this.suggestionsBox.innerHTML = '';
+        this.suggestionContainer.classList.add('net_clipp_hidden');
+        while (this.suggestionsBox.firstChild) {
+            this.suggestionsBox.removeChild(this.suggestionsBox.firstChild);
+        }
         this.currentSuggestionIndex = -1;
     }
 }
