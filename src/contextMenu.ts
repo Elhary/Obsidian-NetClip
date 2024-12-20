@@ -71,7 +71,6 @@ export class ClipperContextMenu {
                         const modal = new WebViewModal(
                             this.app, 
                             this.url, 
-                            undefined, 
                             this.plugin
                         );
                         modal.open();

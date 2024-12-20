@@ -68,7 +68,7 @@ export default class NetClipPlugin extends Plugin {
           return true;
         }
         const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
-        new WebViewModal(this.app, defaultUrl, undefined, this).open();
+        new WebViewModal(this.app, defaultUrl, this).open();
       }
     });
 
