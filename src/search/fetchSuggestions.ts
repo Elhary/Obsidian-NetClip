@@ -38,13 +38,11 @@ export const fetchSuggestions = (
                 const suggestionDiv = document.createElement('div');
                 suggestionDiv.classList.add('netClip-suggestion-item');
 
-                // const iconSpan = document.createElement('span');
-                // iconSpan.classList.add('search_icon');
       
                 const textSpan = document.createElement('span');
                 textSpan.textContent = suggestion;
 
-                // suggestionDiv.appendChild(iconSpan);
+        
                 suggestionDiv.appendChild(textSpan);
                 suggestionDiv.addEventListener('click', () => selectSuggestion(suggestion));
                 suggestionsBox.appendChild(suggestionDiv);
