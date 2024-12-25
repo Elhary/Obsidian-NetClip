@@ -5,7 +5,6 @@ export class ProcessNodeHelper {
   private recentLinks: Set<string> = new Set();
   private seenImages: Set<string> = new Set();
 
-
   constructor(plugin: WebClipperPlugin) {
     this.plugin = plugin;
   }
