@@ -57,6 +57,7 @@ export class DOMHelper {
         .trim();
     }
   
+    
     static normalizePrice(price: string): string {
       const match = price.match(/\d+([.,]\d{2})?/);
       return match ? match[0].replace(/,(\d{2})$/, '.$1').replace(/^(\d+),(\d{2,})$/, '$1.$2') : '0.00';

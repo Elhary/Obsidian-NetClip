@@ -5,7 +5,6 @@ export class ProcessNodeHelper {
   private recentLinks: Set<string> = new Set();
   private seenImages: Set<string> = new Set();
 
-
   constructor(plugin: WebClipperPlugin) {
     this.plugin = plugin;
   }
@@ -113,7 +112,7 @@ export class ProcessNodeHelper {
     const rows = table.rows;
     const columnCount = Math.max(...Array.from(rows).map((row) => row.cells.length));
 
-    // Process header
+
     if (rows.length > 0) {
       const headerRow = rows[0];
       content += '|' + Array.from(headerRow.cells)

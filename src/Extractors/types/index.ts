@@ -1,4 +1,5 @@
 
+
 export interface ReadabilityArticle {
   title: string | null;
   byline: string | null;
