@@ -2,7 +2,7 @@ import {Notice, Plugin, requestUrl, WorkspaceLeaf} from 'obsidian'
 import {CLIPPER_VIEW, clipperHomeView } from './view/ClipperView'
 import {DEFAULT_SETTINGS, NetClipSettingTab} from './settings'
 import { sanitizePath, getDomain, normalizeUrl } from './utils'
-import { ContentExtractors } from './Extractors/extractors'
+import { ContentExtractors } from './extractors/extractors'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './view/EditorWebView'
 import { WebViewModal } from './view/ModalWebView'
 
