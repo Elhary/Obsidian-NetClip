@@ -37,6 +37,8 @@ export default class NetClipPlugin extends Plugin {
       await this.activateView();
     });
 
+
+    
     this.addCommand({
       id: 'open-clipper',
       name: 'Open View Clipper',

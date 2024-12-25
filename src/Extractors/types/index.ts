@@ -1,4 +1,3 @@
-import { Readability } from '@mozilla/readability';
 
 export interface ReadabilityArticle {
   title: string | null;
