@@ -4,9 +4,11 @@ export const CONSTANTS = {
       '$': 'USD', 
       '£': 'GBP', 
       '€': 'EUR', 
-      USD: 'USD', 
-      EUR: 'EUR', 
-      GBP: 'GBP' 
+      '¥': 'JPY',  
+       USD: 'USD', 
+       EUR: 'EUR', 
+       GBP: 'GBP', 
+       JPY: 'JPY'
     },
 
     SELECTORS: {

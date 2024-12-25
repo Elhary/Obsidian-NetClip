@@ -21,6 +21,7 @@ export interface MediaContent {
   title?: string;
 }
 
+
 export interface PriceInfo {
   amount: string;
   currency?: string;
