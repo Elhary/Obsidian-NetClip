@@ -13,7 +13,8 @@ export class DOMHelper {
         element.appendChild(document.importNode(node, true));
       });
     }
-  
+
+	
     static resolveUrl(url: string, base: string): string {
       if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
       try {
