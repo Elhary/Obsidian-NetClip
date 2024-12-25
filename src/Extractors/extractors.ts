@@ -5,6 +5,7 @@ import { ReadabilityArticle, MediaContent, PriceInfo } from './types/index';
 import { CONSTANTS } from './constants';
 import { DOMHelper, TextHelper } from './utils';
 
+
 export class ContentExtractors {
   private plugin: WebClipperPlugin;
   private processNodeHelper: ProcessNodeHelper;
