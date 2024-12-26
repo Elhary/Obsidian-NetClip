@@ -38,7 +38,7 @@ export class ContentExtractors {
     const mediaElements = this.processMediaElements(container, baseUrl);
     
     return this.buildMetadata(article) + 
-           this.processNodeHelper.processNode(container, baseUrl).replace(/\n{5,}/g, '\n\n').trim() + 
+           this.processNodeHelper.processNode(container, baseUrl).replace(/\n{3,}/g, '\n\n').trim() + 
            mediaElements;
   }
 

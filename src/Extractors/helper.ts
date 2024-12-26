@@ -104,7 +104,7 @@ export class ProcessNodeHelper {
     const content = Array.from(element.childNodes)
       .map((child) => this.processNode(child, baseUrl))
       .join('');
-    return `${'#'.repeat(level)} ${content}\n`;
+    return `${'#'.repeat(level)} ${content}\n\n`;
   }
 
   private processTable(table: HTMLTableElement, baseUrl: string): string {
