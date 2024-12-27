@@ -55,6 +55,7 @@ export default class NetClipPlugin extends Plugin {
     });
 
     
+   
     this.addCommand({
       id: 'open-web-editor',
       name: 'Open Web on editor',
