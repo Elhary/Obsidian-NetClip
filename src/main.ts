@@ -28,7 +28,7 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private initWebViewLeaf(): void {
-    const leaf = this.app.workspace.getLeaf(false);
+    const leaf = this.app.workspace.getRightLeaf(false);
     if(leaf){
       leaf.setViewState({
         type: VIEW_TYPE_WORKSPACE_WEBVIEW,
