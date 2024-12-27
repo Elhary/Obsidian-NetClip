@@ -27,16 +27,23 @@ export default class NetClipPlugin extends Plugin {
     return uniqueLines.join('\n');
   }
 
+  private initWebViewLeaf(): void {
+    const leaf = this.app.workspace.getLeaf(false);
+    if(leaf){
+      leaf.setViewState({
+        type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+      });
+    }
+  }
+
+
   async onload() {
     await this.loadSettings();
-    
-    
-
+  
     this.contentExtractors = new ContentExtractors(this);
     this.addRibbonIcon('newspaper', 'NetClip', async () => {
       await this.activateView();
     });
-
 
     
     this.addCommand({
@@ -84,9 +91,17 @@ export default class NetClipPlugin extends Plugin {
     this.registerView(VIEW_TYPE_WORKSPACE_WEBVIEW, (leaf) => 
       new WorkspaceLeafWebView(leaf, this)
     );
-    
 
     this.addSettingTab(new NetClipSettingTab(this.app, this));
+    
+    if (this.app.workspace.layoutReady) {
+      this.initWebViewLeaf();
+    } else {
+      this.app.workspace.onLayoutReady(() =>{
+        this.initWebViewLeaf();
+      }
+      );
+    }
   }
 
   async loadSettings() {
@@ -97,9 +112,6 @@ export default class NetClipPlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
-
-
-
 
 
   async activateView() {
@@ -220,7 +232,6 @@ export default class NetClipPlugin extends Plugin {
       const container = this.ClipperView.containerEl.querySelector(".netclip_saved_container");
       if (container instanceof HTMLDivElement) {
         await this.ClipperView.renderSavedContent(container);
-        
       }
     }
   }

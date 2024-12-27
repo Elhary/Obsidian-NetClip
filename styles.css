@@ -148,7 +148,9 @@
 
 .empty_icon svg {
     stroke: #666;
-    opacity: 80%;
+    opacity: 70%;
+    height: 30px;
+    width: 30px;
 }
 
 .empty_box p {

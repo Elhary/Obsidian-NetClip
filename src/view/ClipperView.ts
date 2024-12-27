@@ -101,7 +101,7 @@ async onOpen() {
             const emptyContainer = container.createEl('div', { cls: 'empty_box' })
             const emptyIcon = emptyContainer.createEl("span", { cls: 'empty_icon' })
             setIcon(emptyIcon, 'lucide-book-open');
-            emptyContainer.createEl("p", { text: "No articles saved yet." });
+            emptyContainer.createEl("p", { text: "Nothing saved yet." });
             return;        
         }
     
