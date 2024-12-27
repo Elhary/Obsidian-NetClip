@@ -6,7 +6,11 @@
 	"description": "Clip, save, search, and browse web pages within your vault",
 	"author": "Elhary",
 	"authorUrl": "https://github.com/Elhary",
-	"fundingUrl": "https://ko-fi.com/elharis",
-	"isDesktopOnly": false
+	"fundingUrl": {
+		"Ko-fi": "https://ko-fi.com/elharis",
+		"Buy me a Coffee": "https://buymeacoffee.com/el_haris"
+	  },
+	  "isDesktopOnly": false
   }
   
+
