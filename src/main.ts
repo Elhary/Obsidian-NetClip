@@ -28,6 +28,11 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private initWebViewLeaf(): void {
+
+    const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW);
+    if(existingLeaf.length > 0){
+      return;
+    }
     const leaf = this.app.workspace.getRightLeaf(false);
     if(leaf){
       leaf.setViewState({
@@ -35,7 +40,6 @@ export default class NetClipPlugin extends Plugin {
       });
     }
   }
-
 
   async onload() {
     await this.loadSettings();
