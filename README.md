@@ -31,12 +31,7 @@ To clip a webpage:
 - **Open Web on editor**: Opens a webview in the workspace for the default URL.
 - **Open Web Modal**: Opens a webview in a modal for the default URL
 
-##  Install Via Brat
-- Install [BRAT](https://tfthacker.com/brat-quick-guide#Adding+a+beta+plugin) from the Community Plugins in Obsidian
-- Open Brat form command, type ``BRAT: Add a beta plugin for testing.`` 
-- enter the link ```https://github.com/Elhary/Obsidian-NetClip```
-- After adding the plugin, you will see it in your Ribbon or Plugin List.
-
+  
 ## Installation
 
 1. Open Obsidian and navigate to `Settings` > `Community Plugins`.
@@ -44,9 +39,12 @@ To clip a webpage:
 3. Click "Install" and enable the plugin.
 4. Configure your settings in the `NetClip` tab in the plugin settings.
 
-## License
+##  Install Via Brat
+- Install [BRAT](https://tfthacker.com/brat-quick-guide#Adding+a+beta+plugin) from the Community Plugins in Obsidian
+- Open Brat form command, type ``BRAT: Add a beta plugin for testing.`` 
+- enter the link ```https://github.com/Elhary/Obsidian-NetClip```
+- After adding the plugin, you will see it in your Ribbon or Plugin List.
 
-This plugin is licensed under the MIT License.
 
 ## Support
 
@@ -55,4 +53,6 @@ If you find the plugin helpful and would like to support its development, you ca
 - [Ko-fi](https://ko-fi.com/elharis)
 - [Buy Me a Coffee](https://buymeacoffee.com/el_haris)
 
+## License
 
+This plugin is licensed under the [MIT](https://mit-license.org) License.
