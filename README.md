@@ -1,4 +1,4 @@
-## NetClip Plugin for Obsidian
+## NetClip
 
 this plugin is for Obsidian that allows you to browse the web and clip webpages directly into your vault.
 
