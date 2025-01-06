@@ -12,7 +12,7 @@ export const fetchSuggestions = (
     }
 
     if (!query || query.trim() === '') {
-        suggestionContainer.setAttribute('data-visible', 'false');
+        suggestionContainer.classList.add('netclip_search_hidden');
         return;
     }
 
@@ -32,8 +32,6 @@ export const fetchSuggestions = (
             const data = JSON.parse(response.text);
             const suggestions = data[1] || [];
 
-            suggestionContainer.setAttribute('data-visible', suggestions.length > 0 ? 'true' : 'false');
-
             suggestions.forEach((suggestion: string) => {
                 const suggestionDiv = document.createElement('div');
                 suggestionDiv.classList.add('netClip-suggestion-item');
@@ -47,12 +45,20 @@ export const fetchSuggestions = (
                 suggestionDiv.addEventListener('click', () => selectSuggestion(suggestion));
                 suggestionsBox.appendChild(suggestionDiv);
             });
+
+
+            if(suggestions.length > 0){
+                suggestionContainer.classList.remove('netclip_search_hidden');
+            }else{
+                suggestionContainer.classList.add('netclip_search_hidden');
+            }
+
         } catch (parseError) {
             console.error('Error parsing suggestions:', parseError);
-            suggestionContainer.setAttribute('data-visible', 'false');
+            suggestionContainer.classList.add('netclip_search_hidden');
         }
     }).catch(error => {
         console.error('Error fetching suggestions:', error);
-        suggestionContainer.setAttribute('data-visible', 'false');
+        suggestionContainer.classList.add('netclip_search_hidden');
     });
 };

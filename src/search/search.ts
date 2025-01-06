@@ -12,6 +12,7 @@ export class WebSearch {
     private suggestionContainer: HTMLElement;
     private currentSuggestionIndex: number = -1;
     private settings: WebSearchSettings;
+    private isVisible: boolean = false;
 
 
     private baseSearchUrls: Record<string, string> = baseSearchUrls;
@@ -30,6 +31,8 @@ export class WebSearch {
             ...settings
         };
 
+
+        this.suggestionContainer.classList.add('netclip_search_hidden');
         this.setupEventListeners();
     }
 
@@ -40,6 +43,7 @@ export class WebSearch {
             if (query === '') {
                 this.hideSuggestions();
             } else {
+                this.showSuggestions();
                 fetchSuggestions(
                     query,
                     this.suggestionContainer,
@@ -71,11 +75,27 @@ export class WebSearch {
             }
         });
 
-        document.addEventListener('click', (event) => {
-            if (!this.searchInput.contains(event.target as Node) &&
-                !this.suggestionContainer.contains(event.target as Node)) {
+        window.addEventListener('click', (event) => {
+            const target = event.target as HTMLElement;
+            if (!this.searchInput.contains(target) &&
+                !this.suggestionContainer.contains(target)) {
                 this.hideSuggestions();
             }
+        }, true);
+
+        const frameContainer = document.querySelector('.netClip_frame-container');
+        if (frameContainer) {
+            frameContainer.addEventListener('click', () => {
+                this.hideSuggestions();
+            }, true);
+        }
+
+        this.searchInput.addEventListener('blur', (event) => {
+            setTimeout(() => {
+                if (!this.suggestionContainer.contains(document.activeElement)) {
+                    this.hideSuggestions();
+                }
+            }, 200);
         });
     }
 
@@ -155,8 +175,13 @@ export class WebSearch {
     }
 
 
+    private showSuggestions(): void {
+        this.isVisible = true;
+        this.suggestionContainer.classList.remove('netclip_search_hidden');
+    }
+
     private hideSuggestions(): void {
-        this.suggestionContainer.classList.add('net_clipp_hidden');
+        this.suggestionContainer.classList.add('netclip_search_hidden');
         while (this.suggestionsBox.firstChild) {
             this.suggestionsBox.removeChild(this.suggestionsBox.firstChild);
         }
