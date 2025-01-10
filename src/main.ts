@@ -2,7 +2,7 @@ import {Notice, Plugin, requestUrl, WorkspaceLeaf} from 'obsidian'
 import {CLIPPER_VIEW, clipperHomeView } from './view/ClipperView'
 import {DEFAULT_SETTINGS, NetClipSettingTab} from './settings'
 import { sanitizePath, getDomain, normalizeUrl } from './utils'
-import { ContentExtractors } from './extractors/extractors'
+import { ContentExtractors } from './Extractors/extractor'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './view/EditorWebView'
 import { WebViewModal } from './view/ModalWebView'
 
@@ -11,7 +11,7 @@ export default class NetClipPlugin extends Plugin {
   settings: NetClipSettingTab;
   contentExtractors: ContentExtractors; 
   seenItems: Set<string> = new Set();
-  private seenImages: Set<string> = new Set();
+
 
   isNewContent(content: string): boolean {
     if (this.seenItems.has(content)) {
@@ -28,18 +28,20 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private initWebViewLeaf(): void {
-
     const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW);
-    if(existingLeaf.length > 0){
-      return;
+    if(existingLeaf.length > 0) {
+        return;
     }
-    const leaf = this.app.workspace.getRightLeaf(false);
-    if(leaf){
-      leaf.setViewState({
-        type: VIEW_TYPE_WORKSPACE_WEBVIEW,
-      });
-    }
-  }
+    
+    this.app.workspace.onLayoutReady(() => {
+        const leaf = this.app.workspace.getRightLeaf(false);
+        if(leaf) {
+            leaf.setViewState({
+                type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+            });
+        }
+    });
+}
 
   async onload() {
     await this.loadSettings();
@@ -52,7 +54,7 @@ export default class NetClipPlugin extends Plugin {
     
     this.addCommand({
       id: 'open-clipper',
-      name: 'Open View Clipper',
+      name: 'Open clipper',
       callback: () => {
         this.activateView();
       }
@@ -62,7 +64,7 @@ export default class NetClipPlugin extends Plugin {
    
     this.addCommand({
       id: 'open-web-editor',
-      name: 'Open Web on editor',
+      name: 'Open page on editor',
       callback: async () => {
         const leaf = this.app.workspace.getLeaf(true);
         await leaf.setViewState({
@@ -76,7 +78,7 @@ export default class NetClipPlugin extends Plugin {
     
     this.addCommand({
       id: 'open-web-modal',
-      name: 'Open Web on Modal',
+      name: 'Open page in modal',
       checkCallback: (checking) => {
         if (checking) {
           return true;
@@ -98,15 +100,7 @@ export default class NetClipPlugin extends Plugin {
     );
 
     this.addSettingTab(new NetClipSettingTab(this.app, this));
-    
-    if (this.app.workspace.layoutReady) {
-      this.initWebViewLeaf();
-    } else {
-      this.app.workspace.onLayoutReady(() =>{
-        this.initWebViewLeaf();
-      }
-      );
-    }
+
   }
 
   async loadSettings() {
@@ -241,6 +235,4 @@ export default class NetClipPlugin extends Plugin {
     }
   }
 
-
-  
 }

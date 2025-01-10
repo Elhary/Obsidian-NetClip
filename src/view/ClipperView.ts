@@ -133,7 +133,7 @@ async onOpen() {
             } else {
                 bottomContent.createEl("span", { 
                     cls: "domain",
-                    text: "Unknown Source"
+                    text: "Unknown source"
                 });
             }
             this.createMenuButton(bottomContent, file, urlMatch?.[1]);
@@ -170,7 +170,7 @@ async onOpen() {
             this.app, 
             file, 
             async () => {
-                //changed
+
                 await this.app.fileManager.trashFile(file);
                 const savedContainer = this.containerEl.querySelector(".netclip_saved_container") as HTMLElement;
                 await this.renderSavedContent(savedContainer);

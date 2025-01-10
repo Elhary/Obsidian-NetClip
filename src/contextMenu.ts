@@ -30,7 +30,7 @@ export class ClipperContextMenu {
         const menu = new Menu();
 
         menu.addItem((item) => {
-            item.setTitle("Open page in Editor")
+            item.setTitle("Open page in editor")  
                 .setIcon("globe")
                 .onClick(() => {
                     if (this.url) {
@@ -64,7 +64,7 @@ export class ClipperContextMenu {
 
 
         menu.addItem((item) => {
-            item.setTitle("Open page in Modal")
+            item.setTitle("Open page in modal")
                 .setIcon("maximize")
                 .onClick(() => {
                     if (this.url) {
@@ -82,7 +82,7 @@ export class ClipperContextMenu {
 
         menu.addItem((item) => {
             item
-                .setTitle("Open in Editor")
+                .setTitle("Open in editor")
                 .setIcon("file-text")
                 .onClick(() => {
                     this.onOpenArticle(this.file);

@@ -87,7 +87,7 @@
   
   .netClip_card img {
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 13/9;
     object-fit: cover;
     border-radius: 4px;
     margin-bottom: 0.5rem;
@@ -170,9 +170,9 @@
     margin-top: 0.75rem;
   }
   
-  .mod-warning {
+  button.netclip_warning{
     background-color: var(--background-modifier-error);
-    color: white;
+    color: var(--text-error);
     border: none;
     border-radius: 4px;
     padding: 0.375rem 0.875rem;
@@ -180,10 +180,9 @@
     transition: background-color 0.3s ease;
   }
   
-  .mod-warning:hover {
+  .netclip_warning:hover {
     background-color: #c9302c;
   }
-  
   
   .workspace-leaf-content[data-type= "netClip_workspace_webview" ] .view-header{
     display: none;

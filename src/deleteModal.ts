@@ -11,13 +11,13 @@ export class DeleteConfirmationModal extends Modal {
     }
 
     onOpen() {
-        this.titleEl.setText('Confirm Delete');
+        this.titleEl.setText('Confirm delete');
         this.contentEl.createEl('p', { text: `Are you sure you want to delete the article "${this.file.basename}"?` });
         
         const buttonContainer = this.contentEl.createEl('div', { cls: 'netclip_button-container' });
         
         const confirmButton = buttonContainer.createEl('button', { 
-            cls: 'mod-warning',
+            cls: 'netclip_warning',
             text: 'Delete' 
         });
         

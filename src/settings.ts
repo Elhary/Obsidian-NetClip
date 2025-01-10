@@ -37,16 +37,14 @@ export class NetClipSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
         
-        const header = containerEl.createEl('h2', { text: 'NetClip Settings' });
-
         new Setting(containerEl)
-            .setName('View Position')
+            .setName('View position')
             .setDesc('Choose where the Web Clipper view should appear')
             .addDropdown(dropdown =>
                 dropdown
-                    .addOption('left', 'Left Sidebar')
-                    .addOption('right', 'Right Sidebar')
-                    .addOption('default', 'Default Position')
+                    .addOption('left', 'Left sidebar')
+                    .addOption('right', 'Right sidebar')
+                    .addOption('default', 'Default position')
                     .setValue(this.plugin.settings.viewPosition)
                     .onChange(async (value: 'left' | 'right' | 'default') => {
                         this.plugin.settings.viewPosition = value;
@@ -62,7 +60,7 @@ export class NetClipSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Default Folder Name')
+            .setName('Default folder')
             .setDesc('Set the default folder where clipped articles are saved')
             .addText(text =>
                 text
@@ -79,7 +77,7 @@ export class NetClipSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Search Engine')
+            .setName('Search engine')
             .setDesc('Choose the default search engine for search queries')
             .addDropdown(dropdown =>
                 dropdown
@@ -98,7 +96,7 @@ export class NetClipSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Default Web Modal URL')
+            .setName('Default url')
             .setDesc('Set the default URL opened when using the web modal/editor')
             .addText(text =>
                 text
