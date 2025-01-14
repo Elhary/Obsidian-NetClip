@@ -1,3 +1,4 @@
+
 export interface NetClipSettings {
     viewPosition: 'left' | 'right' | 'default';
     defaultFolderName: string;

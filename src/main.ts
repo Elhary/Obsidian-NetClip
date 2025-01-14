@@ -5,15 +5,16 @@ import { ContentExtractors } from './Extractors/extractor'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './view/EditorWebView'
 import { WebViewModal } from './view/ModalWebView'
 import { ClipModal } from './modal/clipModal'
-import { NetClipSettings, DEFAULT_SETTINGS } from './settings';
 import NetClipSettingTab from './settingTabs';
+import {DEFAULT_SETTINGS} from './settings';
+
 
 export default class NetClipPlugin extends Plugin {
   private ClipperView: clipperHomeView | null = null;
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
   contentExtractors: ContentExtractors;
   seenItems: Set<string> = new Set();
-  settings: NetClipSettings;
+  settings: NetClipSettingTab;
 
   isNewContent(content: string): boolean {
     if (this.seenItems.has(content)) {

@@ -1,17 +1,17 @@
 import { ItemView, WorkspaceLeaf, TFile, Setting, setIcon } from 'obsidian'
 import NetClipPlugin from '../main'
-import { NetClipSettings } from '../settings'
 import { getDomain } from '../utils'
 import { DeleteConfirmationModal } from '../modal/deleteFiles'
 import { ClipperContextMenu } from '../contextMenu'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './EditorWebView'
 import { ClipModal } from 'src/modal/clipModal'
+import NetClipSettingTab from 'src/settingTabs'
 
 export const CLIPPER_VIEW = 'netClip_clipper_view';
 
 export class clipperHomeView extends ItemView {
     private plugin: NetClipPlugin;
-    settings: NetClipSettings;
+    settings: NetClipSettingTab;
     private currentCategory: string = '';
     icon = 'newspaper';
 
@@ -167,7 +167,7 @@ export class clipperHomeView extends ItemView {
             const emptyContainer = container.createEl('div', { cls: 'empty_box' });
             const emptyIcon = emptyContainer.createEl("span", { cls: 'empty_icon' });
             setIcon(emptyIcon, 'lucide-book-open');
-            emptyContainer.createEl("p", { text: "Nothing saved yet." });
+            emptyContainer.createEl("p", { text: "No matching articles found." });
             return;
         }
 

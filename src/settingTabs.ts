@@ -1,7 +1,6 @@
 import { App, ButtonComponent, Notice, PluginSettingTab, Setting, TFolder } from 'obsidian';
 import NetClipPlugin from './main';
 import { CLIPPER_VIEW } from './view/ClipperView';
-import {NetClipSettings} from './settings'
 import { DeleteCategoryModal } from './modal/deleteCategory';
 
 
@@ -89,7 +88,6 @@ export default class NetClipSettingTab extends PluginSettingTab {
         await this.app.vault.createFolder(folderPath);
         return true;
     }
-
 
 
     private async renameFolderAndUpdatePaths(oldPath: string, newPath: string): Promise<boolean> {
@@ -199,6 +197,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
 
 
+
         new Setting(containerEl)
             .setName('Change folder name')
             .setDesc('Change the folder for saving clipped articles')
@@ -248,6 +247,8 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
 
 
+
+
         new Setting(containerEl)
             .setName('Categories')
             .setDesc('create new category folder')
@@ -270,7 +271,6 @@ export default class NetClipSettingTab extends PluginSettingTab {
                 };
                 return textComponent;
             })
-
             .addButton(button => {
                 return button
                     .setButtonText('Create')

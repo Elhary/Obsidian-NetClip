@@ -1,6 +1,6 @@
 ## NetClip
 
-NetClip is an Obsidian plugin that lets you browse the web and clip webpages directly into your vault. and organized category management for better content organization.
+NetClip is an Obsidian plugin that lets you browse the web and clip webpages directly into your vault. It also offers organized category management for better content organization.
 
 ### Demo
 
@@ -73,5 +73,4 @@ If you find this plugin useful and would like to support its development, consid
 ### License
 
 This plugin is licensed under the [MIT](https://mit-license.org) License.
-
 

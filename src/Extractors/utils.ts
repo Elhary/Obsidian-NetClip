@@ -23,7 +23,6 @@ export class DOMHelper {
         return url;
       }
     }
-
   
     static extractFromSelectors(doc: Document, selectors: string[]): string | null {
       return selectors.reduce((acc, selector) => 
@@ -55,7 +54,7 @@ export class DOMHelper {
     static cleanBrand(brand: string): string {
       return brand
         .replace(/^(brand|by|visit|store|shop)[:|\s]+/i, '')
-        .replace(/\s*(›|»|»|·|\|\-|—)\s*.*/i, '')
+        .replace(/\s*(›|»|»|·|\||\-|—)\s*.*/i, '')
         .trim();
     }
   
@@ -65,7 +64,8 @@ export class DOMHelper {
     }
   
     static extractCurrency(text: string): string | undefined {
-      const symbol = text.match(/[€£$]|USD|EUR|GBP/)?.[0];
+      const symbol = text.match(/[\$€£]|USD|EUR|GBP/)?.[0];
       return symbol ? CONSTANTS.CURRENCY_MAP[symbol as keyof typeof CONSTANTS.CURRENCY_MAP] : undefined;
     }
   }
+  
