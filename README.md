@@ -1,58 +1,77 @@
 ## NetClip
 
-this plugin is for Obsidian that allows you to browse the web and clip webpages directly into your vault.
+NetClip is an Obsidian plugin that lets you browse the web and clip webpages directly into your vault. and organized category management for better content organization.
 
 ### Demo
+
 ![demo_video](./images/GIF.gif)
 
 ---
 
 ![preview_img_1](./images/screenshot.png)
-## Features
 
+### Features
 
-- Save articles or webpages directly into your vault as Markdown files.
-- Extract essential metadata like titles, descriptions, publish dates
-- Automatically clip images and thumbnails for enhanced organization
-- Browse Webpages within Obsidian: View webpages directly within Obsidian
+- **Save articles and webpages**: Directly clip webpages into your vault as Markdown files.
+- **Extract metadata**: Capture essential details like titles, descriptions, and publish dates.
+- **Organize with categories**: Manage clipped content with customizable categories folders.
+- **Automatically clip images and thumbnails**: Enhance your organization with media files.
+- **Webpage browsing within Obsidian**: View web pages directly within the Obsidian interface.
 
+### How to Clip a Webpage
 
-## Clip Webpage
-To clip a webpage:
+1. Open the **Clipper View** by clicking the plugin's icon in your sidebar.
+2. Click the **plus (+) button** at the top right.
+3. The URL will automatically be pasted into the input field.
+4. select a **category** for the clip (Optional).
+5. Click **Clip** to save the content into your vault.
 
-- Open the Clipper View by selecting the plugin's icon in your sidebar.
-- Paste the URL of the page you want to clip into the input field.
-- Click Clip to save the content directly into your vault.
+### Webview Clipping
 
-    
-### Commands
+In Webview mode, there are two buttons available:
+- **Quick Save**: Save the webpage instantly to your vault.
+- **Open Modal**: Opens a modal for selecting a category before saving.
 
-- **Open NetClip View**: Opens the NetClip to view all saved page plugin interface.
-- **Open Web on editor**: Opens a webview in the workspace for the default URL.
-- **Open Web Modal**: Opens a webview in a modal for the default URL
+### Available Commands
 
-  
-## Installation
+- **Open NetClip View**: Launches the main NetClip interface to view all saved pages.
+- **Open Web in Editor**: Opens a webview in the workspace with the default URL.
+- **Open Web Modal**: Opens a modal webview with the default URL.
+- **Open Modal Clipper**: Opens a modal for clipping a webpage.
 
-1. Open Obsidian and navigate to `Settings` > `Community Plugins`.
-2. Search for **NetClip** in the community plugin.
-3. Click "Install" and enable the plugin.
-4. Configure your settings in the `NetClip` tab in the plugin settings.
+### Managing Categories
 
-##  Install Via Brat
-- Install [BRAT](https://tfthacker.com/brat-quick-guide#Adding+a+beta+plugin) from the Community Plugins in Obsidian
-- Open Brat form command, type ``BRAT: Add a beta plugin for testing.`` 
-- enter the link ```https://github.com/Elhary/Obsidian-NetClip```
-- After adding the plugin, you will see it in your Ribbon or Plugin List.
+1. Create new categories via the plugin settings.
+2. Modify or delete existing categories as needed.
+3. Filter saved content by selecting the appropriate category tab.
 
+### Installation
 
-## Support
+#### Community Plugins
 
-If you find the plugin helpful and would like to support its development, you can make a donation to help fund future updates, improvements, and new features.
+1. Open Obsidian and navigate to **Settings** > **Community Plugins**.
+2. Search for **NetClip** in the community plugins directory.
+3. Click **Install** and enable the plugin.
+4. Customize your preferences under the **NetClip** settings tab.
+
+#### Install via BRAT
+
+1. Install [BRAT](https://tfthacker.com/brat-quick-guide#Adding+a+beta+plugin) from Obsidian's Community Plugins.
+2. Open the **BRAT** command form and type:  
+   ``BRAT: Add a beta plugin for testing``
+3. Enter the link:  
+   `https://github.com/Elhary/Obsidian-NetClip`
+4. After adding the plugin, you will see it in your ribbon or plugin list.
+
+### Support
+
+If you find this plugin useful and would like to support its development, consider making a donation:
 
 - [Ko-fi](https://ko-fi.com/elharis)
 - [Buy Me a Coffee](https://buymeacoffee.com/el_haris)
 
-## License
+### License
 
 This plugin is licensed under the [MIT](https://mit-license.org) License.
+
+

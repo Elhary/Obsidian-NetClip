@@ -32,10 +32,12 @@ export class WebViewModal extends Modal {
                 } else {
                     new Notice('Clip webpage function not available');
                 }
-            }
+            },
+            this.plugin
         );
     }
 
+    
     onOpen() {
         const { contentEl } = this;
         const webViewContainer = this.webViewComponent.createContainer();

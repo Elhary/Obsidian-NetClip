@@ -1,5 +1,6 @@
-import { App, Platform, setIcon } from 'obsidian';
+import { App, Platform, setIcon, setTooltip } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
+import { ClipModal } from './modal/clipModal';
 
 export interface WebviewTag extends HTMLElement {
     src: string;
@@ -27,6 +28,7 @@ export class WebViewComponent {
     private forwardBtn: HTMLButtonElement;
     private refreshBtn: HTMLButtonElement;
     private clipBtn?: HTMLButtonElement;
+    private modalClipBtn?: HTMLButtonElement; 
     private navigationHistory: string[] = [];
     private currentHistoryIndex: number = -1;
     private loadingSpinner: HTMLElement;
@@ -38,7 +40,8 @@ export class WebViewComponent {
         private app: App,
         url: string,
         settings: WebViewComponentSettings = {},
-        onClipCallback?: (url: string) => Promise<void>
+        onClipCallback?: (url: string) => Promise<void>,
+        private plugin?: any
     ) {
         this.url = url;
         this.settings = {
@@ -68,7 +71,6 @@ export class WebViewComponent {
 
 
 
-
     private setupSearchInput(container: HTMLElement): void {
         const searchContainer = container.createDiv('netClip_search_container');
         this.searchInput = searchContainer.createEl('input', { type: 'text', placeholder: 'Search...', value: this.url });
@@ -88,13 +90,38 @@ export class WebViewComponent {
 
 
 
-
     private setupClipBtn(container: HTMLElement): void {
+        const clipContianer = container.createDiv('netClip_clip_btn_container');
+
         if (this.onClipCallback) {
-            const clipContianer = container.createDiv('netClip_clip_btn_container');
-            this.clipBtn = clipContianer.createEl('button', { text: 'Clip' });
+            this.clipBtn = clipContianer.createEl('button', {
+                 text: 'Quick clip',
+                 cls: 'netClip_quick_clip_btn netClip_btn'
+            });
+
+            setIcon(this.clipBtn, 'folder-down')
+            setTooltip(this.clipBtn, 'Quick save');
+
             this.clipBtn.onclick = () => {
                 this.onClipCallback?.(this.getCurrentUrl());
+            };
+        }
+
+
+        if (this.plugin) {
+            this.modalClipBtn = clipContianer.createEl('button', { 
+                cls: 'netClip_modal_clip_btn netClip_btn'
+            });
+
+            setIcon(this.modalClipBtn, 'folder-symlink'); 
+            setTooltip(this.modalClipBtn, 'Save to...');
+
+            this.modalClipBtn.onclick = () => {
+                if (this.plugin) {
+                    const modal = new ClipModal(this.app, this.plugin);
+                    modal.tryGetClipboardUrl = async () => this.getCurrentUrl();
+                    modal.open();
+                }
             };
         }
     }

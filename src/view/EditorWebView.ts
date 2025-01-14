@@ -48,7 +48,8 @@ export class WorkspaceLeafWebView extends ItemView {
                 } else {
                     new Notice('Clip webpage function not available');
                 }
-            }
+            },
+            this.plugin
         );
   
         const containerEl = this.webViewComponent.createContainer();
