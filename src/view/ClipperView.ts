@@ -6,7 +6,7 @@ import { ClipperContextMenu } from '../contextMenu'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './EditorWebView'
 import { ClipModal } from 'src/modal/clipModal'
 import NetClipSettingTab from 'src/settingTabs'
-
+import {DEFAULT_IMAGE} from '../assets/image'
 export const CLIPPER_VIEW = 'netClip_clipper_view';
 
 export class clipperHomeView extends ItemView {
@@ -14,6 +14,7 @@ export class clipperHomeView extends ItemView {
     settings: NetClipSettingTab;
     private currentCategory: string = '';
     icon = 'newspaper';
+
 
     constructor(leaf: WorkspaceLeaf, plugin: NetClipPlugin) {
         super(leaf);
@@ -173,14 +174,17 @@ export class clipperHomeView extends ItemView {
 
 
         for (const file of filteredFiles) {
-            const content = await this.app.vault.read(file);
+            const content = await this.app.vault.cachedRead(file);
             const clippedEl = container.createEl('div', { cls: 'netClip_card' });
 
             const thumbnailMatch = content.match(/!\[Thumbnail\]\((.+)\)/);
-            const imageUrl = thumbnailMatch ? thumbnailMatch[1] : 'https://cdn.pixabay.com/photo/2023/12/14/06/45/chicken-8448262_1280.jpg'; // Use a default image if no thumbnail is found
-
-            clippedEl.createEl("img", { attr: { src: imageUrl } });
-
+            if (thumbnailMatch) {
+                clippedEl.createEl("img", { attr: { src: thumbnailMatch[1] } });
+            } else {
+                clippedEl.createEl("img", { attr: { src: DEFAULT_IMAGE } });
+            }            
+        
+    
             const clippedTitle = clippedEl.createEl("h6", { text: file.basename });
             clippedTitle.addEventListener('click', () => {
                 this.openArticle(file);

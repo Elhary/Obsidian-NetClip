@@ -30,24 +30,22 @@ export default class NetClipSettingTab extends PluginSettingTab {
     }
 
     private async syncCategoriesFolders() {
-        const mainFolder = this.app.vault.getAbstractFileByPath(this.plugin.settings.defaultFolderName);
-        if (!mainFolder || !(mainFolder instanceof TFolder)) return;
-
-
+        const mainFolder = this.app.vault.getFolderByPath(this.plugin.settings.defaultFolderName);
+        if (!mainFolder) return;
+    
         const subfolders = mainFolder.children
             .filter(file => file instanceof TFolder)
             .map(folder => folder.name);
-
+    
         this.plugin.settings.categories = subfolders;
         await this.plugin.saveSettings();
     }
 
-
     private async deleteCategory(category: string) {
         const folderPath = `${this.plugin.settings.defaultFolderName}/${category}`;
-        const folder = this.app.vault.getAbstractFileByPath(folderPath);
+        const folder = this.app.vault.getFolderByPath(folderPath);
 
-        if (!(folder && folder instanceof TFolder)) {
+        if (!(folder)) {
             return false
         }
 
@@ -90,30 +88,31 @@ export default class NetClipSettingTab extends PluginSettingTab {
     }
 
 
+
     private async renameFolderAndUpdatePaths(oldPath: string, newPath: string): Promise<boolean> {
-        const oldFolder = this.app.vault.getAbstractFileByPath(oldPath);
+        const oldFolder = this.app.vault.getFolderByPath(oldPath);
         if (!oldFolder) {
             new Notice(`Folder "${oldPath}" not found.`);
             return false;
         }
-
-        const newFolder = this.app.vault.getAbstractFileByPath(newPath);
+    
+        const newFolder = this.app.vault.getFolderByPath(newPath);
         if (newFolder) {
             new Notice(`Folder "${newPath}" already exists.`);
             return false;
         }
-
+    
         await this.app.fileManager.renameFile(oldFolder, newPath);
-
+    
         for (const category of this.plugin.settings.categories) {
             const oldCategoryPath = `${oldPath}/${category}`;
             const newCategoryPath = `${newPath}/${category}`;
-            const categoryFolder = this.app.vault.getAbstractFileByPath(oldCategoryPath);
+            const categoryFolder = this.app.vault.getFolderByPath(oldCategoryPath);
             if (categoryFolder) {
                 await this.app.fileManager.renameFile(categoryFolder, newCategoryPath);
             }
         }
-
+    
         return true;
     }
 
@@ -128,7 +127,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
         this.syncCategoriesFolders();
 
-        new Setting(containerEl).setName('WebView settings').setHeading()
+        new Setting(containerEl).setName('Web view').setHeading()
 
         new Setting(containerEl)
             .setName('Search engine')
@@ -169,7 +168,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
 
 
-        new Setting(containerEl).setName('Clipper settings').setHeading()
+        new Setting(containerEl).setName('Clipper').setHeading()
 
 
 
@@ -251,7 +250,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Categories')
-            .setDesc('create new category folder')
+            .setDesc('Create new category folder')
             .addText(text => {
                 const textComponent = text.setPlaceholder('New category name');
                 const storedTextComponent = textComponent;

@@ -30,6 +30,7 @@ export default class NetClipPlugin extends Plugin {
     return uniqueLines.join('\n');
   }
 
+
   private initWebViewLeaf(): void {
 
     const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW);
@@ -46,30 +47,30 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private async FoldersExist() {
-    const mainFolder = this.app.vault.getAbstractFileByPath(this.settings.defaultFolderName);
+    const mainFolder = this.app.vault.getFolderByPath(this.settings.defaultFolderName);
     if (!mainFolder) {
-      await this.app.vault.createFolder(this.settings.defaultFolderName);
-  
-      for (const category of this.DEMO_CATEGORIES) {
-        const categoryPath = `${this.settings.defaultFolderName}/${category}`;
-        await this.app.vault.createFolder(categoryPath);
-        if (!this.settings.categories.includes(category)) {
-          this.settings.categories.push(category);
+        await this.app.vault.createFolder(this.settings.defaultFolderName);
+
+        for (const category of this.DEMO_CATEGORIES) {
+            const categoryPath = `${this.settings.defaultFolderName}/${category}`;
+            await this.app.vault.createFolder(categoryPath);
+            if (!this.settings.categories.includes(category)) {
+                this.settings.categories.push(category);
+            }
         }
-      }
-      await this.saveSettings();
-      new Notice(`Created folders in ${this.settings.defaultFolderName}`);
+        await this.saveSettings();
+        new Notice(`Created folders in ${this.settings.defaultFolderName}`);
     }
 
     for (const category of this.settings.categories) {
-      const categoryPath = `${this.settings.defaultFolderName}/${category}`;
-      const categoryFolder = this.app.vault.getAbstractFileByPath(categoryPath);
-      if (!categoryFolder) {
-        await this.app.vault.createFolder(categoryPath);
-      }
+        const categoryPath = `${this.settings.defaultFolderName}/${category}`;
+        const categoryFolder = this.app.vault.getFolderByPath(categoryPath);
+        if (!categoryFolder) {
+            await this.app.vault.createFolder(categoryPath);
+        }
     }
-  }
-  
+}
+
 
   async onload() {
 
@@ -116,10 +117,7 @@ export default class NetClipPlugin extends Plugin {
     this.addCommand({
       id: 'open-web-modal',
       name: 'Open page in modal',
-      checkCallback: (checking) => {
-        if (checking) {
-          return true;
-        }
+      callback: () => {
         const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
         new WebViewModal(this.app, defaultUrl, this).open();
       }
@@ -186,14 +184,13 @@ export default class NetClipPlugin extends Plugin {
 
     new Notice("Clipping...");
 
-    let folderPath = this.settings.defaultFolderName;
-    if (category) {
-      folderPath = `${folderPath}/${category}`;
-    }
+    const folderPath = category 
+    ? `${this.settings.defaultFolderName}/${category}`
+    : this.settings.defaultFolderName;
 
-    const folderExists = this.app.vault.getAbstractFileByPath(folderPath);
+    const folderExists = this.app.vault.getFolderByPath(folderPath);
     if (!folderExists) {
-      await this.app.vault.createFolder(folderPath);
+        await this.app.vault.createFolder(folderPath);
     }
 
     const normalizedUrl = normalizeUrl(url);
@@ -265,18 +262,21 @@ export default class NetClipPlugin extends Plugin {
   }
 
   public async updateHomeView() {
-    if (this.ClipperView) {
+    const leaves = this.app.workspace.getLeavesOfType(CLIPPER_VIEW);
+    for (const leaf of leaves) {
+        const view = leaf.view;
+        if (view instanceof clipperHomeView) {
+            const tabsContainer = view.containerEl.querySelector(".netclip_category_tabs");
+            if (tabsContainer instanceof HTMLElement) {
+                view.renderCategoryTabs(tabsContainer);
+            }
 
-      const tabsContainer = this.ClipperView.containerEl.querySelector(".netclip_category_tabs");
-      if (tabsContainer instanceof HTMLElement) {
-        this.ClipperView.renderCategoryTabs(tabsContainer);
-      }
-
-      const container = this.ClipperView.containerEl.querySelector(".netclip_saved_container");
-      if (container instanceof HTMLDivElement) {
-        await this.ClipperView.renderSavedContent(container);
-      }
+            const container = view.containerEl.querySelector(".netclip_saved_container");
+            if (container instanceof HTMLDivElement) {
+                await view.renderSavedContent(container);
+            }
+        }
     }
-  }
+}
 
 }
