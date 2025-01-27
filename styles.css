@@ -250,8 +250,8 @@ button.netclip_warning{
 
 .netClip_web_controls {
   display: flex;
-  padding: 0.625rem;
-  gap: 3rem;
+  padding: 0.4rem;
+  gap: 1rem;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -259,20 +259,25 @@ button.netclip_warning{
 
 }
 
-.netClip_btn {
+.netClip_web_controls 
+.netClip_btn  {
   box-shadow: none;
   background-color: transparent;
   cursor: pointer;
 }
+
 .netClip_nav_left {
   gap: 0.3rem;
 }
-.netClip_nav_left .netClip_btn svg {
-  height: 18px;
-  width: 18px;
 
+.netClip_webview_container .netClip_btn svg{
+  height: 15px;
+  width: 15px;
   stroke: var(--text-muted);
+
 }
+
+
 
 .netClip_web_controls .netClip_nav_left {
   display: flex;
@@ -450,7 +455,7 @@ button.netclip_warning{
 
 .netClip_clip_btn_container{
   display: flex;
-  gap: 0.5em;
+  gap: 0.2em;
 }
 
 .netClip_clip_btn_container button{

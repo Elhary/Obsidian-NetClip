@@ -22,7 +22,6 @@ export default class NetClipSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: NetClipPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-        this.id = 'net-clip-settings';
     }
 
     async onload() {

@@ -101,7 +101,7 @@ export class clipperHomeView extends ItemView {
         
         openSettings.addEventListener('click', () => {
             this.app.setting.open();
-            this.app.setting.openTabById('net-clip-settings');
+            this.app.setting.openTabById(this.plugin.manifest.id);
         });
 
         clipButton.addEventListener("click", () => {
