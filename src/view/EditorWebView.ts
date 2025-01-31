@@ -7,7 +7,7 @@ export const VIEW_TYPE_WORKSPACE_WEBVIEW = 'netClip_workspace_webview';
 export class WorkspaceLeafWebView extends ItemView {
     private webViewComponent: WebViewComponent;
     private plugin: WebClipperPlugin;
-    private initialUrl: string = '';
+    private initialUrl = '';
     icon = 'globe';
     url: string | undefined;
 

@@ -212,9 +212,34 @@ button.netclip_warning{
   background-color: #c9302c;
 }
 
+
+
+
 .workspace-leaf-content[data-type= "netClip_workspace_webview" ] .view-header{
+  background-color: transparent !important;
+}
+
+.workspace-leaf-content[data-type="netClip_workspace_webview" ].is-focused .workspace-leaf.mod-active .view-header{
+  background-color: transparent !important;
+}
+
+.workspace-leaf-content[data-type="netClip_workspace_webview" ] .view-header-title{
   display: none;
 }
+
+.workspace-leaf-content[data-type="netClip_workspace_webview" ] .view-header-left{
+  display: none;
+}
+
+.workspace-leaf-content[data-type="netClip_workspace_webview" ] .view-header-title-container{
+  display: none;
+}
+
+.workspace-leaf-content[data-type="netClip_workspace_webview" ] .view-actions{
+  display: none;
+
+}
+
 .netClip_webview_container {
   position: absolute;
   display: flex;
@@ -225,7 +250,7 @@ button.netclip_warning{
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 0 ;
+  overflow: hidden;
   background-color: var(--background-secondary);
 }
 
@@ -250,7 +275,7 @@ button.netclip_warning{
 
 .netClip_web_controls {
   display: flex;
-  padding: 0.4rem;
+  padding: 0.3rem;
   gap: 1rem;
   align-items: center;
   justify-content: center;
@@ -264,6 +289,8 @@ button.netclip_warning{
   box-shadow: none;
   background-color: transparent;
   cursor: pointer;
+
+
 }
 
 .netClip_nav_left {
@@ -281,11 +308,14 @@ button.netclip_warning{
 
 .netClip_web_controls .netClip_nav_left {
   display: flex;
+  z-index: 1;
 }
 
 .netClip_web_controls .netClip_search_container {
   position: relative;
   width: 100%;
+  z-index: 1;
+
 }
 
 .netClip_web_controls .netClip_search_container input {
@@ -456,6 +486,7 @@ button.netclip_warning{
 .netClip_clip_btn_container{
   display: flex;
   gap: 0.2em;
+  z-index: 1;
 }
 
 .netClip_clip_btn_container button{

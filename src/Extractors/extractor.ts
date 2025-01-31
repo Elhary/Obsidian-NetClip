@@ -57,11 +57,32 @@ export class ContentExtractors {
     return mediaElements.map(media => `\n![${media.alt}](${media.url})\n`).join('');
   }
 
+  
+
   extractThumbnail(doc: Document): string {
-    const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
-    const amazonImage = doc.querySelector('.a-dynamic-image')?.getAttribute('src');
-    return ogImage || amazonImage || '';
-  }
+    const ogImage = doc.querySelector('meta[property="og:image"]');
+    if (ogImage) {
+        const content = ogImage.getAttribute('content');
+        return content ? `${content}?crossorigin=anonymous` : '';
+    }
+
+    const imgElements = doc.querySelectorAll('img[data-lazy-srcset], img[data-srcset], img[data-src]');
+    for (const img of Array.from(imgElements)) {
+        const srcset = img.getAttribute('data-lazy-srcset') || img.getAttribute('data-srcset');
+        if (srcset) {
+            const urls = srcset.split(',').map(entry => entry.trim().split(' ')[0]);
+            const httpsUrl = urls.find(url => url.startsWith('https://'));
+            if (httpsUrl) return httpsUrl;
+        }
+        const dataSrc = img.getAttribute('data-src');
+        if (dataSrc?.startsWith('https://')) return dataSrc;
+    }
+
+    const imgSrc = doc.querySelector('img[src^="https://"]')?.getAttribute('src');
+    if (imgSrc) return imgSrc;
+
+    return doc.querySelector('.a-dynamic-image')?.getAttribute('src') || '';
+}
 
   extractDescription(doc: Document): string | null {
     const jsonLd = this.parseJsonLd(doc);

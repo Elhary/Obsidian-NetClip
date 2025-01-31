@@ -112,7 +112,7 @@ export class ProcessNodeHelper {
     const rows = table.rows;
     const columnCount = Math.max(...Array.from(rows).map((row) => row.cells.length));
 
-    // Process header
+
     if (rows.length > 0) {
       const headerRow = rows[0];
       content += '|' + Array.from(headerRow.cells)
@@ -160,19 +160,36 @@ export class ProcessNodeHelper {
   }
 
   private processImage(element: HTMLImageElement, baseUrl: string): string {
-    const src = element.getAttribute('src');
+    const crossOrigin = element.hasAttribute('crossorigin') 
+        ? element.getAttribute('crossorigin')
+        : 'anonymous';
+
+
+    const dataSrcSet = element.getAttribute('data-lazy-srcset') || element.getAttribute('data-srcset');
+    let src = '';
+    
+    if (dataSrcSet) {
+        const urls = dataSrcSet.split(',').map(entry => {
+            const [url, size] = entry.trim().split(' ');
+            return { url: this.resolveUrl(baseUrl, url), size };
+        });
+        const httpsUrl = urls.find(u => u.url.startsWith('https://'));
+        src = httpsUrl?.url || '';
+    }
+    
+    if (!src) {
+        src = this.resolveUrl(baseUrl, 
+            element.getAttribute('data-src') || 
+            element.getAttribute('src') || 
+            ''
+        );
+    }
+
     const alt = element.getAttribute('alt') || '';
     if (!src || this.seenImages.has(src)) return '';
-
-    this.seenImages.add(src);
-    return `![${alt}](${this.resolveUrl(baseUrl, src)})\n\n`;
-  }
-
-  private processFigcaption(element: HTMLElement, baseUrl: string): string {
-    return Array.from(element.childNodes)
-      .map((child) => this.processNode(child, baseUrl))
-      .join('') + '\n\n';
-  }
+    
+    return `![${alt}](${src}?crossorigin=${encodeURIComponent(crossOrigin)})`;
+}
 
   private processIframe(element: HTMLElement): string {
     const src = element.getAttribute('src');

@@ -5,6 +5,8 @@ export interface NetClipSettings {
     defaultWebUrl: string;
     searchEngine: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
     categories: string[];
+    enableCorsProxy: boolean;
+
 }
 
 export const DEFAULT_SETTINGS: NetClipSettings = {
@@ -12,5 +14,6 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     defaultFolderName: 'Netclips',
     defaultWebUrl: 'https://google.com',
     searchEngine: 'google',
-    categories: []
+    categories: [],
+    enableCorsProxy: false
 };
