@@ -75,7 +75,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
     private async createCategoryFolder(categoryName: string): Promise<boolean> {
         const folderPath = `${this.plugin.settings.defaultFolderName}/${categoryName}`;
-        const existingFolder = this.app.vault.getAbstractFileByPath(folderPath);
+        const existingFolder = this.app.vault.getFolderByPath(folderPath);
 
         if (existingFolder) {
             new Notice(`Category "${categoryName}" already exists`);

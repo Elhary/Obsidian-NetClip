@@ -46,7 +46,6 @@ export class ProcessNodeHelper {
       BR: () => '\n',
       HR: () => '---\n\n',
       IMG: (el) => this.processImage(el as HTMLImageElement, baseUrl),
-      FIGCAPTION: (el) => this.processFigcaption(el, baseUrl),
       IFRAME: (el) => this.processIframe(el),
       VIDEO: (el) => this.processVideo(el),
       CODE: (el) => this.processCode(el),
