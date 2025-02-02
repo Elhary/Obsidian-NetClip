@@ -10,10 +10,15 @@ export class WorkspaceLeafWebView extends ItemView {
     private initialUrl = '';
     icon = 'globe';
     url: string | undefined;
+    public onLoadEvent: Promise<void>;
+    private resolveLoadEvent: () => void;
 
     constructor(leaf: WorkspaceLeaf, plugin: WebClipperPlugin) {
         super(leaf);
         this.plugin = plugin;
+        this.onLoadEvent = new Promise((resolve) => {
+            this.resolveLoadEvent = resolve;
+        });
     }
 
     setUrl(url: string) {
@@ -64,6 +69,8 @@ export class WorkspaceLeafWebView extends ItemView {
         this.initialUrl = (typeof stateUrl === 'string' && stateUrl) || this.plugin.settings.defaultWebUrl || 'https://google.com';
     
         this.createWebViewComponent();
+        
+        this.resolveLoadEvent();
     }
     
 

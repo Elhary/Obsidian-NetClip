@@ -32,29 +32,28 @@ export class ClipperContextMenu {
         menu.addItem((item) => {
             item.setTitle("Open page in editor")  
                 .setIcon("globe")
-                .onClick(() => {
+                .onClick(async () => {
                     if (this.url) {
-                        const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW)
-                            .find((leaf: any) => {
-                                const view = leaf.view as WorkspaceLeafWebView;
-                                return view.url === this.url;
-                            });
-    
-                        if (existingLeaf) {
-                            this.app.workspace.setActiveLeaf(existingLeaf, { focus: true });
-                        } else {
-                            const leaf = this.app.workspace.getLeaf('tab');
+                        const existingLeaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW);
                         
-                            leaf.setViewState({
-                                type: VIEW_TYPE_WORKSPACE_WEBVIEW,
-                                state: { url: this.url }
-                            }).then(() => {
-                                if (leaf.view instanceof WorkspaceLeafWebView) {
-                                    leaf.view.setUrl(this.url);
-                                    
-                                    this.app.workspace.setActiveLeaf(leaf, { focus: true });
-                                }
-                            });
+                        for (const leaf of existingLeaves) {
+                            await leaf.view.onLoadEvent;
+                            if (leaf.view instanceof WorkspaceLeafWebView && leaf.view.url === this.url) {
+                                this.app.workspace.setActiveLeaf(leaf, { focus: true });
+                                return;
+                            }
+                        }
+
+                        const leaf = this.app.workspace.getLeaf('tab');
+                        await leaf.setViewState({
+                            type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                            state: { url: this.url }
+                        });
+
+                        await leaf.view.onLoadEvent;
+                        if (leaf.view instanceof WorkspaceLeafWebView) {
+                            leaf.view.setUrl(this.url);
+                            this.app.workspace.setActiveLeaf(leaf, { focus: true });
                         }
                     } else {
                         new Notice('No URL found for this clipping');
