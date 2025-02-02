@@ -187,8 +187,9 @@ export class ProcessNodeHelper {
     const alt = element.getAttribute('alt') || '';
     if (!src || this.seenImages.has(src)) return '';
     
-    return `![${alt}](${src}?crossorigin=${encodeURIComponent(crossOrigin)})`;
-}
+    this.seenImages.add(src);
+    return `![${alt}](${src}?crossorigin=${encodeURIComponent(crossOrigin!)})`;
+  }
 
   private processIframe(element: HTMLElement): string {
     const src = element.getAttribute('src');
