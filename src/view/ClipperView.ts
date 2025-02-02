@@ -11,7 +11,7 @@ export const CLIPPER_VIEW = 'netClip_clipper_view';
 
 export class clipperHomeView extends ItemView {
     private plugin: NetClipPlugin;
-    settings: NetClipSettingTab;
+    settings: any;
     private currentCategory: string = '';
     icon = 'newspaper';
 

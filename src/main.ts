@@ -9,7 +9,6 @@ import NetClipSettingTab from './settingTabs';
 import { DEFAULT_SETTINGS, NetClipSettings } from './settings';
 
 export default class NetClipPlugin extends Plugin {
-  private ClipperView: clipperHomeView | null = null;
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
   contentExtractors: ContentExtractors;
   seenItems: Set<string> = new Set();
@@ -68,10 +67,10 @@ export default class NetClipPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => this.initWebViewLeaf());
     this.contentExtractors = new ContentExtractors(this);
 
-    // Ribbon Icon
+
     this.addRibbonIcon('newspaper', 'NetClip', async () => this.activateView());
 
-    // Commands
+
     this.addCommand({
       id: 'open-clipper',
       name: 'Open clipper',
@@ -103,11 +102,10 @@ export default class NetClipPlugin extends Plugin {
       }
     });
 
-    // Views
-    this.registerView(CLIPPER_VIEW, (leaf) => {
-      this.ClipperView = new clipperHomeView(leaf, this);
-      return this.ClipperView;
-    });
+
+    this.registerView(CLIPPER_VIEW, (leaf) => 
+      new clipperHomeView(leaf, this)
+    );
 
     this.registerView(VIEW_TYPE_WORKSPACE_WEBVIEW, (leaf) => 
       new WorkspaceLeafWebView(leaf, this)
@@ -155,7 +153,7 @@ export default class NetClipPlugin extends Plugin {
         throw new Error("Invalid URL provided");
       }
 
-      // CORS Proxy Handling
+
       const useProxy = this.settings.enableCorsProxy;
       const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const targetUrl = useProxy ? `${proxyUrl}${normalizedUrl}` : normalizedUrl;
@@ -171,8 +169,6 @@ export default class NetClipPlugin extends Plugin {
       const html = response.text;
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-
-      // Extract content
       let title = doc.querySelector('title')?.textContent || '';
       if (!title) {
         const headingElement = doc.querySelector('h1, .title');
