@@ -1,11 +1,10 @@
-import { ItemView, WorkspaceLeaf, TFile, Setting, setIcon } from 'obsidian'
+import { ItemView, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
 import NetClipPlugin from '../main'
 import { getDomain } from '../utils'
 import { DeleteConfirmationModal } from '../modal/deleteFiles'
 import { ClipperContextMenu } from '../contextMenu'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './EditorWebView'
 import { ClipModal } from 'src/modal/clipModal'
-import NetClipSettingTab from 'src/settingTabs'
 import {DEFAULT_IMAGE} from '../assets/image'
 export const CLIPPER_VIEW = 'netClip_clipper_view';
 
@@ -100,9 +99,9 @@ export class clipperHomeView extends ItemView {
         });
         
         openSettings.addEventListener('click', () => {
-            (this.app as any).setting.open();
-            (this.app as any).setting.openTabById(this.plugin.manifest.id);
-          });
+            this.app.setting.open();
+            this.app.setting.openTabById(this.plugin.manifest.id);
+        });
         clipButton.addEventListener("click", () => {
             new ClipModal(this.app, this.plugin).open();
         });
