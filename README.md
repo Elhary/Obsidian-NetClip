@@ -4,19 +4,22 @@ NetClip is an Obsidian plugin that lets you browse the web and clip webpages dir
 
 ### Demo
 
-![demo_video](./images/GIF.gif)
+![demo_video](./images/demo_gif.gif)
 
 ---
 
-![preview_img_1](./images/screenshot.png)
+![preview_img_1](./images/screenshot_1.png)
+![preview_img_](./images/screenshot_3.png)
 
 ### Features
 
-- **Save articles and webpages**: Directly clip webpages into your vault as Markdown files.
-- **Extract metadata**: Capture essential details like titles, descriptions, and publish dates.
-- **Organize with categories**: Manage clipped content with customizable categories folders.
-- **Automatically clip images and thumbnails**: Enhance your organization with media files.
-- **Webpage browsing within Obsidian**: View web pages directly within the Obsidian interface.
+- **Web Clipping**: Save web articles (title, content, metadata) as Markdown files.
+- **Content Organization**: Organize clipped content into folders/categories.
+- **Metadata Extraction**: Includes author, thumbnail, publication date, reading time
+- **Webview**: browse pages within Obsidian.
+- **Search & Filter**: Search clipped content and filter by categories.
+- **Search Suggestions**: Auto-complete for search queries
+
 
 ### How to Clip a Webpage
 
