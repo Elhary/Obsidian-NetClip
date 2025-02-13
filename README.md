@@ -8,11 +8,11 @@ NetClip is an Obsidian plugin that lets you browse the web and clip webpages dir
 
 ---
 
-![preview_img_1](./images/screenshot_1.png)
+![preview_img_1](./images/Screenshot_1.png)
 
 ---
 
-![preview_img_2](./images/screenshot_2.png)
+![preview_img_2](./images/Screenshot_2.png)
 
 
 
