@@ -2,6 +2,12 @@ import { App, Platform, setIcon, setTooltip } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
 import { ClipModal } from './modal/clipModal';
 
+let remote: any;
+
+if (!Platform.isMobileApp) {
+    remote = require('@electron/remote');
+}
+
 export interface WebviewTag extends HTMLElement {
     src: string;
     allowpopups?: boolean;
@@ -35,6 +41,9 @@ export class WebViewComponent {
     private searchInput: HTMLInputElement;
     private search: WebSearch;
     private onClipCallback?: (url: string) => Promise<void>;
+    private titleChangeCallback?: (title: string) => void;
+    private windowOpenCallback?: (url: string) => void;
+
 
     constructor(
         private app: App,
@@ -173,6 +182,10 @@ export class WebViewComponent {
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
         iframe.addEventListener('load', () => {
             this.onFrameLoad();
+            const title = iframe.contentDocument?.title;
+            if(title && this.titleChangeCallback){
+                this.titleChangeCallback(title);
+            }
         });
         return iframe;
     }
@@ -188,6 +201,16 @@ export class WebViewComponent {
             this.isFrameReady = true;
             this.updateUrlDisplay();
             this.loadingSpinner.classList.remove('loading-spinner-visible');
+
+            const webContents = remote.webContents.fromId(webview.getWebContentsId());
+            webContents.setWindowOpenHandler(({url}) => {
+                if(this.windowOpenCallback){
+                    this.windowOpenCallback(url)
+                    return {action: 'deny'}
+                }
+                return {action: 'allow'};
+
+            })
         });
 
         webview.addEventListener('did-start-loading', () => {
@@ -207,6 +230,12 @@ export class WebViewComponent {
             this.updateUrlDisplay();
             this.updateNavigationButtons();
         });
+
+        webview.addEventListener('page-title-updated', (event: any) => {
+            if(this.titleChangeCallback){
+                this.titleChangeCallback(event.title);
+            }
+        })
 
         return webview;
     }
@@ -321,4 +350,13 @@ export class WebViewComponent {
             }
         }
     }
+
+    onTitleChange(callback: (title: string) => void){
+        this.titleChangeCallback = callback
+    }
+
+    onWindowOpen(callback: (url: string) => void){
+        this.windowOpenCallback = callback;
+    }
+
 }

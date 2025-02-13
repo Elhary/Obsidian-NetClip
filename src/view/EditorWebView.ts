@@ -1,6 +1,8 @@
-import { ItemView, WorkspaceLeaf,  Notice } from 'obsidian';
+import { ItemView, WorkspaceLeaf,  Notice, ViewStateResult } from 'obsidian';
 import WebClipperPlugin from '../main';
 import { WebViewComponent } from '../webViewComponent';
+import { title } from 'process';
+import { stat } from 'fs';
 
 export const VIEW_TYPE_WORKSPACE_WEBVIEW = 'netClip_workspace_webview';
 
@@ -10,6 +12,7 @@ export class WorkspaceLeafWebView extends ItemView {
     private initialUrl = '';
     icon = 'globe';
     url: string | undefined;
+    currentTitle = 'Web View'
     public onLoadEvent: Promise<void>;
     private resolveLoadEvent: () => void;
 
@@ -31,7 +34,7 @@ export class WorkspaceLeafWebView extends ItemView {
     }
 
     getDisplayText(): string {
-        return 'Web View';
+        return this.currentTitle;
     }
 
     private reloadWebView() {
@@ -39,6 +42,13 @@ export class WorkspaceLeafWebView extends ItemView {
         this.createWebViewComponent();
     }
 
+    async setState(state: any, result: ViewStateResult): Promise<void> {
+        if (state?.url) {
+            this.initialUrl = state.url;
+            this.reloadWebView();
+        }
+        super.setState(state, result);
+    }
     
     private createWebViewComponent() {
         this.webViewComponent = new WebViewComponent(
@@ -56,8 +66,26 @@ export class WorkspaceLeafWebView extends ItemView {
             },
             this.plugin
         );
+
+        this.webViewComponent.onWindowOpen((url: string) => {
+            const leaf = this.app.workspace.getLeaf(true);
+            leaf.setViewState({
+                type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                state: {url: url}
+            })
+            this.app.workspace.revealLeaf(leaf);
+        })
   
         const containerEl = this.webViewComponent.createContainer();
+
+        this.webViewComponent.onTitleChange((title: string) => {
+            this.currentTitle = title;
+            this.leaf.setViewState({
+                type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                state: { title: title }
+            });
+        });
+        
         this.containerEl.appendChild(containerEl);
     }
 
@@ -65,11 +93,14 @@ export class WorkspaceLeafWebView extends ItemView {
         this.containerEl = this.containerEl.children[1] as HTMLElement;
         this.containerEl.empty();
     
-        const stateUrl = this.leaf.getViewState().state?.url;
-        this.initialUrl = (typeof stateUrl === 'string' && stateUrl) || this.plugin.settings.defaultWebUrl || 'https://google.com';
+        const state = this.leaf.getViewState();
+        if(state.state?.url && typeof state.state.url === 'string'){
+            this.initialUrl = state.state.url;
+        }else{
+            this.initialUrl = this.plugin.settings.defaultWebUrl || 'https://google.com';
+        }
     
         this.createWebViewComponent();
-        
         this.resolveLoadEvent();
     }
     
