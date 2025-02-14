@@ -1,4 +1,4 @@
-name: Bug Report / Feature Request
+name: Bug Report 
 description: Report a bug or request a feature for the Obsidian Plugin
 body:
   - type: markdown
