@@ -47,17 +47,6 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: obsidian-version
-    attributes:
-      label: Obsidian Version
-      options:
-        - "v0.14.0"
-        - "v0.15.0"
-        - "v0.16.0"
-        - "Other"
-    validations:
-      required: true
 
   - type: input
     id: platform
