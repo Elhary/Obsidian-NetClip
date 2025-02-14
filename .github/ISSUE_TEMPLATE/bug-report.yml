@@ -6,20 +6,6 @@ body:
       value: |
         Thank you for your contribution!
 
-        ## Important
-        - For enhancement requests, please use GitHub Discussions.
-        - Please fill out the template below to the best of your ability.
-        - Be as detailed as possible when describing the issue and provide steps to reproduce if applicable.
-        - Screenshots or other visual aids are highly encouraged.
-
-  - type: checkboxes
-    id: instructions
-    attributes:
-      label: Instructions Check
-      description: Ensure you have read the instructions before filing.
-      options:
-        - label: I have read the instructions.
-        - label: I am not filing an enhancement request.
 
   - type: textarea
     id: issue-description
