@@ -1,12 +1,3 @@
----
-name: Bug Report
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: Elhary
-
----
-
 name: Bug Report / Feature Request
 description: Report a bug or request a feature for the Obsidian Plugin
 body:
