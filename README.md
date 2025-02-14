@@ -73,7 +73,7 @@ In Webview mode, there are two buttons available:
 
 ### Support
 
-If you find this plugin useful and would like to support its development, consider making a donation:
+If you'd like to support the plugin's development, feel free to donate!  Every little bit helps.
 
 - [Ko-fi](https://ko-fi.com/elharis)
 - [Buy Me a Coffee](https://buymeacoffee.com/el_haris)
