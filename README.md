@@ -1,4 +1,10 @@
 ## NetClip
+[![GitHub](https://img.shields.io/badge/GitHub-View_Repository-738adb?style=for-the-badge&logo=github&logoColor=white&labelColor=1a1b27)](https://github.com/Elhary/Obsidian-NetClip)
+[![Version](https://img.shields.io/github/manifest-json/v/Elhary/Obsidian-NetClip?style=for-the-badge&color=6A80B9&labelColor=1a1b27&label=Version)](https://github.com/Elhary/Obsidian-NetClip/releases/latest)
+[![Last Commit](https://img.shields.io/github/last-commit/Elhary/Obsidian-NetClip?style=for-the-badge&color=C890A7&labelColor=1a1b27&label=Last%20Update)](https://github.com/Elhary/Obsidian-NetClip/commits/main)
+[![Stars](https://img.shields.io/github/stars/Elhary/Obsidian-NetClip?style=for-the-badge&color=DDA853&labelColor=1a1b27&label=Stars)](https://github.com/Elhary/Obsidian-NetClip/stargazers)
+[![Issues](https://img.shields.io/github/issues/Elhary/Obsidian-NetClip/help%20wanted?style=for-the-badge&color=A6CDC6&labelColor=1a1b27&label=Help%20Wanted)](https://github.com/Elhary/Obsidian-NetClip/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+
 
 NetClip is an Obsidian plugin that lets you browse the web and clip webpages directly into your vault. It also offers organized category management for better content organization.
 
