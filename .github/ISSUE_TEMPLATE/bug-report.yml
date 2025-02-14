@@ -54,10 +54,10 @@ body:
     attributes:
       label: Obsidian Version
       options:
-        - v0.14.0
-        - v0.15.0
-        - v0.16.0
-        - Other
+        - "v0.14.0"
+        - "v0.15.0"
+        - "v0.16.0"
+        - "Other"
     validations:
       required: true
 
@@ -66,10 +66,10 @@ body:
     attributes:
       label: What platform are you using?
       options:
-        - Linux
-        - macOS
-        - Windows
-        - Other
+        - "Linux"
+        - "macOS"
+        - "Windows"
+        - "Other"
     validations:
       required: true
 
