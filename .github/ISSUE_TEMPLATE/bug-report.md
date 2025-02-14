@@ -1,0 +1,91 @@
+---
+name: Bug Report
+about: Describe this issue template's purpose here.
+title: ''
+labels: ''
+assignees: Elhary
+
+---
+
+name: Bug Report / Feature Request
+description: Report a bug or request a feature for the Obsidian Plugin
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your contribution!
+
+        ## Important
+        - Please search for existing issues to avoid duplicates.
+        - For enhancement requests, please use GitHub Discussions.
+        - Please fill out the template below to the best of your ability.
+        - Be as detailed as possible when describing the issue and provide steps to reproduce if applicable.
+        - Screenshots or other visual aids are highly encouraged.
+
+  - type: checkboxes
+    id: instructions
+    attributes:
+      label: Instructions Check
+      description: Ensure you have read the instructions before filing.
+      options:
+        - label: I have read the instructions.
+        - label: I have searched for existing issues and avoided duplicates.
+        - label: I am not filing an enhancement request.
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: What happened?
+      description: Describe what happened and what you expected to happen.
+      placeholder: Provide a detailed explanation of the issue.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: reproducible
+    attributes:
+      label: Is this issue reproducible?
+      description: Can the issue be consistently reproduced?
+      options:
+        - label: I have checked if the issue is reproducible and can replicate it.
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin Version
+      description: What version of the plugin are you using?
+      placeholder: e.g., 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: obsidian-version
+    attributes:
+      label: Obsidian Version
+      options:
+        - v0.14.0
+        - v0.15.0
+        - v0.16.0
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: What platform are you using?
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Please provide any relevant logs or errors. These will help in diagnosing the issue.
+      placeholder: Paste log output here if applicable.
+      render: shell
