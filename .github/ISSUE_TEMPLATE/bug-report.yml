@@ -65,11 +65,7 @@ body:
     id: platform
     attributes:
       label: What platform are you using?
-      options:
-        - "Linux"
-        - "macOS"
-        - "Windows"
-        - "Other"
+      placeholder: "e.g., Windows, macOS, Linux"
     validations:
       required: true
 
