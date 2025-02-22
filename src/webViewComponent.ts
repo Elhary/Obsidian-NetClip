@@ -198,7 +198,6 @@ export class WebViewComponent {
         }
         iframe.setAttribute('sandbox', sandbox);
 
-        // iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
         iframe.addEventListener('load', () => {
             this.onFrameLoad();
@@ -224,9 +223,17 @@ export class WebViewComponent {
         webview.allowpopups = true;
         
         if (this.plugin?.settings?.privateMode) {
-            webview.partition = 'private';
+            const sessionId = `private-${Date.now()}`;
+            webview.partition = `persist:${sessionId}`;
+            
+            webview.setAttribute('disablewebsecurity', 'true');
+            webview.setAttribute('disableblinkfeatures', 'AutomationControlled');
+            webview.setAttribute('disablefeatures', 'Translate,NetworkService');
+            
+            webview.setAttribute('cookiestore', 'private');
+            webview.setAttribute('disablethirdpartycookies', 'true');
         }
-        
+
         webview.src = this.url;
 
         webview.addEventListener('dom-ready', () => {
@@ -235,16 +242,46 @@ export class WebViewComponent {
             this.loadingSpinner.classList.remove('loading-spinner-visible');
 
             const webContents = remote.webContents.fromId((webview as any).getWebContentsId());
+            
             webContents.setWindowOpenHandler(({url}: {url: string}) => {
-                if(this.windowOpenCallback){
-                    this.windowOpenCallback(url)
-                    return {action: 'deny'}
+                if (this.windowOpenCallback) {
+                    this.windowOpenCallback(url);
+                    return {action: 'deny'};
                 }
+                
+                if (this.plugin?.settings?.privateMode) {
+                    const newWebview = document.createElement('webview') as WebviewTag;
+                    newWebview.partition = webview.partition;
+                    newWebview.src = url;
+                    document.body.appendChild(newWebview);
+                    return {action: 'deny'};
+                }
+                
                 return {action: 'allow'};
             });
 
             if (this.plugin?.settings?.adBlock?.enabled) {
                 this.setupAdBlocking(webview);
+            }
+
+            if (this.plugin?.settings?.privateMode) {
+                webview.executeJavaScript(`
+                    window.addEventListener('load', () => {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        indexedDB.databases().then(dbs => {
+                            dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+                        });
+                        caches.keys().then(keys => {
+                            keys.forEach(key => caches.delete(key));
+                        });
+                        
+                        Object.defineProperty(document, 'cookie', {
+                            get: () => '',
+                            set: () => {}
+                        });
+                    });
+                `);
             }
         });
 
