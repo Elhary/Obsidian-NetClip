@@ -165,7 +165,28 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     })
             );
 
+            new Setting(containerEl)
+              .setName('Enable ad blocking (experimental)')
+              .setDesc('Block ads in web view')
+              .addToggle(toggle => toggle 
+                .setValue(this.plugin.settings.adBlock.enabled)
+                .onChange(async (value) => {
+                    this.plugin.settings.adBlock.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.display
+                })
+              )
 
+              new Setting(containerEl)
+               .setName('Private mode')
+               .setDesc('Block cookies, localStorage, and other tracking mechanisms (prevents saving browsing data)')
+               .addToggle(toggle => toggle
+                  .setValue(this.plugin.settings.privateMode)
+                  .onChange(async (value) => {
+                    this.plugin.settings.privateMode = value;
+                    await this.plugin.saveSettings();
+                  })
+               );
 
         new Setting(containerEl).setName('Clipper').setHeading()
 

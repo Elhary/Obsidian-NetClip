@@ -99,9 +99,9 @@ export class clipperHomeView extends ItemView {
         });
         
         openSettings.addEventListener('click', () => {
-            this.app.setting.open();
-            this.app.setting.openTabById(this.plugin.manifest.id);
-        });
+            (this.app as any).setting.open();
+            (this.app as any).setting.openTabById(this.plugin.manifest.id);
+          });
         clipButton.addEventListener("click", () => {
             new ClipModal(this.app, this.plugin).open();
         });

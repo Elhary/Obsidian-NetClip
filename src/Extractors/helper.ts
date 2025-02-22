@@ -87,9 +87,18 @@ export class ProcessNodeHelper {
       this.recentLinks.delete(oldestLink);
     }
 
-    const prefixSpace = this.shouldAddSpace(element.previousSibling);
-    const suffixSpace = this.shouldAddSpace(element.nextSibling);
-    return `${prefixSpace}[${text}](${absoluteLink})${suffixSpace}`;
+    const prefixSpace = this.shouldAddSpace(element.previousSibling) || '';
+    const suffixSpace = this.shouldAddSpace(element.nextSibling) || '';
+    
+    const needsPrefixSpace = prefixSpace === '' && 
+      (element.previousSibling?.nodeType === Node.TEXT_NODE || 
+       element.previousSibling instanceof HTMLElement);
+    
+    const needsSuffixSpace = suffixSpace === '' && 
+      (element.nextSibling?.nodeType === Node.TEXT_NODE || 
+       element.nextSibling instanceof HTMLElement);
+
+    return `${needsPrefixSpace ? ' ' : ''}[${text}](${absoluteLink})${needsSuffixSpace ? ' ' : ''}`;
   }
 
   private processWrappedContent(element: HTMLElement, baseUrl: string, wrapper: string): string {
@@ -155,7 +164,19 @@ export class ProcessNodeHelper {
   }
 
   private shouldAddSpace(sibling: Node | null): string {
-    return sibling && sibling.nodeType === Node.TEXT_NODE && /\S$/.test(sibling.textContent || '') ? ' ' : '';
+    if (!sibling) return '';
+    
+    if (sibling.nodeType === Node.TEXT_NODE) {
+      const text = sibling.textContent || '';
+      return /\S$/.test(text) ? ' ' : '';
+    }
+    
+    if (sibling instanceof HTMLElement) {
+      const blockElements = ['P', 'DIV', 'BR', 'HR', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+      return blockElements.includes(sibling.tagName) ? ' ' : '';
+    }
+    
+    return '';
   }
 
   private processImage(element: HTMLImageElement, baseUrl: string): string {

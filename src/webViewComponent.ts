@@ -1,6 +1,7 @@
 import { App, Platform, setIcon, setTooltip } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
 import { ClipModal } from './modal/clipModal';
+import { AdBlocker } from './adBlock';
 
 let remote: any;
 
@@ -11,12 +12,16 @@ if (!Platform.isMobileApp) {
 export interface WebviewTag extends HTMLElement {
     src: string;
     allowpopups?: boolean;
+    partition?: string
     reload: () => void;
     getURL?: () => string;
     goBack?: () => void;
     goForward?: () => void;
     canGoBack?: () => boolean;
     canGoForward?: () => boolean;
+    executeJavaScript: (code: string) => Promise<void>;
+
+
 }
 
 interface WebViewComponentSettings extends WebSearchSettings {
@@ -26,6 +31,7 @@ interface WebViewComponentSettings extends WebSearchSettings {
 }
 
 export class WebViewComponent {
+    private static globalAdBlocker: AdBlocker | null = null;
     private frame: HTMLIFrameElement | WebviewTag;
     private url: string;
     private isFrameReady: boolean = false;
@@ -43,7 +49,7 @@ export class WebViewComponent {
     private onClipCallback?: (url: string) => Promise<void>;
     private titleChangeCallback?: (title: string) => void;
     private windowOpenCallback?: (url: string) => void;
-
+    private adBlocker: AdBlocker;
 
     constructor(
         private app: App,
@@ -61,6 +67,13 @@ export class WebViewComponent {
             ...settings
         };
         this.onClipCallback = onClipCallback;
+
+        if(!WebViewComponent.globalAdBlocker){
+            WebViewComponent.globalAdBlocker = new AdBlocker(plugin?.settings?.adBlock);
+        }
+
+        this.adBlocker = WebViewComponent.globalAdBlocker;
+
     }
 
 
@@ -178,10 +191,24 @@ export class WebViewComponent {
         iframe.setAttribute('credentialless', 'true');
         iframe.setAttribute('crossorigin', 'anonymous');
         iframe.setAttribute('src', this.url);
-        iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
+
+        let sandbox = 'allow-forms allow-modals allow-popups allow-presentation allow-scripts allow-top-navigation-by-user-activation';
+        if(!this.plugin?.settings?.privateMode){
+            sandbox += ' allow-same-origin';
+        }
+        iframe.setAttribute('sandbox', sandbox);
+
+        // iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
         iframe.setAttribute('allow', 'encrypted-media;fullscreen;oversized-images;picture-in-picture;sync-xhr;geolocation');
         iframe.addEventListener('load', () => {
             this.onFrameLoad();
+            if (this.plugin?.settings?.adBlock?.enabled) {
+                setTimeout(() => {
+                    if (iframe.contentDocument) {
+                        this.adBlocker.applyFilters(iframe.contentDocument);
+                    }
+                }, 500);
+            }
             const title = iframe.contentDocument?.title;
             if(title && this.titleChangeCallback){
                 this.titleChangeCallback(title);
@@ -195,6 +222,11 @@ export class WebViewComponent {
         const webview = document.createElement('webview') as WebviewTag;
         webview.classList.add('webview');
         webview.allowpopups = true;
+        
+        if (this.plugin?.settings?.privateMode) {
+            webview.partition = 'private';
+        }
+        
         webview.src = this.url;
 
         webview.addEventListener('dom-ready', () => {
@@ -202,15 +234,18 @@ export class WebViewComponent {
             this.updateUrlDisplay();
             this.loadingSpinner.classList.remove('loading-spinner-visible');
 
-            const webContents = remote.webContents.fromId(webview.getWebContentsId());
-            webContents.setWindowOpenHandler(({url}) => {
+            const webContents = remote.webContents.fromId((webview as any).getWebContentsId());
+            webContents.setWindowOpenHandler(({url}: {url: string}) => {
                 if(this.windowOpenCallback){
                     this.windowOpenCallback(url)
                     return {action: 'deny'}
                 }
                 return {action: 'allow'};
+            });
 
-            })
+            if (this.plugin?.settings?.adBlock?.enabled) {
+                this.setupAdBlocking(webview);
+            }
         });
 
         webview.addEventListener('did-start-loading', () => {
@@ -358,5 +393,31 @@ export class WebViewComponent {
     onWindowOpen(callback: (url: string) => void){
         this.windowOpenCallback = callback;
     }
+
+
+    private async setupAdBlocking(webview: WebviewTag): Promise<void>{
+        await this.adBlocker.initializeFilters();
+
+        webview.addEventListener('will-request', (event: any) => {
+            if (this.adBlocker.isAdRequest(event.url)) {
+                event.preventDefault();
+            }
+        });
+
+        webview.addEventListener('dom-ready', () => {
+            webview.executeJavaScript(this.adBlocker.getDOMFilterScript())
+                .catch(error => {
+                    console.error('Adblock script error:', error);
+                });
+        });
+    }
+
+  
+  public static getBlockedStats(): number {
+    if (!WebViewComponent.globalAdBlocker) {
+        return 0;
+    }
+    return WebViewComponent.globalAdBlocker.getBlockedCount();
+}
 
 }
