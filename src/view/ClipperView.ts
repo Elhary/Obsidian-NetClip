@@ -6,6 +6,8 @@ import { ClipperContextMenu } from '../contextMenu'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './EditorWebView'
 import { ClipModal } from 'src/modal/clipModal'
 import {DEFAULT_IMAGE} from '../assets/image'
+import { Menu } from 'obsidian'
+
 export const CLIPPER_VIEW = 'netClip_clipper_view';
 
 export class clipperHomeView extends ItemView {
@@ -57,8 +59,15 @@ export class clipperHomeView extends ItemView {
             placeholder: 'Search saved articles...'
         });
 
-        const categoryTabsContainer = clipperContainer.createEl('div', { cls: 'netclip_category_tabs'});
+        const bottomContainer = clipperContainer.createEl('div', {cls: 'netclip_bottom_container'})
+        const categoryTabsContainer = bottomContainer.createEl('div', { cls: 'netclip_category_tabs'});
         this.renderCategoryTabs(categoryTabsContainer);
+
+        const sortContainer = bottomContainer.createEl('div', { cls: 'netclip_sort_container' });
+        const domainSortButton = sortContainer.createEl('button', { cls: 'netclip_sort_button' });
+        const sortButton = sortContainer.createEl('button', { cls: 'netclip_sort_button' });
+        setIcon(sortButton, 'arrow-up-down');
+        setIcon(domainSortButton, 'earth');
 
         searchInput.addEventListener('input', () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -71,6 +80,77 @@ export class clipperHomeView extends ItemView {
             cls: 'netclip_btn',
         });
         setIcon(clipButton, 'plus');
+
+        sortButton.addEventListener('click', (event) => {
+            const menu = new Menu();
+            
+            menu.addItem((item) => 
+                item
+                    .setTitle('A-Z')
+                    .setIcon('arrow-up')
+                    .onClick(() => this.applySort('a-z'))
+            );
+            
+            menu.addItem((item) => 
+                item
+                    .setTitle('Z-A')
+                    .setIcon('arrow-down')
+                    .onClick(() => this.applySort('z-a'))
+            );
+            
+            menu.addItem((item) => 
+                item
+                    .setTitle('Newest First')
+                    .setIcon('arrow-down')
+                    .onClick(() => this.applySort('new-old'))
+            );
+            
+            menu.addItem((item) => 
+                item
+                    .setTitle('Oldest First')
+                    .setIcon('arrow-up')
+                    .onClick(() => this.applySort('old-new'))
+            );
+
+            menu.showAtMouseEvent(event);
+        });
+
+
+        domainSortButton.addEventListener('click', async (event) => {
+            const menu = new Menu();
+            const files = this.app.vault.getMarkdownFiles();
+            const domains = new Set<string>();
+
+            await Promise.all(files.map(async file => {
+                if (file.path.startsWith(this.settings.defaultFolderName)) {
+                    const content = await this.app.vault.cachedRead(file);
+                    const urlMatch = content.match(/source: "([^"]+)"/);
+                    if (urlMatch) {
+                        const domain = getDomain(urlMatch[1]);
+                        domains.add(domain);
+                    }
+                }
+            }));
+
+            menu.addItem((item) => 
+                item
+                    .setTitle('All')
+                    .setIcon('dot')
+                    .onClick(() => this.applyDomainFilter(''))
+            );
+
+            domains.forEach(domain => {
+                const displayName = domain.replace('.com', '');
+                menu.addItem((item) => 
+                    item
+                        .setTitle(displayName)
+                        .setIcon('dot')
+                        .onClick(() => this.applyDomainFilter(domain))
+                );
+            });
+
+            menu.showAtMouseEvent(event);
+        });
 
         const SavedContentBox = clipperContainer.createEl("div", { cls: "netclip_saved_container" });
 
@@ -102,6 +182,7 @@ export class clipperHomeView extends ItemView {
             (this.app as any).setting.open();
             (this.app as any).setting.openTabById(this.plugin.manifest.id);
           });
+          
         clipButton.addEventListener("click", () => {
             new ClipModal(this.app, this.plugin).open();
         });
@@ -109,21 +190,42 @@ export class clipperHomeView extends ItemView {
         await this.renderSavedContent(SavedContentBox)
     }
 
+    private async applySort(sortOrder: string) {
+        const savedContainer = this.containerEl.querySelector('.netclip_saved_container') as HTMLElement;
+        await this.renderSavedContent(savedContainer, '', sortOrder);
+    }
+
+    private async applyDomainFilter(domain: string) {
+        const savedContainer = this.containerEl.querySelector('.netclip_saved_container') as HTMLElement;
+        await this.renderSavedContent(savedContainer, '', 'a-z', domain);
+    }
+
     public renderCategoryTabs(tabsContainer: HTMLElement){
         tabsContainer.empty();
 
         const allTab = tabsContainer.createEl('div', { 
             cls: `netclip_category_tab ${this.currentCategory === '' ? 'active' : ''}`,
-            text: 'All',
         });
+        
+        const allTabContent = allTab.createEl('div', { cls: 'netclip-category-content' });
+        allTabContent.createEl('span', { text: 'All' });
 
         allTab.addEventListener('click', () => this.switchCategory('', tabsContainer));
 
         this.plugin.settings.categories.forEach(category => {
             const tab = tabsContainer.createEl('div', {
                 cls: `netclip_category_tab ${this.currentCategory === category ? 'active' : ''}`,
-                text: category,   
             });
+            
+            const tabContent = tab.createEl('div', { cls: 'netclip-category-content' });
+            
+            if (this.plugin.settings.categoryIcons[category]) {
+                const iconSpan = tabContent.createEl('span', { cls: 'category-icon' });
+                setIcon(iconSpan, this.plugin.settings.categoryIcons[category]);
+            }
+            
+            tabContent.createEl('span', { text: category });
+            
             tab.addEventListener('click', () => this.switchCategory(category, tabsContainer));
         })
     }
@@ -145,7 +247,7 @@ export class clipperHomeView extends ItemView {
     }
 
 
-    public async renderSavedContent(container: HTMLElement, filter: string = '') {
+    public async renderSavedContent(container: HTMLElement, filter: string = '', sortOrder: string = 'a-z', domainFilter: string = '') {
         container.empty();
 
         const files = this.app.vault.getMarkdownFiles();
@@ -158,11 +260,40 @@ export class clipperHomeView extends ItemView {
             return file.path.startsWith(`${this.settings.defaultFolderName}/${this.currentCategory}`);
         });
 
-        const filteredFiles = filter
+        let filteredFiles = filter
             ? clippedFiles.filter(file => file.basename.toLowerCase().includes(filter))
             : clippedFiles;
 
-        if (filteredFiles.length === 0) {
+        // Apply domain filter if specified
+        if (domainFilter) {
+            filteredFiles = (await Promise.all(filteredFiles.map(async file => {
+                const content = await this.app.vault.cachedRead(file);
+                const urlMatch = content.match(/source: "([^"]+)"/);
+                if (urlMatch) {
+                    const domain = getDomain(urlMatch[1]);
+                    return domain === domainFilter ? file : null;
+                }
+                return null;
+            }))).filter(Boolean) as TFile[];
+        }
+
+        // Sort files based on selected order
+        const sortedFiles = filteredFiles.sort((a, b) => {
+            switch (sortOrder) {
+                case 'a-z':
+                    return a.basename.localeCompare(b.basename);
+                case 'z-a':
+                    return b.basename.localeCompare(a.basename);
+                case 'new-old':
+                    return b.stat.mtime - a.stat.mtime;
+                case 'old-new':
+                    return a.stat.mtime - b.stat.mtime;
+                default:
+                    return 0;
+            }
+        });
+
+        if (sortedFiles.length === 0) {
             const emptyContainer = container.createEl('div', { cls: 'empty_box' });
             const emptyIcon = emptyContainer.createEl("span", { cls: 'empty_icon' });
             setIcon(emptyIcon, 'lucide-book-open');
@@ -171,7 +302,7 @@ export class clipperHomeView extends ItemView {
         }
 
 
-        for (const file of filteredFiles) {
+        for (const file of sortedFiles) {
             const content = await this.app.vault.cachedRead(file);
             const clippedEl = container.createEl('div', { cls: 'netClip_card' });
 
@@ -209,7 +340,6 @@ export class clipperHomeView extends ItemView {
             container.appendChild(clippedEl);
         }
     }
-
 
 
 

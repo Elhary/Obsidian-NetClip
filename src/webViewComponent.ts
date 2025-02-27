@@ -2,6 +2,7 @@ import { App, Platform, setIcon, setTooltip } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
 import { ClipModal } from './modal/clipModal';
 import { AdBlocker } from './adBlock';
+import type * as Electron from 'electron';
 
 let remote: any;
 
@@ -204,7 +205,7 @@ export class WebViewComponent {
             if (this.plugin?.settings?.adBlock?.enabled) {
                 setTimeout(() => {
                     if (iframe.contentDocument) {
-                        this.adBlocker.applyFilters(iframe.contentDocument);
+                        this.adBlocker.applyFilters(iframe as unknown as Electron.WebviewTag);
                     }
                 }, 500);
             }
@@ -432,29 +433,16 @@ export class WebViewComponent {
     }
 
 
-    private async setupAdBlocking(webview: WebviewTag): Promise<void>{
-        await this.adBlocker.initializeFilters();
-
-        webview.addEventListener('will-request', (event: any) => {
-            if (this.adBlocker.isAdRequest(event.url)) {
-                event.preventDefault();
-            }
-        });
-
-        webview.addEventListener('dom-ready', () => {
-            webview.executeJavaScript(this.adBlocker.getDOMFilterScript())
-                .catch(error => {
-                    console.error('Adblock script error:', error);
-                });
+    private setupAdBlocking(webview: WebviewTag): void {
+        this.adBlocker.initializeFilters().then(() => {
+            this.adBlocker.applyFilters(webview as unknown as Electron.WebviewTag);
+            
+            webview.addEventListener('dom-ready', () => {
+                webview.executeJavaScript(this.adBlocker.getDOMFilterScript())
+                    .catch(error => {
+                        console.error('Adblock script error:', error);
+                    });
+            });
         });
     }
-
-  
-  public static getBlockedStats(): number {
-    if (!WebViewComponent.globalAdBlocker) {
-        return 0;
-    }
-    return WebViewComponent.globalAdBlocker.getBlockedCount();
-}
-
 }

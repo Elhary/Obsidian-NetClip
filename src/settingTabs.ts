@@ -324,7 +324,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
             });
 
         this.plugin.settings.categories.forEach(category => {
-            new Setting(containerEl)
+            const setting = new Setting(containerEl)
                 .setName(category)
                 .addButton(btn => btn
                     .setIcon('trash')
@@ -332,7 +332,24 @@ export default class NetClipSettingTab extends PluginSettingTab {
                         if (await this.deleteCategory(category)) {
                             this.display();
                         }
-                    }));
+                    }))
+                .addText(text => {
+                    text.setPlaceholder('Enter icon name')
+                        .setValue(this.plugin.settings.categoryIcons[category] || '')
+                        .onChange(async (value) => {
+                            if (value) {
+                                this.plugin.settings.categoryIcons[category] = value;
+                            } else {
+                                delete this.plugin.settings.categoryIcons[category];
+                            }
+                            await this.plugin.saveSettings();
+                        });
+                    return text;
+                });
+            
+            if (this.plugin.settings.categoryIcons[category]) {
+                setting.setDesc(`Current icon: ${this.plugin.settings.categoryIcons[category]}`);
+            }
         });
 
     }
