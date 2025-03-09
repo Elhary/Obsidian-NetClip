@@ -3,6 +3,7 @@ export interface NetClipSettings {
     viewPosition: 'left' | 'right' | 'default';
     defaultFolderName: string;
     defaultWebUrl: string;
+    parentFolderPath: string;
     searchEngine: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
     categories: string[];
     categoryIcons: Record<string, string>;
@@ -17,6 +18,7 @@ export interface NetClipSettings {
 export const DEFAULT_SETTINGS: NetClipSettings = {
     viewPosition: 'default',
     defaultFolderName: 'Netclips',
+    parentFolderPath: '',
     defaultWebUrl: 'https://google.com',
     searchEngine: 'google',
     categories: [],

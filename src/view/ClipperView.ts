@@ -121,8 +121,13 @@ export class clipperHomeView extends ItemView {
             const files = this.app.vault.getMarkdownFiles();
             const domains = new Set<string>();
 
+            // Construct the base folder path using parent folder if specified
+            const baseFolderPath = this.settings.parentFolderPath 
+                ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+                : this.settings.defaultFolderName;
+
             await Promise.all(files.map(async file => {
-                if (file.path.startsWith(this.settings.defaultFolderName)) {
+                if (file.path.startsWith(baseFolderPath)) {
                     const content = await this.app.vault.cachedRead(file);
                     const urlMatch = content.match(/source: "([^"]+)"/);
                     if (urlMatch) {
@@ -252,12 +257,17 @@ export class clipperHomeView extends ItemView {
 
         const files = this.app.vault.getMarkdownFiles();
 
+        // Construct the base folder path using parent folder if specified
+        const baseFolderPath = this.settings.parentFolderPath 
+            ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+            : this.settings.defaultFolderName;
+
         const clippedFiles = files.filter(file => {
-            const isInMainFolder = file.path.startsWith(this.settings.defaultFolderName);
+            const isInMainFolder = file.path.startsWith(baseFolderPath);
             if (!this.currentCategory) {
                 return isInMainFolder;
             }
-            return file.path.startsWith(`${this.settings.defaultFolderName}/${this.currentCategory}`);
+            return file.path.startsWith(`${baseFolderPath}/${this.currentCategory}`);
         });
 
         let filteredFiles = filter

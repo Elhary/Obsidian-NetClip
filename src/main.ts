@@ -39,22 +39,36 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private async FoldersExist() {
-    const mainFolder = this.app.vault.getFolderByPath(this.settings.defaultFolderName);
+    // Construct the full path to the main folder
+    const mainFolderPath = this.settings.parentFolderPath 
+      ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+      : this.settings.defaultFolderName;
+    
+    const mainFolder = this.app.vault.getFolderByPath(mainFolderPath);
     if (!mainFolder) {
-      await this.app.vault.createFolder(this.settings.defaultFolderName);
+      // Create parent folder if it doesn't exist and is specified
+      if (this.settings.parentFolderPath && !this.app.vault.getFolderByPath(this.settings.parentFolderPath)) {
+        await this.app.vault.createFolder(this.settings.parentFolderPath);
+      }
+      
+      // Create main folder
+      await this.app.vault.createFolder(mainFolderPath);
+      
+      // Create category folders
       for (const category of this.DEMO_CATEGORIES) {
-        const categoryPath = `${this.settings.defaultFolderName}/${category}`;
+        const categoryPath = `${mainFolderPath}/${category}`;
         await this.app.vault.createFolder(categoryPath);
         if (!this.settings.categories.includes(category)) {
           this.settings.categories.push(category);
         }
       }
       await this.saveSettings();
-      new Notice(`Created folders in ${this.settings.defaultFolderName}`);
+      new Notice(`Created folders in ${mainFolderPath}`);
     }
 
+    // Create any missing category folders
     for (const category of this.settings.categories) {
-      const categoryPath = `${this.settings.defaultFolderName}/${category}`;
+      const categoryPath = `${mainFolderPath}/${category}`;
       const categoryFolder = this.app.vault.getFolderByPath(categoryPath);
       if (!categoryFolder) {
         await this.app.vault.createFolder(categoryPath);
@@ -186,9 +200,15 @@ export default class NetClipPlugin extends Plugin {
       const brand = this.contentExtractors.extractBrand(doc);
       const rating = this.contentExtractors.extractRating(doc);
 
-      const folderPath = category 
-        ? `${this.settings.defaultFolderName}/${category}`
+      // Construct the base folder path using parent folder if specified
+      const baseFolderPath = this.settings.parentFolderPath 
+        ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
         : this.settings.defaultFolderName;
+      
+      // Determine the final folder path based on category
+      const folderPath = category 
+        ? `${baseFolderPath}/${category}`
+        : baseFolderPath;
 
       if (!this.app.vault.getFolderByPath(folderPath)) {
         await this.app.vault.createFolder(folderPath);
