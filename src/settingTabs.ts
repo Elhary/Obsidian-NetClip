@@ -2,6 +2,7 @@ import { App, ButtonComponent, Notice, PluginSettingTab, Setting, TFolder } from
 import NetClipPlugin from './main';
 import { CLIPPER_VIEW } from './view/ClipperView';
 import { DeleteCategoryModal } from './modal/deleteCategory';
+import { FolderSelectionModal } from './modal/folderSelection';
 
 
 export default class NetClipSettingTab extends PluginSettingTab {
@@ -29,7 +30,11 @@ export default class NetClipSettingTab extends PluginSettingTab {
     }
 
     private async syncCategoriesFolders() {
-        const mainFolder = this.app.vault.getFolderByPath(this.plugin.settings.defaultFolderName);
+        const mainFolderPath = this.plugin.settings.parentFolderPath 
+            ? `${this.plugin.settings.parentFolderPath}/${this.plugin.settings.defaultFolderName}`
+            : this.plugin.settings.defaultFolderName;
+            
+        const mainFolder = this.app.vault.getFolderByPath(mainFolderPath);
         if (!mainFolder) return;
     
         const subfolders = mainFolder.children
@@ -41,7 +46,11 @@ export default class NetClipSettingTab extends PluginSettingTab {
     }
 
     private async deleteCategory(category: string) {
-        const folderPath = `${this.plugin.settings.defaultFolderName}/${category}`;
+        const baseFolderPath = this.plugin.settings.parentFolderPath 
+            ? `${this.plugin.settings.parentFolderPath}/${this.plugin.settings.defaultFolderName}`
+            : this.plugin.settings.defaultFolderName;
+            
+        const folderPath = `${baseFolderPath}/${category}`;
         const folder = this.app.vault.getFolderByPath(folderPath);
 
         if (!(folder)) {
@@ -74,12 +83,25 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
 
     private async createCategoryFolder(categoryName: string): Promise<boolean> {
-        const folderPath = `${this.plugin.settings.defaultFolderName}/${categoryName}`;
+        const baseFolderPath = this.plugin.settings.parentFolderPath 
+            ? `${this.plugin.settings.parentFolderPath}/${this.plugin.settings.defaultFolderName}`
+            : this.plugin.settings.defaultFolderName;
+            
+        const folderPath = `${baseFolderPath}/${categoryName}`;
         const existingFolder = this.app.vault.getFolderByPath(folderPath);
 
         if (existingFolder) {
             new Notice(`Category "${categoryName}" already exists`);
             return false;
+        }
+
+        const baseFolder = this.app.vault.getFolderByPath(baseFolderPath);
+        if (!baseFolder) {
+            if (this.plugin.settings.parentFolderPath && 
+                !this.app.vault.getFolderByPath(this.plugin.settings.parentFolderPath)) {
+                await this.app.vault.createFolder(this.plugin.settings.parentFolderPath);
+            }
+            await this.app.vault.createFolder(baseFolderPath);
         }
 
         await this.app.vault.createFolder(folderPath);
@@ -89,23 +111,31 @@ export default class NetClipSettingTab extends PluginSettingTab {
 
 
     private async renameFolderAndUpdatePaths(oldPath: string, newPath: string): Promise<boolean> {
-        const oldFolder = this.app.vault.getFolderByPath(oldPath);
+        const fullOldPath = this.plugin.settings.parentFolderPath 
+            ? `${this.plugin.settings.parentFolderPath}/${oldPath}`
+            : oldPath;
+        
+        const fullNewPath = this.plugin.settings.parentFolderPath 
+            ? `${this.plugin.settings.parentFolderPath}/${newPath}`
+            : newPath;
+        
+        const oldFolder = this.app.vault.getFolderByPath(fullOldPath);
         if (!oldFolder) {
-            new Notice(`Folder "${oldPath}" not found.`);
+            new Notice(`Folder "${fullOldPath}" not found.`);
             return false;
         }
     
-        const newFolder = this.app.vault.getFolderByPath(newPath);
+        const newFolder = this.app.vault.getFolderByPath(fullNewPath);
         if (newFolder) {
-            new Notice(`Folder "${newPath}" already exists.`);
+            new Notice(`Folder "${fullNewPath}" already exists.`);
             return false;
         }
     
-        await this.app.fileManager.renameFile(oldFolder, newPath);
+        await this.app.fileManager.renameFile(oldFolder, fullNewPath);
     
         for (const category of this.plugin.settings.categories) {
-            const oldCategoryPath = `${oldPath}/${category}`;
-            const newCategoryPath = `${newPath}/${category}`;
+            const oldCategoryPath = `${fullOldPath}/${category}`;
+            const newCategoryPath = `${fullNewPath}/${category}`;
             const categoryFolder = this.app.vault.getFolderByPath(oldCategoryPath);
             if (categoryFolder) {
                 await this.app.fileManager.renameFile(categoryFolder, newCategoryPath);
@@ -214,8 +244,32 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     })
             );
 
-
-
+        new Setting(containerEl)
+            .setName('Parent folder')
+            .setDesc('Choose a parent folder for NetClip content (leave empty to use vault root)')
+            .addText(text => {
+                return text
+                    .setPlaceholder('Parent folder path')
+                    .setValue(this.plugin.settings.parentFolderPath)
+                    .onChange(async (value) => {
+                        this.plugin.settings.parentFolderPath = value.trim();
+                        await this.plugin.saveSettings();
+                    });
+            })
+            .addButton(button => {
+                return button
+                    .setClass('net-clip-button')
+                    .setButtonText('Browse')
+                    .onClick(async () => {
+                        const modal = new FolderSelectionModal(this.app, this.plugin);
+                        modal.onChooseFolder(async (folderPath) => {
+                            this.plugin.settings.parentFolderPath = folderPath;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        });
+                        modal.open();
+                    });
+            });
 
         new Setting(containerEl)
             .setName('Change folder name')
@@ -327,6 +381,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
             const setting = new Setting(containerEl)
                 .setName(category)
                 .addButton(btn => btn
+                    .setClass('netclip_trash')
                     .setIcon('trash')
                     .onClick(async () => {
                         if (await this.deleteCategory(category)) {
