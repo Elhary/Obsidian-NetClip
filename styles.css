@@ -29,8 +29,14 @@
   width: 20px;
 }
 
+button.net-clip-button{
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
 
-
+.netclip_trash svg{
+  color: var(--background-modifier-error);
+}
 
 
 /* CATEGORY TAB STYLING */
@@ -463,7 +469,8 @@ button.netclip_warning{
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  margin-top: -20px;
+  margin-left: -20px;
   width: 40px;
   height: 40px;
   border: 5px solid var(--background-modifier-border);
@@ -566,8 +573,8 @@ button.netclip_warning{
 
 
 @keyframes spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .netclip_modal {
@@ -626,3 +633,39 @@ button.netclip_warning{
       padding: 0.5rem;
   }
 }
+
+/* Folder selection modal styles */
+.netclip-folder-selection-modal .netclip-folder-name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.netclip-folder-selection-modal .netclip-folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-normal);
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.netclip-folder-selection-modal .setting-item {
+  border-top: 1px solid var(--background-modifier-border);
+  padding: 12px 0;
+}
+
+.netclip-folder-selection-modal .netclip-folder-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.netclip-folder-selection-modal .setting-item-control {
+  margin-left: 8px;
+}
+
