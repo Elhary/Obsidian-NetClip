@@ -39,22 +39,20 @@ export default class NetClipPlugin extends Plugin {
   }
 
   private async FoldersExist() {
-    // Construct the full path to the main folder
+
     const mainFolderPath = this.settings.parentFolderPath 
       ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
       : this.settings.defaultFolderName;
     
     const mainFolder = this.app.vault.getFolderByPath(mainFolderPath);
     if (!mainFolder) {
-      // Create parent folder if it doesn't exist and is specified
+
       if (this.settings.parentFolderPath && !this.app.vault.getFolderByPath(this.settings.parentFolderPath)) {
         await this.app.vault.createFolder(this.settings.parentFolderPath);
       }
       
-      // Create main folder
       await this.app.vault.createFolder(mainFolderPath);
-      
-      // Create category folders
+
       for (const category of this.DEMO_CATEGORIES) {
         const categoryPath = `${mainFolderPath}/${category}`;
         await this.app.vault.createFolder(categoryPath);
@@ -66,7 +64,6 @@ export default class NetClipPlugin extends Plugin {
       new Notice(`Created folders in ${mainFolderPath}`);
     }
 
-    // Create any missing category folders
     for (const category of this.settings.categories) {
       const categoryPath = `${mainFolderPath}/${category}`;
       const categoryFolder = this.app.vault.getFolderByPath(categoryPath);
