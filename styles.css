@@ -669,3 +669,438 @@ button.netclip_warning{
   margin-left: 8px;
 }
 
+
+
+
+
+
+.netclip-support-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+.netclip-support-button {
+  display: inline-flex;
+  align-items: center;
+}
+.netclip-support-button img {
+  border-radius: 5px;
+  transition: transform 0.2s ease;
+  height: 40px;
+  object-fit: contain;
+}
+.netclip-support-button img:hover {
+  transform: scale(1.05);
+}
+.netclip-support-buttons {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* AI Processing Animation Styles */
+.netclip_ai_processing_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  gap: 20px;
+}
+
+.netclip_ai_animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.netclip_ai_status {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-normal);
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.netclip_ai_status.error {
+  color: var(--text-error);
+}
+
+/* Typing animation */
+.netclip_typing_animation {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+}
+
+.netclip_typing_dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--text-accent);
+  animation: typing-animation 1.5s infinite ease-in-out;
+}
+
+.netclip_typing_dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.netclip_typing_dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.netclip_typing_dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-animation {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* AI Steps */
+.netclip_ai_steps {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.netclip_ai_step {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.netclip_ai_step::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: var(--background-modifier-border);
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.netclip_ai_step.active {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  opacity: 1;
+  font-weight: 500;
+}
+
+.netclip_ai_step.active::before {
+  background-color: var(--text-accent);
+  box-shadow: 0 0 8px var(--text-accent-hover);
+  animation: pulse 1.5s infinite;
+}
+
+.netclip_ai_step.completed {
+  background-color: var(--background-primary-alt);
+  color: var(--text-normal);
+  opacity: 0.8;
+}
+
+.netclip_ai_step.completed::before {
+  background-color: var(--interactive-success);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--text-accent-rgb), 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(var(--text-accent-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--text-accent-rgb), 0);
+  }
+}
+
+.netclip_error_close {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.netclip_error_close:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+/* AI Processing Modal Styles */
+.netclip_ai_processing_modal {
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 8px;
+}
+
+.netclip_ai_processing_content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.netclip_ai_processing_content h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--text-normal);
+}
+
+/* Prompt Progress Styles */
+.netclip_prompt_progress {
+  width: 100%;
+  margin-top: 15px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 15px;
+}
+
+.netclip_prompt_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  transition: all 0.3s ease;
+}
+
+.netclip_prompt_name {
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.netclip_prompt_status {
+  font-size: 0.85em;
+  padding: 3px 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.netclip_prompt_status.processing {
+  background-color: var(--text-accent);
+  color: var(--text-on-accent);
+  animation: pulse 1.5s infinite;
+}
+
+.netclip_prompt_status.completed {
+  background-color: var(--interactive-success);
+  color: var(--text-on-accent);
+}
+
+/* Info Message Styles */
+.netclip_info_message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background-color: var(--background-modifier-form-field);
+  border-left: 4px solid var(--text-accent);
+  width: 100%;
+  max-width: 450px;
+}
+
+.netclip_info_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+.netclip_info_icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.netclip_info_text {
+  font-size: 0.9em;
+  color: var(--text-normal);
+  line-height: 1.4;
+}
+
+
+
+/* NetClip Settings Tab Styling */
+.netclip-setting-header {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 0.5rem;
+  background-color: var(--background-secondary);
+  padding: 12px;
+  border-radius: 15px;
+  border: none;
+}
+
+.netclip-setting-tab-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.netclip-navigation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.netclip-navigation-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.netclip-navigation-item-selected {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.netclip-navigation-item-selected:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.netclip-setting-content {
+  padding: 0.5rem;
+}
+
+/* Category settings styling */
+.netclip-category-setting {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--background-secondary);
+}
+
+.netclip-category-setting .setting-item {
+  border-top: none;
+  padding-top: 0.5rem;
+}
+
+.netclip-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.netclip-category-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+
+
+.netclip_prompt_modal{
+  max-width: 800px;
+  width: 100%;
+}
+
+.netclip_prompt_modal textarea{
+  width: 100%;
+
+}
+
+.prompt-section{
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  margin-bottom: 1em;
+  border-radius: 10px;
+}
+
+.netclip_clip_modal{
+  max-width: 900px;
+  max-height: 700px;
+  width: 100%;
+  height: auto;
+}
+
+.netclip_prompt_container{
+  max-height: 300px;
+  overflow: hidden;
+  overflow-y: scroll;
+  
+}
+
+.netclip_clip_modal .netclip_clip_modal_content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4em;
+  width: 100%;
+}
+
+

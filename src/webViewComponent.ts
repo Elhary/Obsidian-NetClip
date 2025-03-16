@@ -51,6 +51,7 @@ export class WebViewComponent {
     private titleChangeCallback?: (title: string) => void;
     private windowOpenCallback?: (url: string) => void;
     private adBlocker: AdBlocker;
+    private eventListeners: { element: HTMLElement; type: string; listener: EventListener }[] = [];
 
     constructor(
         private app: App,
@@ -444,5 +445,25 @@ export class WebViewComponent {
                     });
             });
         });
+    }
+
+    private addEventListenerWithCleanup(element: HTMLElement, type: string, listener: EventListener) {
+        element.addEventListener(type, listener);
+        this.eventListeners.push({ element, type, listener });
+    }
+
+    unload() {
+        this.eventListeners.forEach(({ element, type, listener }) => {
+            element.removeEventListener(type, listener);
+        });
+        this.eventListeners = [];
+        
+        if (this.frame) {
+            this.frame.remove();
+        }
+        
+        if (this.search) {
+            this.search.unload();
+        }
     }
 }
