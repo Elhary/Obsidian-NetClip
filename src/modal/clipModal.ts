@@ -1,9 +1,13 @@
-import {App, Modal} from 'obsidian';
+import {App, Modal, Setting} from 'obsidian';
 import NetClipPlugin from "../main";
 import { normalizeUrl } from "../utils";
+import { AIPrompt } from '../settings';
+import { AIProcessingModal } from './aiProcessingModal';
 
 export class ClipModal extends Modal {
     modalEl: HTMLElement;
+    private selectedPrompts: AIPrompt[] = [];
+    private selectedVariables: Record<string, Record<string, string>> = {};
 
     constructor(app: App, private plugin: NetClipPlugin){
         super(app)
@@ -12,10 +16,8 @@ export class ClipModal extends Modal {
     async tryGetClipboardUrl(): Promise<string>{
         try{
             const text = await navigator.clipboard.readText();
-            const url = normalizeUrl(text);
-            return url || '';
-        } catch (error){
-            console.warn('failed to read clipboard', error);
+            return normalizeUrl(text) || '';
+        } catch {
             return '';
         }
     }
@@ -26,7 +28,6 @@ export class ClipModal extends Modal {
         const {contentEl} = this;
         contentEl.addClass('netclip_clip_modal_content');
         contentEl.createEl('h2', {text: 'Clip webpage'});
-
 
         const clipContainer = contentEl.createDiv({cls: 'netclip_clip_container'});
         const urlContainer = clipContainer.createDiv({cls: 'netclip_clip_url_container'});
@@ -59,23 +60,95 @@ export class ClipModal extends Modal {
             });
         });
 
+        if (this.plugin.settings.enableAI && this.plugin.settings.geminiApiKey) {
+            const promptContainer = contentEl.createDiv({cls: 'netclip_prompt_container'});
+            promptContainer.createEl('h3', {text: 'AI Processing'});
+
+            this.plugin.settings.prompts.forEach(prompt => {
+                const promptDiv = promptContainer.createDiv({cls: 'prompt-section'});
+                new Setting(promptDiv)
+                    .setName(prompt.name)
+                    .addToggle(toggle => toggle
+                        .setValue(prompt.enabled)
+                        .onChange(value => {
+                            if (value) {
+                                if (!this.selectedPrompts.includes(prompt)) {
+                                    this.selectedPrompts.push(prompt);
+                                    this.selectedVariables[prompt.name] = {};
+                                    this.renderVariableSelectors(promptDiv, prompt);
+                                }
+                            } else {
+                                const index = this.selectedPrompts.indexOf(prompt);
+                                if (index > -1) {
+                                    this.selectedPrompts.splice(index, 1);
+                                    delete this.selectedVariables[prompt.name];
+                                    const varContainer = promptDiv.querySelector(`.prompt-variables-${prompt.name.replace(/\s+/g, '-')}`);
+                                    if (varContainer) varContainer.remove();
+                                }
+                            }
+                        }));
+
+                if (prompt.enabled) {
+                    this.selectedPrompts.push(prompt);
+                    this.selectedVariables[prompt.name] = {};
+                    this.renderVariableSelectors(promptDiv, prompt);
+                }
+            });
+        }
+
         const clipButton = contentEl.createEl('button', {text: 'Clip'});
 
         clipButton.addEventListener('click', async () => {
             if(urlInput.value){
                 const normalizedUrl = normalizeUrl(urlInput.value);
                 if (normalizedUrl){
-                    await this.plugin.clipWebpage(normalizedUrl, categorySelect.value);
-                    this.close(); 
+                    if (this.selectedPrompts.length > 0) {
+                        this.close();
+                        new AIProcessingModal(
+                            this.app,
+                            this.plugin,
+                            normalizedUrl,
+                            categorySelect.value,
+                            this.selectedPrompts,
+                            this.selectedVariables
+                        ).open();
+                    } else {
+                        await this.plugin.clipWebpage(
+                            normalizedUrl,
+                            categorySelect.value,
+                            null,
+                            {}
+                        );
+                        this.close();
+                    }
                 }
             }
         });
+    }
 
+    private renderVariableSelectors(container: HTMLElement, prompt: AIPrompt) {
+        const varContainer = container.createDiv({
+            cls: `prompt-variables prompt-variables-${prompt.name.replace(/\s+/g, '-')}`
+        });
+        
+        Object.entries(prompt.variables).forEach(([varName, options]) => {
+            new Setting(varContainer)
+                .setName(`${prompt.name} - ${varName}`)
+                .addDropdown(dropdown => {
+                    options.forEach(option => dropdown.addOption(option, option));
+                    dropdown.onChange(value => {
+                        this.selectedVariables[prompt.name][varName] = value;
+                    });
+                    if (options.length > 0) {
+                        this.selectedVariables[prompt.name][varName] = options[0];
+                        dropdown.setValue(options[0]);
+                    }
+                });
+        });
     }
 
     onClose(){
         const {contentEl} = this;
         contentEl.empty();
     }
-
 }

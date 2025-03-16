@@ -1,5 +1,6 @@
 import { App, Modal, Setting, TFolder, setIcon } from 'obsidian';
 import NetClipPlugin from '../main';
+import { t } from '../translations';
 
 export class FolderSelectionModal extends Modal {
     private plugin: NetClipPlugin;
@@ -21,8 +22,8 @@ export class FolderSelectionModal extends Modal {
         contentEl.empty();
         contentEl.addClass('netclip-folder-selection-modal');
 
-        contentEl.createEl('h2', { text: 'Select Parent Folder' });
-        contentEl.createEl('p', { text: 'Choose a parent folder for NetClip content. Leave empty to use vault root.' });
+        contentEl.createEl('h2', { text: t('select_parent_folder') });
+        contentEl.createEl('p', { text: t('select_parent_folder_desc') });
 
         const rootSetting = new Setting(contentEl);
         
@@ -33,15 +34,15 @@ export class FolderSelectionModal extends Modal {
         setIcon(rootIconContainer, 'vault');
         rootNameContainer.appendChild(rootIconContainer);
         const rootTextSpan = document.createElement('span');
-        rootTextSpan.textContent = 'Vault Root';
+        rootTextSpan.textContent = t('vault_root');
         rootNameContainer.appendChild(rootTextSpan);
         
         rootSetting.nameEl.empty();
         rootSetting.nameEl.appendChild(rootNameContainer);
-        rootSetting.setDesc('Store NetClip content directly in the vault root');
+        rootSetting.setDesc(t('store_in_root_desc'));
         
         rootSetting.addButton(button => button
-            .setButtonText('Select')
+            .setButtonText(t('select'))
             .onClick(() => {
                 this.selectedFolderPath = '';
                 this.close();
@@ -50,7 +51,7 @@ export class FolderSelectionModal extends Modal {
 
         const folders = this.getAllFolders();
         
-        contentEl.createEl('h3', { text: 'Available Folders' });
+        contentEl.createEl('h3', { text: t('available_folders') });
         const folderList = contentEl.createEl('div', { cls: 'netclip-folder-list' });
 
         folders.forEach(folder => {
@@ -72,7 +73,7 @@ export class FolderSelectionModal extends Modal {
             folderSetting.nameEl.appendChild(nameContainer);
             
             folderSetting.addButton(button => button
-                .setButtonText('Select')
+                .setButtonText(t('select'))
                 .onClick(() => {
                     this.selectedFolderPath = folderPath;
                     this.close();
@@ -82,7 +83,7 @@ export class FolderSelectionModal extends Modal {
 
         new Setting(contentEl)
             .addButton(button => button
-                .setButtonText('Cancel')
+                .setButtonText(t('cancel'))
                 .onClick(() => {
                     this.close();
                 }));
