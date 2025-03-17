@@ -205,16 +205,15 @@ export class WebSearch {
     }
 
     public unload(): void {
-        // Remove all event listeners
+       
         this.searchInput.removeEventListener('input', this.handleInput);
         this.searchInput.removeEventListener('keydown', this.handleKeydown);
         this.searchInput.removeEventListener('blur', this.handleBlur);
         window.removeEventListener('click', this.handleWindowClick);
-        
-        // Clean up suggestions
+
         this.hideSuggestions();
         
-        // Remove DOM elements if needed
+      
         if (this.suggestionContainer.parentNode) {
             this.suggestionContainer.remove();
         }
