@@ -52,9 +52,9 @@ NetClip is an Obsidian plugin that lets you browse the web and clip webpages dir
   
 To use AI features:
 
-1. Get a Gemini API key from [Google AI Studio]([Get API key | Google AI Studio](https://aistudio.google.com/apikey))
+1. Get a Gemini API key from [Get API key | Google AI Studio](https://aistudio.google.com/apikey)
 2. Enable AI processing in plugin settings
-3. Add your[ API key]([Get API key | Google AI Studio](https://aistudio.google.com/apikey))
+3. Add your [API key](https://aistudio.google.com/apikey)
 4. Create custom prompts or use the default ones 
 5. Select prompts when clipping content
 
