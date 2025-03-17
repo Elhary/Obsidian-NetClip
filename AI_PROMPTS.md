@@ -34,7 +34,7 @@ To begin using AI prompts in NetClip, you’ll need to enable the feature and co
 NetClip includes a special built-in variable, `${article}`, which automatically captures the extracted content (e.g., title, body text, metadata) from your web clips. This variable is pre-populated when you clip a webpage, making it easy to integrate into your prompts.
 
 ### Example Usage:
-```json
+```
 Translate the following ${article} to ${target_lang}
 ```
 
