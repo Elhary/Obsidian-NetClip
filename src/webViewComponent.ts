@@ -21,8 +21,8 @@ export interface WebviewTag extends HTMLElement {
     canGoBack?: () => boolean;
     canGoForward?: () => boolean;
     executeJavaScript: (code: string) => Promise<void>;
-
-
+    remove: () => void;
+    detach: () => void;
 }
 
 interface WebViewComponentSettings extends WebSearchSettings {
@@ -52,6 +52,7 @@ export class WebViewComponent {
     private windowOpenCallback?: (url: string) => void;
     private adBlocker: AdBlocker;
     private eventListeners: { element: HTMLElement; type: string; listener: EventListener }[] = [];
+    private frameDoc: Document | null = null;
 
     constructor(
         private app: App,
@@ -75,11 +76,8 @@ export class WebViewComponent {
         }
 
         this.adBlocker = WebViewComponent.globalAdBlocker;
-
     }
 
-
-    
     createContainer(): HTMLElement {
         const containerEl = document.createElement('div');
         containerEl.classList.add('netClip_webview_container');
@@ -93,7 +91,74 @@ export class WebViewComponent {
         return containerEl;
     }
 
+    private setupFrameContainer(containerEl: HTMLElement): HTMLElement {
+        const frameContainer = containerEl.createDiv('netClip_frame-container');
+        this.loadingSpinner = frameContainer.createDiv('loading-spinner');
+        this.frameDoc = frameContainer.ownerDocument;
+        this.frame = this.createFrame();
+        frameContainer.appendChild(this.frame);
+        return frameContainer;
+    }
 
+    private createFrame(): HTMLIFrameElement | WebviewTag {
+        return Platform.isMobileApp ? this.createIframe() : this.createWebview();
+    }
+
+    private createWebview(): WebviewTag {
+        const webview = this.frameDoc?.createElement('webview') as WebviewTag || document.createElement('webview') as WebviewTag;
+        webview.classList.add('webview');
+
+        webview.setAttribute('allowpopups', '');
+        webview.setAttribute('webpreferences', 'contextIsolation=yes, nodeIntegration=no');
+        webview.setAttribute('plugins', 'true');
+        
+
+        if (!this.plugin?.settings?.privateMode) {
+            webview.partition = 'persist:netclip-shared';
+        } else {
+            const sessionId = `private-${Date.now()}`;
+            webview.partition = `persist:${sessionId}`;
+        }
+        
+        if (this.plugin?.settings?.privateMode) {
+            webview.setAttribute('disablewebsecurity', 'true');
+            webview.setAttribute('disableblinkfeatures', 'AutomationControlled');
+            webview.setAttribute('disablefeatures', 'Translate,NetworkService');
+            webview.setAttribute('cookiestore', 'private');
+            webview.setAttribute('disablethirdpartycookies', 'true');
+        }
+
+        webview.src = this.url;
+
+        // Handle window destruction and recreation
+        webview.addEventListener('destroyed', () => {
+            const parent = webview.parentElement;
+            if (parent && parent.ownerDocument !== this.frameDoc) {
+                this.cleanupWebview(webview);
+                
+          
+                this.frameDoc = parent.ownerDocument;
+                
+                const newWebview = this.createWebview();
+                parent.appendChild(newWebview);
+                this.frame = newWebview;
+                this.setupWebviewEvents(newWebview);
+            }
+        });
+
+        this.setupWebviewEvents(webview);
+        return webview;
+    }
+
+    private cleanupWebview(webview: WebviewTag): void {
+        if (webview) {
+            try {
+                webview.remove();
+            } catch (e) {
+                // console.warn('Error cleaning up webview:', e); 
+            }
+        }
+    }
 
     private setupSearchInput(container: HTMLElement): void {
         const searchContainer = container.createDiv('netClip_search_container');
@@ -112,8 +177,6 @@ export class WebViewComponent {
         });
     }
 
-
-
     private setupClipBtn(container: HTMLElement): void {
         const clipContianer = container.createDiv('netClip_clip_btn_container');
 
@@ -130,7 +193,6 @@ export class WebViewComponent {
                 this.onClipCallback?.(this.getCurrentUrl());
             };
         }
-
 
         if (this.plugin) {
             this.modalClipBtn = clipContianer.createEl('button', { 
@@ -150,8 +212,6 @@ export class WebViewComponent {
         }
     }
 
-
-
     private setupNavigationBtns(container: HTMLElement): void {
         const leftContainer = container.createDiv('netClip_nav_left');
         this.backBtn = leftContainer.createEl('button', { cls: 'netClip_back_btn netClip_btn' });
@@ -168,24 +228,6 @@ export class WebViewComponent {
         setIcon(this.refreshBtn, 'rotate-ccw');
         this.refreshBtn.onclick = () => this.refresh();
     }
-
-
-
-    private setupFrameContainer(containerEl: HTMLElement): HTMLElement {
-        const frameContainer = containerEl.createDiv('netClip_frame-container');
-        this.loadingSpinner = frameContainer.createDiv('loading-spinner');
-        this.frame = this.createFrame();
-        frameContainer.appendChild(this.frame);
-        return frameContainer;
-    }
-
-
-
-    private createFrame(): HTMLIFrameElement | WebviewTag {
-        return Platform.isMobileApp ? this.createIframe() : this.createWebview();
-    }
-
-
 
     private createIframe(): HTMLIFrameElement {
         const iframe = document.createElement('iframe');
@@ -218,26 +260,7 @@ export class WebViewComponent {
         return iframe;
     }
 
-
-    private createWebview(): WebviewTag {
-        const webview = document.createElement('webview') as WebviewTag;
-        webview.classList.add('webview');
-        webview.allowpopups = true;
-        
-        if (this.plugin?.settings?.privateMode) {
-            const sessionId = `private-${Date.now()}`;
-            webview.partition = `persist:${sessionId}`;
-            
-            webview.setAttribute('disablewebsecurity', 'true');
-            webview.setAttribute('disableblinkfeatures', 'AutomationControlled');
-            webview.setAttribute('disablefeatures', 'Translate,NetworkService');
-            
-            webview.setAttribute('cookiestore', 'private');
-            webview.setAttribute('disablethirdpartycookies', 'true');
-        }
-
-        webview.src = this.url;
-
+    private setupWebviewEvents(webview: WebviewTag): void {
         webview.addEventListener('dom-ready', () => {
             this.isFrameReady = true;
             this.updateUrlDisplay();
@@ -245,6 +268,7 @@ export class WebViewComponent {
 
             const webContents = remote.webContents.fromId((webview as any).getWebContentsId());
             
+    
             webContents.setWindowOpenHandler(({url}: {url: string}) => {
                 if (this.windowOpenCallback) {
                     this.windowOpenCallback(url);
@@ -252,14 +276,27 @@ export class WebViewComponent {
                 }
                 
                 if (this.plugin?.settings?.privateMode) {
-                    const newWebview = document.createElement('webview') as WebviewTag;
-                    newWebview.partition = webview.partition;
-                    newWebview.src = url;
-                    document.body.appendChild(newWebview);
+                    this.createNewPrivateWindow(url);
                     return {action: 'deny'};
                 }
                 
-                return {action: 'allow'};
+       
+                return {
+                    action: 'allow',
+                    overrideBrowserWindowOptions: {
+                        width: 800,
+                        height: 600,
+                        webPreferences: {
+                            nodeIntegration: false,
+                            contextIsolation: true,
+                            webSecurity: true,
+                            partition: webview.partition,
+                            javascript: true,
+                            plugins: true,
+                            webgl: true
+                        }
+                    }
+                };
             });
 
             if (this.plugin?.settings?.adBlock?.enabled) {
@@ -267,25 +304,10 @@ export class WebViewComponent {
             }
 
             if (this.plugin?.settings?.privateMode) {
-                webview.executeJavaScript(`
-                    window.addEventListener('load', () => {
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        indexedDB.databases().then(dbs => {
-                            dbs.forEach(db => indexedDB.deleteDatabase(db.name));
-                        });
-                        caches.keys().then(keys => {
-                            keys.forEach(key => caches.delete(key));
-                        });
-                        
-                        Object.defineProperty(document, 'cookie', {
-                            get: () => '',
-                            set: () => {}
-                        });
-                    });
-                `);
+                this.setupPrivateMode(webview);
             }
         });
+
 
         webview.addEventListener('did-start-loading', () => {
             this.loadingSpinner.classList.add('loading-spinner-visible');
@@ -309,12 +331,36 @@ export class WebViewComponent {
             if(this.titleChangeCallback){
                 this.titleChangeCallback(event.title);
             }
-        })
+        });
 
-        return webview;
+        webview.addEventListener('did-fail-load', (event: any) => {
+            this.loadingSpinner.classList.remove('loading-spinner-visible');
+        });
     }
 
-
+    private createNewPrivateWindow(url: string): void {
+        const container = document.createElement('div');
+        container.classList.add('netClip_webview_container');
+        
+        const controlsEl = container.createDiv('netClip_web_controls');
+        this.setupNavigationBtns(controlsEl);
+        this.setupSearchInput(controlsEl);
+        this.setupClipBtn(controlsEl);
+        
+        const frameContainer = container.createDiv('netClip_frame-container');
+        const newWebview = this.createWebview();
+        newWebview.src = url;
+        frameContainer.appendChild(newWebview);
+        
+        document.body.appendChild(container);
+        container.style.position = 'fixed';
+        container.style.top = '50%';
+        container.style.left = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
+        container.style.width = '80%';
+        container.style.height = '80%';
+        container.style.zIndex = '1000';
+    }
 
     private onFrameLoad(): void {
         this.isFrameReady = true;
@@ -328,9 +374,6 @@ export class WebViewComponent {
         }
     }
 
-
-
-
     private navigateTo(url: string): void {
         this.url = url;
         this.navigationHistory.push(this.url);
@@ -338,8 +381,6 @@ export class WebViewComponent {
         this.frame.src = this.url;
         this.updateUrlDisplay();
     }
-    
-
 
     private getCurrentUrl(): string {
         if (this.frame instanceof HTMLIFrameElement) {
@@ -350,8 +391,6 @@ export class WebViewComponent {
         return this.url;
     }
 
-
-
     private updateUrlDisplay(): void {
         const currentUrl = this.getCurrentUrl();
         this.url = currentUrl;
@@ -359,8 +398,6 @@ export class WebViewComponent {
             this.searchInput.value = currentUrl;
         }
     }
-
-
 
     private updateNavigationButtons(): void {
         if (this.frame instanceof HTMLIFrameElement) {
@@ -372,9 +409,6 @@ export class WebViewComponent {
             this.forwardBtn.disabled = !(webview.canGoForward?.());
         }
     }
-
-
-
 
     private goBack(): void {
         if (this.isFrameReady) {
@@ -393,8 +427,6 @@ export class WebViewComponent {
         }
     }
 
-
-
     private goForward(): void {
         if (this.isFrameReady) {
             this.loadingSpinner.classList.add('loading-spinner-visible');
@@ -411,8 +443,6 @@ export class WebViewComponent {
             }
         }
     }
-
-
 
     private refresh(): void {
         if (this.isFrameReady) {
@@ -433,7 +463,6 @@ export class WebViewComponent {
         this.windowOpenCallback = callback;
     }
 
-
     private setupAdBlocking(webview: WebviewTag): void {
         this.adBlocker.initializeFilters().then(() => {
             this.adBlocker.applyFilters(webview as unknown as Electron.WebviewTag);
@@ -441,9 +470,43 @@ export class WebViewComponent {
             webview.addEventListener('dom-ready', () => {
                 webview.executeJavaScript(this.adBlocker.getDOMFilterScript())
                     .catch(error => {
-                        console.error('Adblock script error:', error);
+                        // console.error('Adblock script error:', error); 
                     });
             });
+        });
+    }
+
+    private setupPrivateMode(webview: WebviewTag): void {
+        webview.executeJavaScript(`
+            window.sessionStorage.clear();
+            window.localStorage.clear();
+            
+            // Override storage APIs
+            Object.defineProperties(window, {
+                'localStorage': {
+                    value: undefined
+                },
+                'sessionStorage': {
+                    value: undefined
+                }
+            });
+            
+            // Clear cookies
+            document.cookie.split(';').forEach(cookie => {
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            });
+        `).catch(console.error);
+
+        const webContents = remote.webContents.fromId((webview as any).getWebContentsId());
+        webContents.session.webRequest.onBeforeSendHeaders((details: any, callback: any) => {
+            const requestHeaders = {
+                ...details.requestHeaders,
+                'DNT': '1',
+                'Sec-GPC': '1'
+            };
+            callback({ requestHeaders });
         });
     }
 
