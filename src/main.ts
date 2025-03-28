@@ -8,13 +8,14 @@ import { ClipModal } from './modal/clipModal';
 import { DEFAULT_SETTINGS, NetClipSettings, AIPrompt } from './settings';
 import { GeminiService } from './services/gemini';
 import NetClipSettingTab from './settingTabs';
+import { Menu, Editor, MarkdownView } from 'obsidian';
 
 export default class NetClipPlugin extends Plugin {
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
   contentExtractors: ContentExtractors;
   seenItems: Set<string> = new Set();
   settings: NetClipSettings;
-  private geminiService: GeminiService | null = null;
+  public geminiService: GeminiService | null = null;
 
   isNewContent(content: string): boolean {
     if (this.seenItems.has(content)) {
@@ -40,45 +41,136 @@ export default class NetClipPlugin extends Plugin {
     }
   }
 
-  private async FoldersExist() {
+  public async FoldersExist() {
     const mainFolderPath = this.settings.parentFolderPath 
       ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
       : this.settings.defaultFolderName;
     
-    const mainFolder = this.app.vault.getFolderByPath(mainFolderPath);
-    if (!mainFolder) {
+    try {
       if (this.settings.parentFolderPath && !this.app.vault.getFolderByPath(this.settings.parentFolderPath)) {
-        await this.app.vault.createFolder(this.settings.parentFolderPath);
-      }
-      
-      await this.app.vault.createFolder(mainFolderPath);
-
-      for (const category of this.DEMO_CATEGORIES) {
-        const categoryPath = `${mainFolderPath}/${category}`;
-        await this.app.vault.createFolder(categoryPath);
-        if (!this.settings.categories.includes(category)) {
-          this.settings.categories.push(category);
+        try {
+          await this.app.vault.createFolder(this.settings.parentFolderPath);
+        } catch (error) {
+          if (!error.message.includes('already exists')) {
+            throw error;
+          }
         }
       }
-      await this.saveSettings();
-      new Notice(`Created folders in ${mainFolderPath}`);
-    }
-
-    for (const category of this.settings.categories) {
-      const categoryPath = `${mainFolderPath}/${category}`;
-      const categoryFolder = this.app.vault.getFolderByPath(categoryPath);
-      if (!categoryFolder) {
-        await this.app.vault.createFolder(categoryPath);
+      
+      if (!this.app.vault.getFolderByPath(mainFolderPath)) {
+        try {
+          await this.app.vault.createFolder(mainFolderPath);
+          
+          for (const category of this.DEMO_CATEGORIES) {
+            const categoryPath = `${mainFolderPath}/${category}`;
+            if (!this.app.vault.getFolderByPath(categoryPath)) {
+              try {
+                await this.app.vault.createFolder(categoryPath);
+                if (!this.settings.categories.includes(category)) {
+                  this.settings.categories.push(category);
+                }
+              } catch (error) {
+                if (!error.message.includes('already exists')) {
+                  throw error;
+                }
+              }
+            }
+          }
+          await this.saveSettings();
+          new Notice(`Created folders in ${mainFolderPath}`);
+        } catch (error) {
+          if (!error.message.includes('already exists')) {
+            throw error;
+          }
+        }
       }
+
+      for (const category of this.settings.categories) {
+        const categoryPath = `${mainFolderPath}/${category}`;
+        if (!this.app.vault.getFolderByPath(categoryPath)) {
+          try {
+            await this.app.vault.createFolder(categoryPath);
+          } catch (error) {
+            if (!error.message.includes('already exists')) {
+              throw error;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error creating folders:', error);
+      throw error;
     }
   }
 
   async onload() {
     await this.loadSettings();
+    await this.FoldersExist();
 
     if (this.settings.geminiApiKey) {
       this.geminiService = new GeminiService(this.settings.geminiApiKey, this.settings);
     }
+
+    this.registerEvent(
+      this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        
+      
+        const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+        
+        let match;
+        let url: string | null = null;
+        
+
+        while ((match = mdLinkRegex.exec(line)) !== null) {
+          const linkStart = match.index;
+          const linkEnd = linkStart + match[0].length;
+          if (cursor.ch >= linkStart && cursor.ch <= linkEnd) {
+            url = match[2];
+            break;
+          }
+        }
+        
+        if (!url) {
+          while ((match = urlRegex.exec(line)) !== null) {
+            const linkStart = match.index;
+            const linkEnd = linkStart + match[0].length;
+            if (cursor.ch >= linkStart && cursor.ch <= linkEnd) {
+              url = match[0];
+              break;
+            }
+          }
+        }
+
+        if (url) {
+          menu.addItem((item) => {
+            item
+              .setTitle("Open in WebView")
+              .setIcon("globe")
+              .onClick(async () => {
+                const leaf = this.app.workspace.getLeaf(true);
+                await leaf.setViewState({
+                  type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                  state: { url: url }
+                });
+                this.app.workspace.revealLeaf(leaf);
+              });
+          });
+
+          menu.addItem((item) => {
+            item
+              .setTitle("Open in Modal WebView")
+              .setIcon("picture-in-picture-2")
+              .onClick(() => {
+                new WebViewModal(this.app, url, this).open();
+              });
+          });
+        }
+      })
+    );
+
     this.app.workspace.onLayoutReady(() => this.initWebViewLeaf());
     this.contentExtractors = new ContentExtractors(this);
 
@@ -113,6 +205,45 @@ export default class NetClipPlugin extends Plugin {
         const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
         new WebViewModal(this.app, defaultUrl, this).open();
       }
+    });
+
+    this.addCommand({
+      id: 'open-link-in-webview',
+      name: 'Open link under cursor in WebView',
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        const url = this.getLinkUnderCursor(line, cursor.ch);
+        
+        if (url) {
+          const leaf = this.app.workspace.getLeaf(true);
+          leaf.setViewState({
+            type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+            state: { url: url }
+          });
+          this.app.workspace.revealLeaf(leaf);
+        } else {
+          new Notice('No link found under cursor');
+        }
+      },
+      hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'z' }]
+    });
+
+    this.addCommand({
+      id: 'open-link-in-modal-webview',
+      name: 'Open link under cursor in Modal WebView',
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        const url = this.getLinkUnderCursor(line, cursor.ch);
+        
+        if (url) {
+          new WebViewModal(this.app, url, this).open();
+        } else {
+          new Notice('No link found under cursor');
+        }
+      },
+      hotkeys: [{ modifiers: ['Ctrl', 'Alt'], key: 'z' }]
     });
 
     this.registerView(CLIPPER_VIEW, (leaf) => 
@@ -163,9 +294,7 @@ export default class NetClipPlugin extends Plugin {
       throw new Error("Content extractors not initialized");
     }
 
-    if (category) {
-      await this.FoldersExist();
-    }
+    await this.FoldersExist();
     new Notice("Clipping...");
 
     const normalizedUrl = normalizeUrl(url);
@@ -186,16 +315,8 @@ export default class NetClipPlugin extends Plugin {
       }
     }
 
-    const useProxy = this.settings.enableCorsProxy;
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const targetUrl = useProxy ? `${proxyUrl}${normalizedUrl}` : normalizedUrl;
-
     const response = await requestUrl({
-      url: targetUrl,
-      headers: useProxy ? {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Origin': 'http://localhost'
-      } : {}
+      url: normalizedUrl
     });
 
     const html = response.text;
@@ -226,7 +347,9 @@ export default class NetClipPlugin extends Plugin {
         : this.settings.defaultFolderName;
       folderPath = `${baseFolderPath}/${effectiveCategory}`;
     } else {
-      folderPath = this.settings.parentFolderPath || '';
+      folderPath = this.settings.parentFolderPath 
+        ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+        : this.settings.defaultFolderName;
     }
 
     if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
@@ -290,7 +413,7 @@ export default class NetClipPlugin extends Plugin {
       (brand ? `brand: "${brand}"\n` : '') +
       (rating ? `rating: "${rating}"\n` : '') +
       `---\n\n` +
-      (thumbnailUrl ? `![Thumbnail](${thumbnailUrl}?crossorigin=anonymous)\n\n` : '');
+      (thumbnailUrl ? `![Thumbnail](${thumbnailUrl})\n\n` : '');
   }
 
   public async updateHomeView() {
@@ -329,5 +452,31 @@ export default class NetClipPlugin extends Plugin {
 
     await this.app.vault.modify(file, processedContent);
     new Notice(`Successfully processed with ${prompt.name}`);
+  }
+
+
+  private getLinkUnderCursor(line: string, cursorPos: number): string | null {
+    const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+    
+    let match;
+
+    while ((match = mdLinkRegex.exec(line)) !== null) {
+        const linkStart = match.index;
+        const linkEnd = linkStart + match[0].length;
+        if (cursorPos >= linkStart && cursorPos <= linkEnd) {
+            return match[2];
+        }
+    }
+
+    while ((match = urlRegex.exec(line)) !== null) {
+        const linkStart = match.index;
+        const linkEnd = linkStart + match[0].length;
+        if (cursorPos >= linkStart && cursorPos <= linkEnd) {
+            return match[0];
+        }
+    }
+    
+    return null;
   }
 }

@@ -50,11 +50,7 @@ button.net-clip-button{
 }
 
 
-.netclip-category-content{
-  display: flex;
-  gap: 9px;
-  align-items: center;
-}
+
 
 .netclip_category_tabs{
   display: flex;
@@ -1063,7 +1059,20 @@ button.netclip_warning{
   height: 24px;
 }
 
+.netclip-category-content{
+  display: flex;
+  gap: 14px;
+  align-items: end;
+}
 
+.netclip-category-content .category-icon{
+  height: 18px;
+  width: 17px;
+}
+.netclip-category-content .category-icon svg{
+  height: 100%;
+  width: 100%;
+}
 
 .netclip_prompt_modal{
   max-width: 800px;
@@ -1072,7 +1081,6 @@ button.netclip_warning{
 
 .netclip_prompt_modal textarea{
   width: 100%;
-
 }
 
 .prompt-section{
@@ -1104,3 +1112,34 @@ button.netclip_warning{
 }
 
 
+.netclip-info-box {
+  background-color: var(--background-primary);
+  border-radius: 4px;
+  padding: 16px;
+  margin: 10px 0;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.netclip-info-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-normal);
+}
+
+.netclip-info-icon {
+  color: var(--interactive-accent);
+  display: flex;
+  align-items: center;
+}
+
+.netclip-details-link {
+  margin-left: auto;
+  color: var(--interactive-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.netclip-details-link:hover {
+  text-decoration: underline;
+}

@@ -7,6 +7,7 @@ import { t } from './translations';
 import { PromptModal } from './modal/promptModal';
 import { AIPrompt } from './settings';
 import { Modal } from 'obsidian';
+import { GeminiService } from './services/gemini';
 
 interface TabContent{
     content: HTMLElement;
@@ -371,6 +372,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     .onChange(async (value) => {
                         this.plugin.settings.parentFolderPath = value.trim();
                         await this.plugin.saveSettings();
+                        await this.plugin.FoldersExist();
                     });
             })
             .addButton(button => {
@@ -382,6 +384,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
                         modal.onChooseFolder(async (folderPath) => {
                             this.plugin.settings.parentFolderPath = folderPath;
                             await this.plugin.saveSettings();
+                            await this.plugin.FoldersExist();
                             this.display();
                         });
                         modal.open();
@@ -650,9 +653,30 @@ export default class NetClipSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.geminiApiKey)
                 .onChange(async (value) => {
                     this.plugin.settings.geminiApiKey = value;
+                    if (value) {
+                        this.plugin.geminiService = new GeminiService(value, this.plugin.settings);
+                    } else {
+                        this.plugin.geminiService = null;
+                    }
                     await this.plugin.saveSettings();
                 })
             );
+
+        const infoDiv = containerEl.createDiv('netclip-info-box');
+        const infoContent = infoDiv.createDiv('netclip-info-content');
+        
+        const infoIcon = infoContent.createSpan('netclip-info-icon');
+        setIcon(infoIcon, 'info');
+        
+        const textSpan = infoContent.createSpan();
+        textSpan.setText('Learn how to create and use AI prompts effectively');
+        
+        const detailsLink = infoContent.createEl('a', {
+            text: 'View Documentation →',
+            href: 'https://github.com/Elhary/Obsidian-NetClip/blob/main/AI_PROMPTS.md'
+        });
+        detailsLink.addClass('netclip-details-link');
+        detailsLink.setAttribute('target', '_blank');
 
         if (this.plugin.settings.enableAI) {
             new Setting(containerEl)
