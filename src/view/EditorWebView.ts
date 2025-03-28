@@ -1,8 +1,6 @@
 import { ItemView, WorkspaceLeaf,  Notice, ViewStateResult } from 'obsidian';
 import WebClipperPlugin from '../main';
 import { WebViewComponent } from '../webViewComponent';
-import { title } from 'process';
-import { stat } from 'fs';
 
 export const VIEW_TYPE_WORKSPACE_WEBVIEW = 'netClip_workspace_webview';
 

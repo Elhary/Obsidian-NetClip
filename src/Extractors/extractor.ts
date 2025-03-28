@@ -29,7 +29,7 @@ export class ContentExtractors {
       nbTopCandidates: 5,
       maxElemsToParse: 0,
       keepClasses: true
-    }).parse();
+    }).parse() as ReadabilityArticle | null;
 
     if (!article) return this.fallbackExtraction(doc, baseUrl);
 
