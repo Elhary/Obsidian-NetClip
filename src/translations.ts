@@ -123,6 +123,15 @@ export const TRANSLATIONS: Translations = {
         'support_kofi': 'Support on Ko-fi',
         'support_kofi_desc': 'Support me on Ko-fi',
 
+        'home_tab': 'Home tab',
+        'show_clock': 'Show clock', 
+        'show_recent_files': 'Show recent files',
+        'show_saved_articles': 'Show saved articles',
+        'replace_new_tabs': 'Replace new tabs',
+        'replace_new_tabs_desc': 'When enabled, new empty tabs will be replaced with the NetClip home tab',
+        'show_clock_desc': 'Show a clock on the home tab',
+        'show_recent_files_desc': 'Display the recent files section on the home tab',
+        'show_saved_articles_desc': 'Display the saved articles section on the home tab',
     },
     'ja': {
         'clipper_view': 'クリッパービュー',
@@ -237,6 +246,15 @@ export const TRANSLATIONS: Translations = {
         'support_kofi': 'Ko-fiでサポート',
         'support_kofi_desc': 'Ko-fiでサポート',
 
+        'home_tab': 'ホームタブ',
+        'show_clock': '時計を表示',
+        'show_recent_files': '最近のファイルを表示',
+        'show_saved_articles': '保存された記事を表示',
+        'replace_new_tabs': '新規タブを置き換える',
+        'replace_new_tabs_desc': '有効にすると、新しい空のタブがNetClipホームタブに置き換えられます',
+        'show_clock_desc': 'ホームタブに時計を表示します',
+        'show_recent_files_desc': 'ホームタブに最近のファイルセクションを表示します',
+        'show_saved_articles_desc': 'ホームタブに保存された記事セクションを表示します',
     }
 
 }
@@ -245,4 +263,4 @@ export function formatString(str: string, ...args: any[]): string {
     return str.replace(/{(\d+)}/g, (match, index) => {
         return typeof args[index] !== 'undefined' ? args[index] : match;
     });
-} 
+}

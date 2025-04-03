@@ -1,3 +1,5 @@
+import { Shortcut } from "./modal/ShortcutModal";
+
 export interface NetClipSettings {
     viewPosition: 'left' | 'right' | 'default';
     defaultFolderName: string;
@@ -18,6 +20,14 @@ export interface NetClipSettings {
         defaultLocation: string; 
         domainMappings: Record<string, string>;  
     };
+
+    replaceTabHome: boolean;
+    shortcuts: Shortcut[];
+    showClock: boolean;
+    homeTab: {
+        showRecentFiles: boolean;
+        showSavedArticles: boolean;
+    }
 }
 
 export interface AIPrompt {
@@ -72,5 +82,13 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     defaultSaveLocations: {
         defaultLocation: '',
         domainMappings: {}
+    },
+    replaceTabHome: true,
+    shortcuts: [],
+    showClock: true,
+    homeTab: {
+        showRecentFiles: true,
+        showSavedArticles: true
     }
+
 };

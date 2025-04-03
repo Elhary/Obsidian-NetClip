@@ -184,6 +184,12 @@ export default class NetClipSettingTab extends PluginSettingTab {
         );
 
         this.createTabAndContent(
+            "Home",
+            navigateEl,
+            settingsEl,
+            (el: HTMLElement) => this.homeTab(el)
+        );
+        this.createTabAndContent(
             "AI prompts",
             navigateEl,
             settingsEl,
@@ -216,6 +222,7 @@ export default class NetClipSettingTab extends PluginSettingTab {
             "Web view": "globe",
             "Clipper": "scissors",
             "AI prompts": "bot",
+            "Home": "home",
             "Support": "help",
         }
 
@@ -625,6 +632,64 @@ export default class NetClipSettingTab extends PluginSettingTab {
             if (this.plugin.settings.categoryIcons[category]) {
                 setting.setDesc(`Current icon: ${this.plugin.settings.categoryIcons[category]}`);
             }
+        });
+    }
+
+
+    private homeTab(containerEl: HTMLElement){
+        new Setting(containerEl)
+        .setName(t('home_tab'))
+        .setHeading();
+
+        new Setting(containerEl)
+        .setName(t('replace_new_tabs'))
+        .setDesc(t('replace_new_tabs_desc'))
+        .addToggle(toggle => {
+            toggle
+                .setValue(this.plugin.settings.replaceTabHome)
+                .onChange(async (value) => {
+                    this.plugin.settings.replaceTabHome = value;
+                    await this.plugin.saveSettings();
+                });
+        });
+
+        new Setting(containerEl)
+        .setName(t('show_clock'))
+        .setDesc(t('show_clock_desc'))
+        .addToggle(toggle => {
+            toggle
+                .setValue(this.plugin.settings.showClock)
+                .onChange(async (value) => {
+                    this.plugin.settings.showClock = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                });
+        });
+
+        new Setting(containerEl)
+            .setName(t('show_recent_files'))
+            .setDesc(t('show_recent_files_desc'))
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.homeTab.showRecentFiles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.homeTab.showRecentFiles = value;
+                        await this.plugin.saveSettings();
+                        this.plugin.refreshHomeViews();
+                    });
+            });
+                     
+        new Setting(containerEl)
+        .setName(t('show_saved_articles'))
+        .setDesc(t('show_saved_articles_desc'))
+        .addToggle(toggle => {
+            toggle
+                .setValue(this.plugin.settings.homeTab.showSavedArticles)
+                .onChange(async (value) => {
+                    this.plugin.settings.homeTab.showSavedArticles = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                });
         });
     }
 

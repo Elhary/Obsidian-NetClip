@@ -709,19 +709,6 @@ button.netclip_warning{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* AI Processing Animation Styles */
 .netclip_ai_processing_container {
   display: flex;
@@ -1143,3 +1130,599 @@ button.netclip_warning{
 .netclip-details-link:hover {
   text-decoration: underline;
 }
+
+
+/* Home Tab Styles */
+
+
+:root{
+  --netclip-primary:#ffffff;
+  --netclip-secondry:#f6f6f6;
+}
+.workspace-leaf-content[data-type="netclip-home-tab-view"] .view-header {
+  z-index: 2;
+
+}
+.netclip-home-tab-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.netclip-home-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.netclip-home-tab-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.netclip-home-tab-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.netclip-home-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--interactive-accent) ;
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.netclip-home-tab-button:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-home-tab-search {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+.netclip-search-icon {
+  position: absolute;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.netclip-home-tab-search input{
+  padding: 12px;
+  height: 50px;
+
+}
+
+.netclip-search-input {
+  flex: 1;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: 4px;
+}
+
+
+
+.netclip-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.netclip-search-button:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-home-tab-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow-y: auto;
+  
+  flex: 1;
+}
+
+.netclip-home-tab-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.netclip-home-tab-section h3 {
+  font-size: 18px;
+  padding-bottom: 2px;
+}
+
+.netclip-section-title{
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 12px;
+}
+
+.netclip-section-icon svg{
+  height: 22px;
+  width: 22px;
+  stroke-width: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.netclip-recent-files,
+.netclip-saved-articles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.netclip-recent-files{
+  overflow: hidden;
+  overflow-y: auto;
+  height: 188px;
+}
+
+.netclip-file-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-secondary);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.netclip-file-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.netclip-file-icon {
+  color: var(--text-muted);
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.netclip-file-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.netclip-file-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 10px;
+}
+
+.netclip-view-all-btn {
+  margin: 20px auto 10px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: block;
+}
+
+.netclip-view-all-btn:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+@media (max-width: 768px) {
+  .netclip-home-tab-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+  }
+  
+  .netclip-home-tab-buttons {
+      width: 100%;
+  }
+  
+  .netclip-home-tab-button {
+      flex: 1;
+      justify-content: center;
+  }
+}
+
+
+.netclip-home-tab-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.netclip-home-tab-section {
+  margin-bottom: 40px;
+}
+
+.netclip-home-tab-section h3 {
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+
+.netclip-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(210px, auto); 
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.netclip-article-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+}
+
+
+.netclip-article-card:nth-child(1),
+.netclip-article-card:nth-child(6),
+.netclip-article-card:nth-child(7) {
+  grid-column: span 2;
+}
+
+
+
+
+.netclip-article-card:hover {
+  transform: translateY(-2px);
+}
+
+.netclip-article-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; 
+  overflow: hidden;
+}
+
+.netclip-article-card:nth-child(6) .netclip-article-image-container {
+  padding-top: 35%; 
+}
+
+.netclip-article-card:nth-child(1) .netclip-article-image-container {
+  padding-top: 35%; 
+}
+
+.netclip-article-card:nth-child(7) .netclip-article-image-container {
+  padding-top: 35%;
+}
+
+.netclip-article-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.netclip-article-content {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  flex-grow: 1;
+  background-color: #fff;
+}
+
+.theme-dark .netclip-article-content {
+  background-color: var(--background-secondary);
+}
+
+.netclip-article-title {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  color: var(--text-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.netclip-article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.netclip-article-source {
+  display: flex;
+  align-items: center;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.8;
+}
+
+.netclip-article-date {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.netclip-article-hide {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.netclip-article-hide:hover {
+  opacity: 1;
+}
+
+.netclip-hide-icon {
+  color: var(--text-muted);
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .netclip-articles-grid {
+      grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .netclip-article-card:nth-child(4) {
+      grid-column: 1 / span 2;
+      grid-row: auto;
+  }
+  
+  .netclip-article-card:nth-child(5) {
+      grid-column: auto;
+      grid-row: auto;
+  }
+  
+  .netclip-article-title {
+      font-size: 0.85rem;
+  }
+  
+  .netclip-article-meta {
+      font-size: 0.75rem;
+  }
+}
+
+/* Shortcuts styling */
+.netclip-shortcuts-section {
+  margin-bottom: 25px;
+}
+
+.netclip-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 25px;
+  margin-top: 15px;
+}
+
+.netclip-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+
+.netclip-shortcut-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background-color:var(--background-secondary);
+  padding: 12px;
+  display: flex;
+  border: 1px solid var(--background-modifier-border);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.netclip-shortcut-icon img{
+  border-radius: 5px;
+}
+
+.netclip-shortcut-favicon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.netclip-shortcut-name {
+  font-size: 12px;
+  color: var(--text-normal);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.netclip-shortcut-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.netclip-shortcut-add:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.netclip-shortcut-add-icon {
+  width: 41px;
+  height: 41px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.netclip-shortcut-add-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.netclip-shortcut-add-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Modal styling */
+.netclip-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.netclip-modal-button-cancel {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.netclip-modal-button-submit {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.netclip-favicon-preview-container {
+  display: flex;
+  align-items: center;
+}
+
+.netclip-favicon-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+  background-color: var(--background-secondary);
+  padding: 4px;
+}
+
+input.is-invalid {
+  border-color: var(--background-modifier-error) !important;
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+@keyframes shake {
+  0% { margin-left: 0; }
+  25% { margin-left: 5px; }
+  75% { margin-left: -5px; }
+  100% { margin-left: 0; }
+}
+/* Clock Styling */
+.netclip-clock-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+}
+
+.netclip-time {
+  font-size: 5rem; 
+  font-weight: 500; 
+  letter-spacing: 0.05em; 
+}
+
+.theme-light .netclip-time {
+  color: var(--text-muted);
+}
+.theme-dark .netclip-time {
+  color: #fff;
+}
+
+.netclip-date {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Wallpaper Styling */
+.netclip-home-tab-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.netclip-wallpaper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.netclip-wallpaper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+/* Blur effect - applied via inline style with blur amount from settings */
+
+/* Ensure text is readable on wallpaper */
+.netclip-home-tab-container .netclip-clock-section {
+  position: relative;
+  z-index: 1;
+}
+
+

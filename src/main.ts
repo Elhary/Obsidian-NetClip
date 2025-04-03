@@ -9,6 +9,7 @@ import { DEFAULT_SETTINGS, NetClipSettings, AIPrompt } from './settings';
 import { GeminiService } from './services/gemini';
 import NetClipSettingTab from './settingTabs';
 import { Menu, Editor, MarkdownView } from 'obsidian';
+import { HOME_TAB_VIEW, HomeTabView } from './view/HomeTab';
 
 export default class NetClipPlugin extends Plugin {
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
@@ -255,10 +256,55 @@ export default class NetClipPlugin extends Plugin {
     );
 
     this.addSettingTab(new NetClipSettingTab(this.app, this));
+
+    this.registerView(HOME_TAB_VIEW, (leaf) => new HomeTabView(leaf, this))
+
+    this.registerEvent(this.app.workspace.on('layout-change', () => {
+      if (this.settings.replaceTabHome) {
+        this.replaceTabHome();
+      }
+    }));
+
+    this.addCommand({
+      id: 'open-home-tab',
+      name: 'Open Home Tab',
+      callback: () => this.activateHomeTab()
+    });
   }
+
+
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    
+    if (this.settings.shortcuts && this.settings.shortcuts.length === 0) {
+      const githubShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://github.com/Elhary/Obsidian-NetClip',
+        favicon: `https://www.google.com/s2/favicons?domain=github.com&sz=128`
+      };
+      const youtubeShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://youtube.com',
+        favicon: `https://www.google.com/s2/favicons?domain=youtube.com&sz=128`
+      };
+      const redditShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://www.reddit.com/r/ObsidianMD/',
+        favicon: `https://www.google.com/s2/favicons?domain=reddit.com&sz=128`
+      };
+      const obsidianShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://forum.obsidian.md/',
+        favicon: `https://www.google.com/s2/favicons?domain=obsidian.md&sz=128`
+      };
+      this.settings.shortcuts.push(githubShortcut, youtubeShortcut, redditShortcut, obsidianShortcut );
+      this.saveSettings();
+    }
   }
 
   async saveSettings() {
@@ -478,5 +524,41 @@ export default class NetClipPlugin extends Plugin {
     }
     
     return null;
+  }
+
+
+  private replaceTabHome() {
+    const emptyLeaves = this.app.workspace.getLeavesOfType('empty');
+    if (emptyLeaves.length > 0) {
+      emptyLeaves.forEach(leaf => {
+        leaf.setViewState({
+          type: HOME_TAB_VIEW
+        });
+      });
+    }
+  }
+
+  
+  public activateHomeTab() {
+    const leaf = this.app.workspace.getLeaf('tab');
+    if (leaf) {
+      leaf.setViewState({
+        type: HOME_TAB_VIEW
+      });
+      this.app.workspace.revealLeaf(leaf);
+    }
+  }
+
+  public refreshHomeViews(): void {
+    this.app.workspace.getLeavesOfType(HOME_TAB_VIEW).forEach((leaf) => {
+        if (leaf.view instanceof HomeTabView) {
+            leaf.detach();
+            const newLeaf = this.app.workspace.getLeaf();
+            newLeaf.setViewState({
+                type: HOME_TAB_VIEW,
+                active: true
+            });
+        }
+    });
   }
 }
