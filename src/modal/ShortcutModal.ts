@@ -25,7 +25,6 @@ export class ShortcutModal extends Modal {
         
         contentEl.createEl('h2', { text: this.shortcut ? 'Edit shortcut' : 'Add shortcut' });
         
-        // URL input field
         new Setting(contentEl)
             .setName('URL')
             .setDesc('Enter the website URL')
