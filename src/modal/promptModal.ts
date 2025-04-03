@@ -5,6 +5,7 @@ export class PromptModal extends Modal {
     private prompt: AIPrompt;
     private tempPrompt: AIPrompt;
     private onSave: (prompt: AIPrompt) => void;
+    private pendingVariableChanges: Map<string, { newName: string, values: string[] }> = new Map();
 
     constructor(app: App, prompt: AIPrompt, onSave: (prompt: AIPrompt) => void) {
         super(app);
@@ -58,6 +59,14 @@ export class PromptModal extends Modal {
                 .setButtonText('Save')
                 .setCta()
                 .onClick(() => {
+                    for (const [oldKey, change] of this.pendingVariableChanges) {
+                        const newVars = { ...this.tempPrompt.variables };
+                        if (oldKey !== change.newName) {
+                            delete newVars[oldKey];
+                        }
+                        newVars[change.newName] = change.values;
+                        this.tempPrompt.variables = newVars;
+                    }
                     this.onSave(this.tempPrompt);
                     this.close();
                 }))
@@ -75,30 +84,44 @@ export class PromptModal extends Modal {
         new Setting(varContainer)
             .setName('Variable Name')
             .setDesc('Enter a name for your variable. Use ${variableName} in your prompt to reference it.')
-            .addText(text => text
-                .setValue(key)
-                .setPlaceholder("Enter variable name")
-                .onChange(value => {
-                    if (value && value !== key) {
-                        const newVars = { ...this.tempPrompt.variables };
-                        const currentValues = newVars[key];
-                        delete newVars[key];
-                        newVars[value] = currentValues;
-                        this.tempPrompt.variables = newVars;
+            .addText(text => {
+                text.setValue(key)
+                    .setPlaceholder("Enter variable name");
+                
+                text.inputEl.addEventListener('input', (e) => {
+                    const newName = (e.target as HTMLInputElement).value;
+                    if (newName !== key) {
+                        this.pendingVariableChanges.set(key, {
+                            newName,
+                            values: this.tempPrompt.variables[key]
+                        });
+                    } else {
+                        this.pendingVariableChanges.delete(key);
                     }
-                }));
+                });
+                return text;
+            });
 
         new Setting(varContainer)
             .setName('Variable Values')
             .setDesc('Add possible values for this variable, one per line')
-            .addTextArea(text => text
-                .setPlaceholder("Enter possible values, one per line")
-                .setValue(values.join('\n'))
-                .onChange(value => {
-                    const newVars = { ...this.tempPrompt.variables };
-                    newVars[key] = value.split('\n').filter(v => v.trim());
-                    this.tempPrompt.variables = newVars;
-                }));
+            .addTextArea(text => {
+                text.setPlaceholder("Enter possible values, one per line")
+                    .setValue(values.join('\n'))
+                    .onChange(value => {
+                        const newValues = value.split('\n').filter(v => v.trim());
+                        const existingChange = this.pendingVariableChanges.get(key);
+                        if (existingChange) {
+                            existingChange.values = newValues;
+                        } else {
+                            this.pendingVariableChanges.set(key, {
+                                newName: key,
+                                values: newValues
+                            });
+                        }
+                    });
+                return text;
+            });
 
         new Setting(varContainer)
             .addButton(btn => btn
