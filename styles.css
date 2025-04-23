@@ -96,6 +96,10 @@ button.netclip_sort_button{
   padding: 20px 12px;
 }
 
+.netclip_sort_button svg{
+  color: #9a9a9a;
+}
+
 /* SEARCH BAR STYLING */
 
 .netclip_search_box{
@@ -131,13 +135,11 @@ button.netclip_sort_button{
   border-radius: 4px;
   border: 1px solid var(--background-modifier-border);
   background-color: var(--background-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .netClip_card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .netClip_card img {
@@ -350,12 +352,6 @@ button.netclip_warning{
   stroke: var(--text-muted);
 
 }
-
-.clickable-icon {
-
-}
-
-
 
 .netClip_web_controls .netClip_nav_left {
   display: flex;
@@ -631,6 +627,26 @@ button.netclip_warning{
 }
 
 /* Folder selection modal styles */
+
+.netclip-folder-search {
+  margin: 8px 0;
+  padding: 0 12px;
+}
+
+.netclip-folder-search-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.netclip-folder-search-input:focus {
+  box-shadow: 0 0 0 2px var(--background-modifier-border);
+  outline: none;
+}
+
 .netclip-folder-selection-modal .netclip-folder-name-container {
   display: flex;
   align-items: center;
@@ -664,10 +680,6 @@ button.netclip_warning{
 .netclip-folder-selection-modal .setting-item-control {
   margin-left: 8px;
 }
-
-
-
-
 
 
 .netclip-support-buttons-container {

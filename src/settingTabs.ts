@@ -372,20 +372,11 @@ export default class NetClipSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName(t('parent_folder'))
             .setDesc(t('parent_folder_desc'))
-            .addText(text => {
-                return text
-                    .setPlaceholder(t('parent_folder_path'))
-                    .setValue(this.plugin.settings.parentFolderPath)
-                    .onChange(async (value) => {
-                        this.plugin.settings.parentFolderPath = value.trim();
-                        await this.plugin.saveSettings();
-                        await this.plugin.FoldersExist();
-                    });
-            })
             .addButton(button => {
+                const displayPath = this.plugin.settings.parentFolderPath || t('vault_root');
                 return button
                     .setClass('net-clip-button')
-                    .setButtonText(t('browse'))
+                    .setButtonText(displayPath)
                     .onClick(async () => {
                         const modal = new FolderSelectionModal(this.app, this.plugin);
                         modal.onChooseFolder(async (folderPath) => {
@@ -819,24 +810,12 @@ export default class NetClipSettingTab extends PluginSettingTab {
         const githubLink = githubContainer.createEl('a', {
             href: 'https://github.com/Elhary/Obsidian-NetClip'
         });
+        
         githubLink.setAttribute('target', '_blank');
         githubLink.createEl('img', {
             attr: {
                 src: 'https://img.shields.io/github/stars/Elhary/Obsidian-NetClip?style=social',
                 alt: t('github_repo'),
-                height: '40'
-            }
-        });
-
-        const coffeeContainer = buttonsContainer.createDiv('netclip-support-button');
-        const coffeeLink = coffeeContainer.createEl('a', {
-            href: 'https://buymeacoffee.com/el_haris'
-        });
-        coffeeLink.setAttribute('target', '_blank');
-        coffeeLink.createEl('img', {
-            attr: {
-                src: 'https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png',
-                alt: t('buy_coffee'),
                 height: '40'
             }
         });

@@ -6,6 +6,9 @@ export class FolderSelectionModal extends Modal {
     private plugin: NetClipPlugin;
     private folderCallback: (folderPath: string) => void;
     private selectedFolderPath: string = '';
+    private searchInput: HTMLInputElement;
+    private folderList: HTMLElement;
+    private allFolders: TFolder[] = [];
 
     constructor(app: App, plugin: NetClipPlugin) {
         super(app);
@@ -24,6 +27,18 @@ export class FolderSelectionModal extends Modal {
 
         contentEl.createEl('h2', { text: t('select_parent_folder') });
         contentEl.createEl('p', { text: t('select_parent_folder_desc') });
+
+    
+        const searchContainer = contentEl.createDiv('netclip-folder-search');
+        this.searchInput = searchContainer.createEl('input', {
+            type: 'text',
+            placeholder: 'Search folders...',
+            cls: 'netclip-folder-search-input'
+        });
+
+        this.searchInput.addEventListener('input', () => {
+            this.filterFolders(this.searchInput.value);
+        });
 
         const rootSetting = new Setting(contentEl);
         
@@ -49,37 +64,12 @@ export class FolderSelectionModal extends Modal {
                 this.folderCallback('');
             }));
 
-        const folders = this.getAllFolders();
+        this.allFolders = this.getAllFolders();
         
         contentEl.createEl('h3', { text: t('available_folders') });
-        const folderList = contentEl.createEl('div', { cls: 'netclip-folder-list' });
-
-        folders.forEach(folder => {
-            const folderPath = folder.path;
-            const folderSetting = new Setting(folderList);
-            
-            const nameContainer = document.createElement('span');
-            nameContainer.className = 'netclip-folder-name-container';
-            const iconContainer = document.createElement('span');
-            iconContainer.className = 'netclip-folder-icon';
-            setIcon(iconContainer, 'folder');
-            
-            nameContainer.appendChild(iconContainer);
-            const textSpan = document.createElement('span');
-            textSpan.textContent = folderPath;
-            nameContainer.appendChild(textSpan);
-            
-            folderSetting.nameEl.empty();
-            folderSetting.nameEl.appendChild(nameContainer);
-            
-            folderSetting.addButton(button => button
-                .setButtonText(t('select'))
-                .onClick(() => {
-                    this.selectedFolderPath = folderPath;
-                    this.close();
-                    this.folderCallback(folderPath);
-                }));
-        });
+        this.folderList = contentEl.createEl('div', { cls: 'netclip-folder-list' });
+        
+        this.displayFolders(this.allFolders);
 
         new Setting(contentEl)
             .addButton(button => button
@@ -115,4 +105,43 @@ export class FolderSelectionModal extends Modal {
         
         return folders.sort((a, b) => a.path.localeCompare(b.path));
     }
-} 
+
+    private displayFolders(folders: TFolder[]) {
+        this.folderList.empty();
+        
+        folders.forEach(folder => {
+            const folderPath = folder.path;
+            const folderSetting = new Setting(this.folderList);
+            
+            const nameContainer = document.createElement('span');
+            nameContainer.className = 'netclip-folder-name-container';
+            const iconContainer = document.createElement('span');
+            iconContainer.className = 'netclip-folder-icon';
+            setIcon(iconContainer, 'folder');
+            
+            nameContainer.appendChild(iconContainer);
+            const textSpan = document.createElement('span');
+            textSpan.textContent = folderPath;
+            nameContainer.appendChild(textSpan);
+            
+            folderSetting.nameEl.empty();
+            folderSetting.nameEl.appendChild(nameContainer);
+            
+            folderSetting.addButton(button => button
+                .setButtonText(t('select'))
+                .onClick(() => {
+                    this.selectedFolderPath = folderPath;
+                    this.close();
+                    this.folderCallback(folderPath);
+                }));
+        });
+    }
+
+    private filterFolders(searchTerm: string) {
+        const normalizedSearch = searchTerm.toLowerCase();
+        const filteredFolders = this.allFolders.filter(folder => 
+            folder.path.toLowerCase().includes(normalizedSearch)
+        );
+        this.displayFolders(filteredFolders);
+    }
+}

@@ -83,7 +83,7 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
         defaultLocation: '',
         domainMappings: {}
     },
-    replaceTabHome: true,
+    replaceTabHome: false,
     shortcuts: [],
     showClock: true,
     homeTab: {
