@@ -20,14 +20,25 @@ export interface NetClipSettings {
         defaultLocation: string; 
         domainMappings: Record<string, string>;  
     };
-
+    cardDisplay: {
+        showDescription: boolean;
+        showAuthor: boolean;
+        showDate: boolean;
+        showDomain: boolean;
+        showThumbnail: boolean;
+    };
     replaceTabHome: boolean;
     shortcuts: Shortcut[];
     showClock: boolean;
     homeTab: {
         showRecentFiles: boolean;
         showSavedArticles: boolean;
-    }
+        backgroundImage: string;
+        backgroundBlur: number;
+        textColor: string;
+        textBrightness: number;
+    };
+    keepOriginalContent: boolean;
 }
 
 export interface AIPrompt {
@@ -38,8 +49,8 @@ export interface AIPrompt {
 }
 
 export const DEFAULT_SETTINGS: NetClipSettings = {
-    viewPosition: 'default',
-    defaultFolderName: 'Netclips',
+    viewPosition: 'right',
+    defaultFolderName: 'NetClip',
     parentFolderPath: '',
     defaultWebUrl: 'https://google.com',
     searchEngine: 'google',
@@ -47,7 +58,7 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     categoryIcons: {},
     enableCorsProxy: false,
     adBlock: {
-        enabled: false,
+        enabled: true
     },
     privateMode: false,
     geminiApiKey: '',
@@ -83,12 +94,23 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
         defaultLocation: '',
         domainMappings: {}
     },
+    cardDisplay: {
+        showDescription: true,
+        showAuthor: true,
+        showDate: true,
+        showDomain: true,
+        showThumbnail: true
+    },
     replaceTabHome: false,
     shortcuts: [],
     showClock: true,
     homeTab: {
         showRecentFiles: true,
-        showSavedArticles: true
-    }
-
+        showSavedArticles: true,
+        backgroundImage: '',
+        backgroundBlur: 0,
+        textColor: '#ffffff',
+        textBrightness: 100
+    },
+    keepOriginalContent: false
 };

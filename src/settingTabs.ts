@@ -369,6 +369,63 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     })
             );
 
+        new Setting(containerEl).setName('Card Display').setHeading();
+
+        new Setting(containerEl)
+            .setName('Show Description')
+            .setDesc('Show article description in the card')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.cardDisplay.showDescription)
+                .onChange(async (value) => {
+                    this.plugin.settings.cardDisplay.showDescription = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.updateHomeView();
+                }));
+
+        new Setting(containerEl)
+            .setName('Show Author')
+            .setDesc('Show article author in the card')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.cardDisplay.showAuthor)
+                .onChange(async (value) => {
+                    this.plugin.settings.cardDisplay.showAuthor = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.updateHomeView();
+                }));
+
+        new Setting(containerEl)
+            .setName('Show Date')
+            .setDesc('Show article date in the card')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.cardDisplay.showDate)
+                .onChange(async (value) => {
+                    this.plugin.settings.cardDisplay.showDate = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.updateHomeView();
+                }));
+
+        new Setting(containerEl)
+            .setName('Show Domain')
+            .setDesc('Show article source domain in the card')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.cardDisplay.showDomain)
+                .onChange(async (value) => {
+                    this.plugin.settings.cardDisplay.showDomain = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.updateHomeView();
+                }));
+
+        new Setting(containerEl)
+            .setName('Show Thumbnail')
+            .setDesc('Show article thumbnail image in the card')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.cardDisplay.showThumbnail)
+                .onChange(async (value) => {
+                    this.plugin.settings.cardDisplay.showThumbnail = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.updateHomeView();
+                }));
+
         new Setting(containerEl)
             .setName(t('parent_folder'))
             .setDesc(t('parent_folder_desc'))
@@ -682,6 +739,77 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     this.plugin.refreshHomeViews();
                 });
         });
+
+        new Setting(containerEl)
+            .setName('Background Image')
+            .setDesc('Set a background image for the home tab (enter image URL)')
+            .addText(text => text
+                .setPlaceholder('Enter image URL')
+                .setValue(this.plugin.settings.homeTab.backgroundImage)
+                .onChange(async (value) => {
+                    this.plugin.settings.homeTab.backgroundImage = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                }))
+            .addButton(button => button
+                .setButtonText('Clear')
+                .onClick(async () => {
+                    this.plugin.settings.homeTab.backgroundImage = '';
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                }))
+            .addButton(button => button
+                .setButtonText('Test')
+                .onClick(() => {
+                    const url = this.plugin.settings.homeTab.backgroundImage;
+                    if (url) {
+                        const img = new Image();
+                        img.onload = () => {
+                            new Notice('Background image loaded successfully');
+                        };
+                        img.onerror = () => {
+                            new Notice('Failed to load background image. Please check the URL');
+                        };
+                        img.src = url;
+                    }
+                }));
+
+        new Setting(containerEl)
+            .setName('Background Blur')
+            .setDesc('Adjust the blur intensity of the background image (0-20)')
+            .addSlider(slider => slider
+                .setLimits(0, 20, 1)
+                .setValue(this.plugin.settings.homeTab.backgroundBlur)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.homeTab.backgroundBlur = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                }));
+
+        new Setting(containerEl)
+            .setName('Text Color')
+            .setDesc('Choose the text color when background image is set')
+            .addColorPicker(color => color
+                .setValue(this.plugin.settings.homeTab.textColor)
+                .onChange(async (value) => {
+                    this.plugin.settings.homeTab.textColor = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                }));
+
+        new Setting(containerEl)
+            .setName('Text Brightness')
+            .setDesc('Adjust the brightness of the text (0-100%)')
+            .addSlider(slider => slider
+                .setLimits(0, 100, 5)
+                .setValue(this.plugin.settings.homeTab.textBrightness)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.homeTab.textBrightness = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshHomeViews();
+                }));
     }
 
 
@@ -755,9 +883,64 @@ export default class NetClipSettingTab extends PluginSettingTab {
                         }).open();
                     }));
 
+            // Add Export/Import buttons
+            new Setting(containerEl)
+                .setName(t('export_prompts'))
+                .setDesc(t('export_prompts_desc'))
+                .addButton(button => button
+                    .setButtonText(t('export_prompts'))
+                    .onClick(() => this.exportPrompts(this.plugin.settings.prompts)));
+
+            new Setting(containerEl)
+                .setName(t('import_prompts'))
+                .setDesc(t('import_prompts_desc'))
+                .addButton(button => button
+                    .setButtonText(t('import_prompts'))
+                    .onClick(() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = async (e) => {
+                            const file = (e.target as HTMLInputElement).files?.[0];
+                            if (file) {
+                                try {
+                                    const text = await file.text();
+                                    const prompts = JSON.parse(text);
+                                    
+                                    // Validate the imported data
+                                    if (!Array.isArray(prompts) || !prompts.every(p => 
+                                        typeof p === 'object' && 
+                                        typeof p.name === 'string' && 
+                                        typeof p.prompt === 'string' && 
+                                        typeof p.enabled === 'boolean' && 
+                                        typeof p.variables === 'object'
+                                    )) {
+                                        throw new Error('Invalid format');
+                                    }
+                                    
+                                    this.plugin.settings.prompts = prompts;
+                                    await this.plugin.saveSettings();
+                                    new Notice(t('import_success'));
+                                    this.display();
+                                } catch (error) {
+                                    new Notice(t('import_error'));
+                                }
+                            }
+                        };
+                        input.click();
+                    }));
+
             this.plugin.settings.prompts.forEach((prompt, index) => {
                 new Setting(containerEl)
                     .setName(prompt.name)
+                    .addToggle(toggle => toggle
+                        .setTooltip(prompt.enabled ? t('hide_in_clipper_desc') : t('show_in_clipper_desc'))
+                        .setValue(prompt.enabled)
+                        .onChange(async (value) => {
+                            this.plugin.settings.prompts[index].enabled = value;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }))
                     .addButton(button => button
                         .setButtonText(t('edit_prompt'))
                         .onClick(() => {
@@ -767,6 +950,10 @@ export default class NetClipSettingTab extends PluginSettingTab {
                                 this.display();
                             }).open();
                         }))
+                    .addButton(button => button
+                        .setButtonText(t('export_prompt'))
+                        .setTooltip(t('export_single_prompt_desc'))
+                        .onClick(() => this.exportPrompts([prompt], prompt.name)))
                     .addButton(button => button
                         .setButtonText(t('delete_prompt'))
                         .onClick(async () => {
@@ -794,6 +981,19 @@ export default class NetClipSettingTab extends PluginSettingTab {
                         }));
             });
         }
+    }
+
+    private exportPrompts(prompts: AIPrompt[], filename?: string) {
+        const promptsJson = JSON.stringify(prompts, null, 2);
+        const blob = new Blob([promptsJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename ? `netclip-prompt-${filename}.json` : 'netclip-prompts.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     private supportTab(containerEl: HTMLElement) {

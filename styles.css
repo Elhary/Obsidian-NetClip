@@ -1,3 +1,18 @@
+:root {
+  --netclip-primary:#ffffff;
+  --netclip-secondry:#f6f6f6;
+  
+  /* RGB values for glass effect */
+  --background-secondary-rgb: 238, 238, 238;
+  --background-modifier-border-rgb: 200, 200, 200;
+}
+
+/* Dark theme RGB values */
+.theme-dark {
+  --background-secondary-rgb: 41, 41, 41;
+  --background-modifier-border-rgb: 64, 64, 64;
+}
+
 .net_clipper_container {
   display: flex;
   flex-direction: column;
@@ -125,61 +140,91 @@ button.netclip_sort_button{
 }
 
 .netClip_card {
-  position: relative;
+  background-color: var(--background-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 200px;
   display: flex;
-  max-width: 270px;
   flex-direction: column;
-  height: 100%;
-  min-height: 260px;
-  padding: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary);
-  transition: transform 0.3s ease;
 }
 
 .netClip_card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .netClip_card img {
   width: 100%;
-  aspect-ratio: 13/9;
+  height: 140px;
   object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+}
+
+.netclip_card_content {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .netClip_card h6 {
-  font-size: 0.9em;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
   line-height: 1.4;
-  margin: 0 0 0.5rem;
-  flex-grow: 1;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   color: var(--text-normal);
   cursor: pointer;
 }
 
+.netClip_card h6:hover {
+  color: var(--text-accent);
+}
+
+.netclip_card_description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.netclip_card_meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.netclip_card_author {
+  color: var(--text-accent);
+}
+
+.netclip_card_date {
+  color: var(--text-muted);
+}
+
 .netclip_card_bottom {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
   margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: 0.9rem;
-  color: var(--text-accent);
+  border-top: 1px solid var(--background-modifier-border);
 }
 
-.domain {
+.netclip_card_bottom .domain {
+  font-size: 0.75rem;
+  color: var(--text-muted);
   text-decoration: none;
-  color: var(--text-accent);
-  font-weight: normal;
 }
 
-.domain:hover {
+.netclip_card_bottom .domain:hover {
+  color: var(--text-accent);
   text-decoration: underline;
 }
 
@@ -1083,6 +1128,8 @@ button.netclip_warning{
 }
 
 .prompt-section{
+  max-width: 274px;
+  width: 100%;
   padding: 12px;
   border: 1px solid var(--background-modifier-border);
   margin-bottom: 1em;
@@ -1097,6 +1144,10 @@ button.netclip_warning{
 }
 
 .netclip_prompt_container{
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  flex-wrap: wrap;
   max-height: 300px;
   overflow: hidden;
   overflow-y: scroll;
@@ -1146,19 +1197,43 @@ button.netclip_warning{
 
 /* Home Tab Styles */
 
-
-:root{
-  --netclip-primary:#ffffff;
-  --netclip-secondry:#f6f6f6;
+.workspace-leaf-content[data-type="netclip-home-tab-view"] {
+  position: relative;
+  overflow: hidden; /* Prevent blur edges from showing */
 }
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--background-blur, 0));
+  transform: scale(1.1); /* Prevent blur edges from showing */
+  pointer-events: none;
+  z-index: 1;
+}
+
 .workspace-leaf-content[data-type="netclip-home-tab-view"] .view-header {
   z-index: 2;
-
+  position: relative;
 }
+
 .netclip-home-tab-container {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 5;
+}
+.workspace-leaf-content[data-type="netclip-home-tab-view"] .view-content{
+  z-index: 10;
+  background-color: transparent;
 }
 
 .netclip-home-tab-header {
@@ -1399,13 +1474,33 @@ button.netclip_warning{
 
 }
 
+.netClip_card{
+  border: 1px solid var(--background-modifier-border);
+}
+.netclip_card_top{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.netclip_card_top .netclip_card_meta{
+  display: flex;
+  margin-top: 1em;
+  width: 100%;
+  justify-content: space-between;
+  bottom: 0;
+}
+.netclip_card_date{
+  color: var(--text-faint);
+}
 
 .netclip-article-card:nth-child(1),
 .netclip-article-card:nth-child(6),
 .netclip-article-card:nth-child(7) {
   grid-column: span 2;
 }
-
 
 
 
@@ -1736,5 +1831,122 @@ input.is-invalid {
   position: relative;
   z-index: 1;
 }
+
+/* Glass morphism styles when background is present */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-card,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-icon,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-home-tab-button {
+    background-color: rgba(var(--background-secondary-rgb), 0.3) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(var(--background-modifier-border-rgb), 0.2) !important;
+}
+
+/* Add hover effects for glass items */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-card:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-icon:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-home-tab-button:hover {
+    background-color: rgba(var(--background-secondary-rgb), 0.4) !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+
+/* Adjust text colors for better visibility */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-title,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-name {
+    color: var(--text-normal);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust section titles */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-title {
+    border-bottom-color: rgba(var(--background-modifier-border-rgb), 0.3);
+}
+
+
+
+/* Clock styling with background */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-clock-section {    -webkit-backdrop-filter: blur(8px);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-time {
+    color: var(--text-normal);
+    text-shadow: 0 2px 4px rgba(52, 10, 10, 0.2);
+}
+
+/* Search input styling */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input {
+    background-color: rgba(var(--background-secondary-rgb), 0.3);
+    border: 1px solid rgba(var(--background-modifier-border-rgb), 0.2);
+    color: var(--text-normal);
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Article card content area */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-content {
+    background-color: transparent !important;
+}
+
+/* Ensure all icons are visible */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-icon svg {
+    color: var(--text-normal);
+    opacity: 0.8;
+}
+
+/* Text color styles when background is present */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] {
+    --text-color-with-brightness: color-mix(in srgb, var(--custom-text-color), transparent calc(100% - var(--text-brightness)));
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-title,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-name,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-time,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-date,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-title h3,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input {
+    color: var(--text-color-with-brightness) !important;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .view-content svg{
+  color: var(--text-color-with-brightness) !important;
+}
+
+
+/* .workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-icon {
+    color: var(--text-color-with-brightness) !important;
+    opacity: calc(var(--text-brightness) / 100);
+} */
+
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input::placeholder {
+    color: var(--text-color-with-brightness);
+    opacity: 0.7;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-meta,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-date {
+    color: var(--text-color-with-brightness);
+    opacity: 0.8;
+}
+
+/* .workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-time,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-title,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-name {
+    text-shadow: none;
+} */
 
 

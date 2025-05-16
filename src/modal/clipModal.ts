@@ -8,18 +8,45 @@ export class ClipModal extends Modal {
     modalEl: HTMLElement;
     private selectedPrompts: AIPrompt[] = [];
     private selectedVariables: Record<string, Record<string, string>> = {};
+    private keepOriginalContent: boolean;
 
     constructor(app: App, private plugin: NetClipPlugin){
-        super(app)
+        super(app);
+        this.keepOriginalContent = this.plugin.settings.keepOriginalContent;
     }
 
-    async tryGetClipboardUrl(): Promise<string>{
-        try{
+    async tryGetClipboardUrl(): Promise<string | null> {
+        try {
             const text = await navigator.clipboard.readText();
-            return normalizeUrl(text) || '';
-        } catch {
-            return '';
+            if (text.startsWith('http')) {
+                return text;
+            }
+        } catch (error) {
+            console.error('Failed to read clipboard:', error);
         }
+        return null;
+    }
+
+    private renderVariableSelectors(promptDiv: HTMLElement, prompt: AIPrompt) {
+        if (!prompt.variables || Object.keys(prompt.variables).length === 0) return;
+
+        const varContainer = promptDiv.createDiv({
+            cls: `prompt-variables-${prompt.name.replace(/\s+/g, '-')}`
+        });
+
+        Object.entries(prompt.variables).forEach(([key, options]) => {
+            new Setting(varContainer)
+                .setName(key)
+                .addDropdown(dropdown => {
+                    options.forEach(option => dropdown.addOption(option, option));
+                    dropdown.onChange(value => {
+                        if (!this.selectedVariables[prompt.name]) {
+                            this.selectedVariables[prompt.name] = {};
+                        }
+                        this.selectedVariables[prompt.name][key] = value;
+                    });
+                });
+        });
     }
 
     async onOpen(){
@@ -61,15 +88,29 @@ export class ClipModal extends Modal {
         });
 
         if (this.plugin.settings.enableAI && this.plugin.settings.geminiApiKey) {
-            const promptContainer = contentEl.createDiv({cls: 'netclip_prompt_container'});
-            promptContainer.createEl('h3', {text: 'AI Processing'});
+            const aipromptContainer = contentEl.createDiv({cls: 'ai_prompt_container'});
+            aipromptContainer.createEl('h3', {text: 'AI Processing'});
+            const promptContainer = aipromptContainer.createEl('div', {cls: 'netclip_prompt_container'})
 
-            this.plugin.settings.prompts.forEach(prompt => {
+            new Setting(aipromptContainer)
+                .setName('Keep Original Content')
+                .setDesc('Keep the original content when applying AI prompts')
+                .addToggle(toggle => toggle
+                    .setValue(this.keepOriginalContent)
+                    .onChange(value => {
+                        this.keepOriginalContent = value;
+                        this.plugin.settings.keepOriginalContent = value;
+                        this.plugin.saveSettings();
+                    }));
+
+            const enabledPrompts = this.plugin.settings.prompts.filter(prompt => prompt.enabled);
+            
+            enabledPrompts.forEach(prompt => {
                 const promptDiv = promptContainer.createDiv({cls: 'prompt-section'});
                 new Setting(promptDiv)
                     .setName(prompt.name)
                     .addToggle(toggle => toggle
-                        .setValue(prompt.enabled)
+                        .setValue(false)
                         .onChange(value => {
                             if (value) {
                                 if (!this.selectedPrompts.includes(prompt)) {
@@ -87,12 +128,6 @@ export class ClipModal extends Modal {
                                 }
                             }
                         }));
-
-                if (prompt.enabled) {
-                    this.selectedPrompts.push(prompt);
-                    this.selectedVariables[prompt.name] = {};
-                    this.renderVariableSelectors(promptDiv, prompt);
-                }
             });
         }
 
@@ -110,7 +145,8 @@ export class ClipModal extends Modal {
                             normalizedUrl,
                             categorySelect.value,
                             this.selectedPrompts,
-                            this.selectedVariables
+                            this.selectedVariables,
+                            this.keepOriginalContent
                         ).open();
                     } else {
                         await this.plugin.clipWebpage(
@@ -126,28 +162,7 @@ export class ClipModal extends Modal {
         });
     }
 
-    private renderVariableSelectors(container: HTMLElement, prompt: AIPrompt) {
-        const varContainer = container.createDiv({
-            cls: `prompt-variables prompt-variables-${prompt.name.replace(/\s+/g, '-')}`
-        });
-        
-        Object.entries(prompt.variables).forEach(([varName, options]) => {
-            new Setting(varContainer)
-                .setName(`${prompt.name} - ${varName}`)
-                .addDropdown(dropdown => {
-                    options.forEach(option => dropdown.addOption(option, option));
-                    dropdown.onChange(value => {
-                        this.selectedVariables[prompt.name][varName] = value;
-                    });
-                    if (options.length > 0) {
-                        this.selectedVariables[prompt.name][varName] = options[0];
-                        dropdown.setValue(options[0]);
-                    }
-                });
-        });
-    }
-
-    onClose(){
+    onClose() {
         const {contentEl} = this;
         contentEl.empty();
     }

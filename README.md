@@ -22,7 +22,16 @@ NetClip is an Obsidian plugin that lets you browse the web and clip webpages dir
 
 ---
 
-  
+## Clipper View
+![preview_img_2](./images/Screenshot_2.png)
+
+## Web view
+
+![preview_img_2](./images/Screenshot_3.png)
+
+
+
+## Home Tab
 
 ![preview_img_1](./images/Screenshot_1.png)
 
@@ -31,7 +40,6 @@ NetClip is an Obsidian plugin that lets you browse the web and clip webpages dir
 ---
 
 
-![preview_img_2](./images/Screenshot_2.png)
 
 
 ### Features
@@ -112,7 +120,6 @@ If you'd like to support the plugin's development, feel free to donate!  Every 
 
   
 - [Ko-fi](https://ko-fi.com/elharis)
-- [Buy Me a Coffee](https://buymeacoffee.com/el_haris)
 
 ### License
 This plugin is licensed under the [MIT](https://mit-license.org) License.

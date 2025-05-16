@@ -20,7 +20,8 @@ export class AIProcessingModal extends Modal {
         private url: string,
         private category: string,
         private selectedPrompts: AIPrompt[],
-        private selectedVariables: Record<string, Record<string, string>>
+        private selectedVariables: Record<string, Record<string, string>>,
+        private keepOriginalContent: boolean = true
     ) {
         super(app);
         this.selectedPrompts.forEach(prompt => {
@@ -98,16 +99,15 @@ export class AIProcessingModal extends Modal {
     }
 
     private updateStep() {
-        this.aiStepElements.forEach(el => el.removeClass('active', 'completed'));
-        
-        for (let i = 0; i < this.currentStep; i++) {
-            this.aiStepElements[i].addClass('completed');
-        }
-        
-        if (this.currentStep < this.aiStepElements.length) {
-            this.aiStepElements[this.currentStep].addClass('active');
-            this.aiStatusText.setText(this.aiSteps[this.currentStep]);
-        }
+        this.aiStepElements.forEach((el, index) => {
+            if (index < this.currentStep) {
+                el.addClass('completed');
+            } else if (index === this.currentStep) {
+                el.addClass('active');
+            } else {
+                el.removeClass('active', 'completed');
+            }
+        });
     }
 
     async processWithAnimation() {
@@ -131,7 +131,8 @@ export class AIProcessingModal extends Modal {
                 this.url,
                 this.category,
                 this.selectedPrompts,
-                this.selectedVariables
+                this.selectedVariables,
+                this.keepOriginalContent
             );
             
             this.currentStep = this.aiSteps.length - 1;

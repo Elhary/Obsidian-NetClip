@@ -5,9 +5,10 @@ import { DeleteConfirmationModal } from '../modal/deleteFiles'
 import { ClipperContextMenu } from '../contextMenu'
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './EditorWebView'
 import { ClipModal } from 'src/modal/clipModal'
-import {DEFAULT_IMAGE} from '../assets/image'
+import { DEFAULT_IMAGE } from '../assets/image'
 import { Menu } from 'obsidian'
 import { t } from '../translations'
+import { findFirstImageInNote } from '../mediaUtils'
 
 export const CLIPPER_VIEW = 'clipper-view';
 
@@ -312,22 +313,74 @@ export class ClipperHomeView extends ItemView {
             const content = await this.app.vault.cachedRead(file);
             const clippedEl = container.createEl('div', { cls: 'netClip_card' });
 
-            const thumbnailMatch = content.match(/!\[Thumbnail\]\((.+)\)/);
-            if (thumbnailMatch) {
-                clippedEl.createEl("img", { attr: { src: thumbnailMatch[1] } });
-            } else {
-                clippedEl.createEl("img", { attr: { src: DEFAULT_IMAGE } });
-            }            
+            if (this.settings.cardDisplay.showThumbnail) {
+                const frontmatterMatch = content.match(/^---[\s\S]*?thumbnail: "([^"]+)"[\s\S]*?---/);
+                let thumbnailUrl = frontmatterMatch ? frontmatterMatch[1] : null;
 
-            const clippedTitle = clippedEl.createEl("h6", { text: file.basename });
+                if (!thumbnailUrl) {
+                    const thumbnailMatch = content.match(/!\[Thumbnail\]\((.+)\)/);
+                    thumbnailUrl = thumbnailMatch ? thumbnailMatch[1] : null;
+                }
+
+                if (!thumbnailUrl) {
+                    thumbnailUrl = await findFirstImageInNote(this.app, content);
+                }
+
+                clippedEl.createEl("img", { 
+                    attr: { 
+                        src: thumbnailUrl || DEFAULT_IMAGE,
+                        loading: "lazy"
+                    } 
+                });
+            }
+
+            const contentContainer = clippedEl.createEl('div', { cls: 'netclip_card_content' });
+    
+            const topContainer = contentContainer.createEl('div', { cls: 'netclip_card_top' });
+            const clippedTitle = topContainer.createEl("h6", { text: file.basename });
             clippedTitle.addEventListener('click', () => {
                 this.openArticle(file);
             });
 
-            const bottomContent = clippedEl.createEl("div", { cls: "netclip_card_bottom" });
+            if (this.settings.cardDisplay.showDescription) {
+                const descriptionMatch = content.match(/desc:\s*(?:"([^"]+)"|([^\n]+))/);
+                if (descriptionMatch) {
+                    topContainer.createEl("p", { 
+                        cls: "netclip_card_description",
+                        text: descriptionMatch[1] || descriptionMatch[2]
+                    });
+                }
+            }
+
+            const metaContainer = topContainer.createEl("div", { cls: "netclip_card_meta" });
+
+            if (this.settings.cardDisplay.showAuthor) {
+                const authorMatch = content.match(/author:\s*(?:"([^"]+)"|([^\n]+))/);
+                if (authorMatch) {
+                    metaContainer.createEl("span", {
+                        cls: "netclip_card_author",
+                        text: authorMatch[1] || authorMatch[2]
+                    });
+                }
+            }
+
+            if (this.settings.cardDisplay.showDate) {
+                const creationDate = new Date(file.stat.ctime);
+                const formattedDate = creationDate.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                metaContainer.createEl("span", {
+                    cls: "netclip_card_date",
+                    text: formattedDate
+                });
+            }
+
+            const bottomContent = contentContainer.createEl("div", { cls: "netclip_card_bottom" });
             const urlMatch = content.match(/source: "([^"]+)"/);
 
-            if (urlMatch) {
+            if (this.settings.cardDisplay.showDomain && urlMatch) {
                 const articleUrl = urlMatch[1];
                 const domainName = getDomain(articleUrl);
                 bottomContent.createEl("a", {
@@ -335,12 +388,8 @@ export class ClipperHomeView extends ItemView {
                     href: articleUrl,
                     text: domainName
                 });
-            } else {
-                bottomContent.createEl("span", {
-                    cls: "domain",
-                    text: t('unknown_source')
-                });
             }
+
             this.createMenuButton(bottomContent, file, urlMatch?.[1]);
             container.appendChild(clippedEl);
         }

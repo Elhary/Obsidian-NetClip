@@ -7,6 +7,7 @@ import { getDomain } from '../utils';
 import { ShortcutModal, Shortcut } from '../modal/ShortcutModal';
 import { CLIPPER_VIEW } from './ClipperView';
 import { ClipModal } from 'src/modal/clipModal';
+import { findFirstImageInNote } from '../mediaUtils';
 
 export const HOME_TAB_VIEW = 'netclip-home-tab-view';
 
@@ -62,9 +63,29 @@ export class HomeTabView extends ItemView {
         return;
     }
 
+    private updateBackgroundImage() {
+        const { backgroundImage, backgroundBlur, textColor, textBrightness } = this.plugin.settings.homeTab;
+        const leafContent = this.containerEl.closest('.workspace-leaf-content[data-type="netclip-home-tab-view"]');
+        if (leafContent) {
+            if (backgroundImage) {
+                leafContent.setAttribute('style', 
+                    `--background-image: url('${backgroundImage}'); 
+                     --background-blur: ${backgroundBlur}px;
+                     --custom-text-color: ${textColor};
+                     --text-brightness: ${textBrightness}%;`
+                );
+            } else {
+                leafContent.removeAttribute('style');
+            }
+        }
+    }
 
     async onOpen(){
-        const container = this.contentEl.createEl('div', { cls: 'netclip-home-tab-container' });
+        const container = this.containerEl.children[1];
+        container.empty();
+        
+        // Apply background image if set
+        this.updateBackgroundImage();
 
         if(this.plugin.settings.showClock){
             const clockSection = container.createEl('div', { cls: 'netclip-clock-section' });
@@ -358,20 +379,25 @@ export class HomeTabView extends ItemView {
 
             const imageContainer = articleCard.createEl('div', { cls: 'netclip-article-image-container' });
             
-            const thumbnailMatch = content.match(/!\[Thumbnail\]\((.+)\)/);
-            if (thumbnailMatch) {
-                imageContainer.createEl("img", { 
-                    cls: 'netclip-article-thumbnail',
-                    attr: { src: thumbnailMatch[1] } 
-                });
-            } else {
-        
-                imageContainer.createEl("img", { 
-                    cls: 'netclip-article-thumbnail',
-                    attr: { src: DEFAULT_IMAGE } 
-                });
+            const frontmatterMatch = content.match(/^---[\s\S]*?thumbnail: "([^"]+)"[\s\S]*?---/);
+            let thumbnailUrl = frontmatterMatch ? frontmatterMatch[1] : null;
+
+            if (!thumbnailUrl) {
+                const thumbnailMatch = content.match(/!\[Thumbnail\]\((.+)\)/);
+                thumbnailUrl = thumbnailMatch ? thumbnailMatch[1] : null;
             }
-            
+
+            if (!thumbnailUrl) {
+                thumbnailUrl = await findFirstImageInNote(this.app, content);
+            }
+
+            imageContainer.createEl("img", { 
+                cls: 'netclip-article-thumbnail',
+                attr: { 
+                    src: thumbnailUrl || DEFAULT_IMAGE,
+                    loading: "lazy"
+                } 
+            });
 
             const contentContainer = articleCard.createEl('div', { cls: 'netclip-article-content' });
             
@@ -530,5 +556,13 @@ export class HomeTabView extends ItemView {
     private async refreshContent() {
         this.contentEl.empty();
         await this.onOpen();
+        this.updateBackgroundImage();
+    }
+
+    async onunload() {
+        const leafContent = this.containerEl.closest('.workspace-leaf-content[data-type="netclip-home-tab-view"]');
+        if (leafContent) {
+            leafContent.removeAttribute('style');
+        }
     }
 }

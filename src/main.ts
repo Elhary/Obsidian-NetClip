@@ -334,7 +334,8 @@ export default class NetClipPlugin extends Plugin {
     url: string, 
     category: string = '', 
     selectedPrompt: AIPrompt | AIPrompt[] | null = null, 
-    selectedVariables: Record<string, Record<string, string>> | Record<string, string> = {}
+    selectedVariables: Record<string, Record<string, string>> | Record<string, string> = {},
+    keepOriginalContent: boolean = true
   ): Promise<string> {
     if (!this.contentExtractors) {
       throw new Error("Content extractors not initialized");
@@ -418,7 +419,12 @@ export default class NetClipPlugin extends Plugin {
 
     let processedContent = completeNote;
     if (this.geminiService && selectedPrompt) {
-      processedContent = await this.geminiService.processContent(completeNote, selectedPrompt, selectedVariables);
+      processedContent = await this.geminiService.processContent(
+        completeNote, 
+        selectedPrompt, 
+        selectedVariables,
+        keepOriginalContent
+      );
       
       const titleMatch = processedContent.match(/^---[\s\S]*?\ntitle: "([^"]+)"[\s\S]*?\n---/);
       if (titleMatch && titleMatch[1]) {
