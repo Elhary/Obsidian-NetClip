@@ -280,7 +280,16 @@ export default class NetClipSettingTab extends PluginSettingTab {
     private webViewSettings(containerEl: HTMLElement){
         new Setting(containerEl).setName('Web view').setHeading()
         this.syncCategoriesFolders();
-        
+
+        if ((window as any).Platform?.isMobileApp || (typeof (window as any).cordova !== 'undefined')) {
+            const warning = containerEl.createDiv('netclip-info-box');
+            const infoContent = warning.createDiv('netclip-info-content');
+            const infoIcon = infoContent.createSpan('netclip-info-icon');
+            setIcon(infoIcon, 'alert-triangle');
+            const textSpan = infoContent.createSpan();
+            textSpan.setText('Web view is not supported on mobile devices. You can still use the clipper and other features.');
+        }
+
         new Setting(containerEl)
             .setName('Search engine')
             .setDesc('Choose your preferred search engine for the web view')

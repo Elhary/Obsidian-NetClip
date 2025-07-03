@@ -1,4 +1,4 @@
-import { App, Platform, setIcon, setTooltip } from 'obsidian';
+import { App, Platform, setIcon, setTooltip, Notice } from 'obsidian';
 import { WebSearch, WebSearchSettings } from './search/search'; 
 import { ClipModal } from './modal/clipModal';
 import { AdBlocker } from './adBlock';
@@ -81,6 +81,17 @@ export class WebViewComponent {
     createContainer(): HTMLElement {
         const containerEl = document.createElement('div');
         containerEl.classList.add('netClip_webview_container');
+        if (Platform.isMobileApp) {
+            const msg = containerEl.createDiv('netclip_mobile_message');
+            const icon = document.createElement('span');
+            setIcon(icon, 'triangle-alert');
+            msg.appendChild(icon);
+            msg.appendChild(document.createElement('br'));
+            const line1 = document.createElement('span');
+            line1.appendChild(document.createTextNode('Web browsing is not supported inside Obsidian Mobile.'));
+            msg.appendChild(line1);
+            return containerEl;
+        }
         const controlsEl = containerEl.createDiv('netClip_web_controls');
         this.setupNavigationBtns(controlsEl);
         this.setupSearchInput(controlsEl);
@@ -130,7 +141,6 @@ export class WebViewComponent {
 
         webview.src = this.url;
 
-        // Handle window destruction and recreation
         webview.addEventListener('destroyed', () => {
             const parent = webview.parentElement;
             if (parent && parent.ownerDocument !== this.frameDoc) {
@@ -227,6 +237,14 @@ export class WebViewComponent {
         this.refreshBtn = leftContainer.createEl('button', { cls: 'netClip_refresh_btn netClip_btn' });
         setIcon(this.refreshBtn, 'rotate-ccw');
         this.refreshBtn.onclick = () => this.refresh();
+
+        if (Platform.isMobileApp) {
+            this.backBtn.disabled = true;
+            this.forwardBtn.disabled = true;
+            this.refreshBtn.disabled = false; 
+            setTooltip(this.backBtn, 'Back not supported on mobile');
+            setTooltip(this.forwardBtn, 'Forward not supported on mobile');
+        }
     }
 
     private createIframe(): HTMLIFrameElement {
@@ -236,7 +254,7 @@ export class WebViewComponent {
         iframe.setAttribute('crossorigin', 'anonymous');
         iframe.setAttribute('src', this.url);
 
-        let sandbox = 'allow-forms allow-modals allow-popups allow-presentation allow-scripts allow-top-navigation-by-user-activation';
+        let sandbox = 'allow-forms allow-modals allow-pops allow-presentation allow-scripts allow-top-navigation-by-user-activation';
         if(!this.plugin?.settings?.privateMode){
             sandbox += ' allow-same-origin';
         }
@@ -256,6 +274,21 @@ export class WebViewComponent {
             if(title && this.titleChangeCallback){
                 this.titleChangeCallback(title);
             }
+        });
+
+        iframe.addEventListener('error', () => {
+            if (iframe.parentElement) iframe.parentElement.removeChild(iframe);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'netClip_webview_error';
+            const iconDiv = document.createElement('div');
+            const msgDiv = document.createElement('div');
+            msgDiv.appendChild(document.createTextNode('Web page could not be loaded.'));
+            msgDiv.appendChild(document.createElement('br'));
+            msgDiv.appendChild(document.createTextNode('Some sites block embedding in Obsidian Mobile.'));
+            errorDiv.appendChild(iconDiv);
+            errorDiv.appendChild(msgDiv);
+            const frameContainer = document.querySelector('.netClip_frame-container');
+            if (frameContainer) frameContainer.appendChild(errorDiv);
         });
         return iframe;
     }
@@ -414,9 +447,12 @@ export class WebViewComponent {
         if (this.isFrameReady) {
             this.loadingSpinner.classList.add('loading-spinner-visible');
             if (this.frame instanceof HTMLIFrameElement) {
+                // On mobile, navigation history is managed manually
                 if (this.currentHistoryIndex > 0) {
                     this.currentHistoryIndex--;
                     this.frame.src = this.navigationHistory[this.currentHistoryIndex];
+                } else if (Platform.isMobileApp) {
+                    new Notice('Back navigation is not supported on mobile.');
                 }
             } else {
                 const webview = this.frame as WebviewTag;
@@ -434,6 +470,8 @@ export class WebViewComponent {
                 if (this.currentHistoryIndex < this.navigationHistory.length - 1) {
                     this.currentHistoryIndex++;
                     this.frame.src = this.navigationHistory[this.currentHistoryIndex];
+                } else if (Platform.isMobileApp) {
+                    new Notice('Forward navigation is not supported on mobile.');
                 }
             } else {
                 const webview = this.frame as WebviewTag;
@@ -464,6 +502,10 @@ export class WebViewComponent {
     }
 
     private setupAdBlocking(webview: WebviewTag): void {
+        if (Platform.isMobileApp) {
+            // Ad blocking not supported on mobile iframe
+            return;
+        }
         this.adBlocker.initializeFilters().then(() => {
             this.adBlocker.applyFilters(webview as unknown as Electron.WebviewTag);
             
@@ -477,6 +519,10 @@ export class WebViewComponent {
     }
 
     private setupPrivateMode(webview: WebviewTag): void {
+        if (Platform.isMobileApp) {
+            // Private mode not supported on mobile iframe
+            return;
+        }
         webview.executeJavaScript(`
             window.sessionStorage.clear();
             window.localStorage.clear();

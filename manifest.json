@@ -1,7 +1,7 @@
 {
 	"id": "net-clip",
 	"name": "NetClip",
-	"version": "1.3.8",
+	"version": "1.3.9",
     "minAppVersion": "1.4.0",
 	"description": "Clip, save, search, and browse web pages within your vault",
 	"author": "Elhary",

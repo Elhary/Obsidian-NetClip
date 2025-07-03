@@ -165,7 +165,11 @@ export default class NetClipPlugin extends Plugin {
               .setTitle("Open in Modal WebView")
               .setIcon("picture-in-picture-2")
               .onClick(() => {
-                new WebViewModal(this.app, url, this).open();
+                if (url) {
+                  new WebViewModal(this.app, url, this).open();
+                } else {
+                  new Notice('No valid URL found to open in WebView.');
+                }
               });
           });
         }
