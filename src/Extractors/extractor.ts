@@ -4,6 +4,7 @@ import { Readability } from '@mozilla/readability';
 import { ReadabilityArticle, MediaContent, PriceInfo } from './types/index';
 import { CONSTANTS } from './constants';
 import { DOMHelper, TextHelper } from './utils';
+import Defuddle from 'defuddle';
 
 
 export class ContentExtractors {
@@ -23,6 +24,9 @@ export class ContentExtractors {
     const docClone = doc.cloneNode(true) as Document;
     docClone.querySelectorAll('img[src*=".gif"], img[data-src*=".gif"]').forEach(gif => gif.classList.add('gif'));
 
+	// Process with Defuddle first while we have access to the document
+	const defuddled = new Defuddle(docClone, { url: baseUrl }).parse();
+
     const article = new Readability(docClone, {
       charThreshold: 20,
       classesToPreserve: ['markdown', 'highlight', 'code', 'gif'],
@@ -35,11 +39,9 @@ export class ContentExtractors {
 
     const container = document.createElement('div');
     DOMHelper.setContentSafely(container, article.content || '');
-    const mediaElements = this.processMediaElements(container, baseUrl);
-    
+
     return this.buildMetadata(article) + 
-           this.processNodeHelper.processNode(container, baseUrl).replace(/\n{3,}/g, '\n\n').trim() + 
-           mediaElements;
+           this.processNodeHelper.processNode(defuddled.content, baseUrl).replace(/\n{3,}/g, '\n\n').trim();
   }
 
   private processMediaElements(container: Element, baseUrl: string): string {
