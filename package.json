@@ -5,6 +5,7 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
+		"dev-build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
@@ -26,8 +27,9 @@
 	"dependencies": {
 		"@electron/remote": "^2.1.2",
 		"@google/generative-ai": "^0.24.0",
-		"@mozilla/readability": "^0.6.0",
 		"@types/turndown": "^5.0.5",
+		"defuddle": "^0.6.6",
+		"mathml-to-latex": "^1.5.0",
 		"turndown": "^7.2.0"
 	}
 }
