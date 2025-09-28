@@ -1,10 +1,9 @@
 import WebClipperPlugin from '../main';
 import { ProcessNodeHelper } from './helper';
-import { Readability } from '@mozilla/readability';
 import { ReadabilityArticle, MediaContent, PriceInfo } from './types/index';
 import { CONSTANTS } from './constants';
 import { DOMHelper, TextHelper } from './utils';
-import Defuddle from 'defuddle';
+import Defuddle, { DefuddleResponse } from 'defuddle';
 
 
 export class ContentExtractors {
@@ -27,20 +26,7 @@ export class ContentExtractors {
 	// Process with Defuddle first while we have access to the document
 	const defuddled = new Defuddle(docClone, { url: baseUrl }).parse();
 
-    const article = new Readability(docClone, {
-      charThreshold: 20,
-      classesToPreserve: ['markdown', 'highlight', 'code', 'gif'],
-      nbTopCandidates: 5,
-      maxElemsToParse: 0,
-      keepClasses: true
-    }).parse() as ReadabilityArticle | null;
-
-    if (!article) return this.fallbackExtraction(doc, baseUrl);
-
-    const container = document.createElement('div');
-    DOMHelper.setContentSafely(container, article.content || '');
-
-    return this.buildMetadata(article) + 
+    return this.buildMetadata(defuddled) + 
            this.processNodeHelper.processNode(defuddled.content, baseUrl).replace(/\n{3,}/g, '\n\n').trim();
   }
 
@@ -129,8 +115,8 @@ export class ContentExtractors {
     const jsonLd = this.parseJsonLd(doc);
     const sources = [
       () => {
-        const article = new Readability(doc.cloneNode(true) as Document).parse() as ReadabilityArticle;
-        return article?.byline;
+        const article = new Defuddle(doc.cloneNode(true) as Document).parse();
+        return article?.author;
       },
       () => jsonLd.author?.name || (typeof jsonLd.author === 'string' ? jsonLd.author : null),
       () => doc.querySelector('meta[name="author"]')?.getAttribute('content'),
@@ -238,23 +224,11 @@ export class ContentExtractors {
     return null;
   }
 
-  private buildMetadata(article: ReadabilityArticle): string {
+  private buildMetadata(article: DefuddleResponse): string {
     return [
       article.title ? `# ${article.title}\n\n` : '',
-      article.byline ? `*By ${article.byline}*\n\n` : '',
-      article.excerpt ? `> ${article.excerpt}\n\n` : ''
+      article.author ? `*By ${article.author}*\n\n` : '',
     ].join('');
-  }
-
-  private fallbackExtraction(doc: Document, baseUrl: string): string {
-    const mainContent = CONSTANTS.SELECTORS.MAIN_CONTENT.reduce((acc, selector) => 
-      acc || doc.querySelector(selector), doc.body as Element);
-
-    this.cleanupElements(mainContent);
-    const mediaElements = this.processMediaElements(mainContent, baseUrl);
-
-    return this.processNodeHelper.processNode(mainContent, baseUrl)
-      .replace(/\n{3,}/g, '\n\n').trim() + mediaElements;
   }
 
   private cleanupElements(element: Element): void {
