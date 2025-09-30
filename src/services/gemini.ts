@@ -24,17 +24,14 @@ export class GeminiService {
 
     private replaceVariables(prompt: string, variables: Record<string, string>, promptDefinition?: AIPrompt): string {
         return prompt.replace(/\${(\w+)}/g, (match, variable) => {
-            // First try to use the provided variable value
             if (variables[variable]) {
                 return variables[variable];
             }
             
-            // If no value provided but we have defaults in the prompt definition, use the first default
             if (promptDefinition?.variables?.[variable]?.[0]) {
                 return promptDefinition.variables[variable][0];
             }
             
-            // If no value found at all, keep the original placeholder
             return match;
         });
     }
