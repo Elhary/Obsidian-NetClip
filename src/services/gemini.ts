@@ -18,13 +18,24 @@ export class GeminiService {
 
     constructor(apiKey: string, settings: NetClipSettings) {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        this.model = this.genAI.getGenerativeModel({ model: settings.geminiModel || "gemini-2.5-pro" });
         this.settings = settings;
     }
 
-    private replaceVariables(prompt: string, variables: Record<string, string>): string {
+    private replaceVariables(prompt: string, variables: Record<string, string>, promptDefinition?: AIPrompt): string {
         return prompt.replace(/\${(\w+)}/g, (match, variable) => {
-            return variables[variable] || match;
+            // First try to use the provided variable value
+            if (variables[variable]) {
+                return variables[variable];
+            }
+            
+            // If no value provided but we have defaults in the prompt definition, use the first default
+            if (promptDefinition?.variables?.[variable]?.[0]) {
+                return promptDefinition.variables[variable][0];
+            }
+            
+            // If no value found at all, keep the original placeholder
+            return match;
         });
     }
 
@@ -128,11 +139,10 @@ export class GeminiService {
             document.dispatchEvent(progressEvent);
             
             const promptVars = Array.isArray(prompts) ? variablesMap[prompt.name] || {} : variablesMap.single;
-            
             const processedPrompt = this.replaceVariables(prompt.prompt, {
                 ...promptVars,
                 article: currentContent
-            });
+            }, prompt);
             
             const singlePrompt = `System Instruction for YAML Properties:
 ${SYSTEM_INSTRUCTION}
