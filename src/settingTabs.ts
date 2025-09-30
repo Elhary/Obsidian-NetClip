@@ -855,6 +855,20 @@ export default class NetClipSettingTab extends PluginSettingTab {
                 })
             );
 
+        new Setting(containerEl)
+            .setName('Gemini Model')
+            .setDesc('Select which Gemini model to use for AI processing')
+            .addDropdown(dropdown => dropdown
+                .addOption('gemini-2.5-pro', 'Gemini 2.5 Pro')
+                .addOption('gemini-flash-latest', 'Gemini Flash Latest')
+                .addOption('gemini-flash-lite-latest', 'Gemini Flash Lite Latest')
+                .addOption('gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite')
+                .setValue(this.plugin.settings.geminiModel)
+                .onChange(async (value: 'gemini-2.5-pro' | 'gemini-flash-latest' | 'gemini-flash-lite-latest' | 'gemini-2.5-flash-lite') => {
+                    this.plugin.settings.geminiModel = value;
+                    await this.plugin.saveSettings();
+                }));
+
         const infoDiv = containerEl.createDiv('netclip-info-box');
         const infoContent = infoDiv.createDiv('netclip-info-content');
         

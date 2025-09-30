@@ -6,6 +6,7 @@ export interface NetClipSettings {
     parentFolderPath: string;
     defaultWebUrl: string;
     searchEngine: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
+    geminiModel: 'gemini-2.5-pro' | 'gemini-flash-latest' | 'gemini-flash-lite-latest' | 'gemini-2.5-flash-lite';
     categories: string[];
     categoryIcons: Record<string, string>;
     enableCorsProxy: boolean;
@@ -54,6 +55,7 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     parentFolderPath: '',
     defaultWebUrl: 'https://google.com',
     searchEngine: 'google',
+    geminiModel: 'gemini-2.5-pro',
     categories: [],
     categoryIcons: {},
     enableCorsProxy: false,
