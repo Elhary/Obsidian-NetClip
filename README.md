@@ -114,12 +114,6 @@ In Webview mode, there are two buttons available:
    `https://github.com/Elhary/Obsidian-NetClip`
 4. After adding the plugin, you will see it in your ribbon or plugin list.
 
-### Support
-
-If you'd like to support the plugin's development, feel free to donate!  Every little bit helps.
-
-  
-- [Ko-fi](https://ko-fi.com/elharis)
-
 ### License
 This plugin is licensed under the [MIT](https://mit-license.org) License.
+
