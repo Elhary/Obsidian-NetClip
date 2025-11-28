@@ -156,6 +156,94 @@ export default class NetClipSettingTab extends PluginSettingTab {
         return true;
     }
 
+    private async openEditCategoryModal(oldCategoryName: string) {
+        const modal = new Modal(this.app);
+        modal.titleEl.setText(`Edit Category: ${oldCategoryName}`);
+        
+        const content = modal.contentEl;
+        let newCategoryName = oldCategoryName;
+        
+        new Setting(content)
+            .setName('New category name')
+            .setDesc('Enter the new name for this category')
+            .addText(text => text
+                .setPlaceholder('Enter new category name')
+                .setValue(oldCategoryName)
+                .onChange(value => {
+                    newCategoryName = value.trim();
+                }));
+        
+        new Setting(content)
+            .addButton(btn => btn
+                .setButtonText('Cancel')
+                .onClick(() => {
+                    modal.close();
+                }))
+            .addButton(btn => btn
+                .setButtonText('Rename')
+                .setCta()
+                .onClick(async () => {
+                    if (!newCategoryName) {
+                        new Notice(t('please_enter_category_name'));
+                        return;
+                    }
+
+                    if (newCategoryName === oldCategoryName) {
+                        modal.close();
+                        return;
+                    }
+
+                    if (this.plugin.settings.categories.includes(newCategoryName)) {
+                        new Notice(`Category "${newCategoryName}" already exists`);
+                        return;
+                    }
+
+                    const baseFolderPath = this.plugin.settings.parentFolderPath 
+                        ? `${this.plugin.settings.parentFolderPath}/${this.plugin.settings.defaultFolderName}`
+                        : this.plugin.settings.defaultFolderName;
+                    
+                    const oldPath = `${baseFolderPath}/${oldCategoryName}`;
+                    const newPath = `${baseFolderPath}/${newCategoryName}`;
+                    
+                    const oldFolder = this.app.vault.getFolderByPath(oldPath);
+                    if (!oldFolder) {
+                        new Notice(`Category folder not found`);
+                        return;
+                    }
+
+                    const newFolder = this.app.vault.getFolderByPath(newPath);
+                    if (newFolder) {
+                        new Notice(`Category "${newCategoryName}" already exists`);
+                        return;
+                    }
+
+                    try {
+                        await this.app.fileManager.renameFile(oldFolder, newPath);
+                        
+                        // Update settings
+                        const categoryIndex = this.plugin.settings.categories.indexOf(oldCategoryName);
+                        if (categoryIndex > -1) {
+                            this.plugin.settings.categories[categoryIndex] = newCategoryName;
+                        }
+
+                        // Update category icons if they exist
+                        if (this.plugin.settings.categoryIcons[oldCategoryName]) {
+                            this.plugin.settings.categoryIcons[newCategoryName] = this.plugin.settings.categoryIcons[oldCategoryName];
+                            delete this.plugin.settings.categoryIcons[oldCategoryName];
+                        }
+
+                        await this.plugin.saveSettings();
+                        new Notice(`Category renamed to "${newCategoryName}"`);
+                        this.display();
+                        modal.close();
+                    } catch (error) {
+                        new Notice(`Failed to rename category: ${error}`);
+                    }
+                }));
+        
+        modal.open();
+    }
+
     private settingTitile(){
         new Setting(this.containerEl).setName('Netclip').setHeading(); 
     }
@@ -665,6 +753,13 @@ export default class NetClipSettingTab extends PluginSettingTab {
             const setting = new Setting(containerEl)
                 .setName(category)
                 .addButton(btn => btn
+                    .setClass('netclip_edit')
+                    .setIcon('pencil')
+                    .setTooltip(t('edit_category') || 'Edit category')
+                    .onClick(async () => {
+                        await this.openEditCategoryModal(category);
+                    }))
+                .addButton(btn => btn
                     .setClass('netclip_trash')
                     .setIcon('trash')
                     .onClick(async () => {
@@ -906,7 +1001,6 @@ export default class NetClipSettingTab extends PluginSettingTab {
                         }).open();
                     }));
 
-            // Add Export/Import buttons
             new Setting(containerEl)
                 .setName(t('export_prompts'))
                 .setDesc(t('export_prompts_desc'))
@@ -1042,18 +1136,5 @@ export default class NetClipSettingTab extends PluginSettingTab {
                 height: '40'
             }
         });
-
-        const kofiContainer = buttonsContainer.createDiv('netclip-support-button');
-        const kofiLink = kofiContainer.createEl('a', {
-            href: 'https://ko-fi.com/elharis'
-        });
-        kofiLink.setAttribute('target', '_blank');
-        kofiLink.createEl('img', {
-            attr: {
-                src: 'https://storage.ko-fi.com/cdn/kofi3.png?v=3',
-                height: '40'
-            }
-        });
-
     }
 }

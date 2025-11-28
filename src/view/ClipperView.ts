@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
+import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian'
 import NetClipPlugin from '../main'
 import { getDomain } from '../utils'
 import { DeleteConfirmationModal } from '../modal/deleteFiles'
@@ -195,7 +195,7 @@ export class ClipperHomeView extends ItemView {
             new ClipModal(this.app, this.plugin).open();
         });
 
-        await this.renderSavedContent(SavedContentBox)
+        await this.renderSavedContent(SavedContentBox);
     }
 
     private async applySort(sortOrder: string) {
@@ -391,6 +391,7 @@ export class ClipperHomeView extends ItemView {
             }
 
             this.createMenuButton(bottomContent, file, urlMatch?.[1]);
+            
             container.appendChild(clippedEl);
         }
     }
