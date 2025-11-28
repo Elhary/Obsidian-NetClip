@@ -17,6 +17,12 @@ export class WebSearch {
 
     private baseSearchUrls: Record<string, string> = baseSearchUrls;
 
+    // Store bound event listeners
+    private handleInput: (event: Event) => void;
+    private handleKeydown: (event: KeyboardEvent) => void;
+    private handleBlur: (event: FocusEvent) => void;
+    private handleWindowClick: (event: MouseEvent) => void;
+
     constructor(
         searchInput: HTMLInputElement,
         suggestionContainer: HTMLElement,
@@ -33,55 +39,21 @@ export class WebSearch {
 
 
         this.suggestionContainer.classList.add('netclip_search_hidden');
+        
+        // Bind event handlers
+        this.handleInput = this.onInput.bind(this);
+        this.handleKeydown = this.onKeydown.bind(this);
+        this.handleBlur = this.onBlur.bind(this);
+        this.handleWindowClick = this.onWindowClick.bind(this);
+        
         this.setupEventListeners();
     }
 
     private setupEventListeners(): void {
-
-        this.searchInput.addEventListener('input', () => {
-            const query = this.searchInput.value.trim();
-            if (query === '') {
-                this.hideSuggestions();
-            } else {
-                this.showSuggestions();
-                fetchSuggestions(
-                    query,
-                    this.suggestionContainer,
-                    this.suggestionsBox,
-                    this.selectSuggestion.bind(this)
-                );
-            }
-        });
-
-
-        this.searchInput.addEventListener("keydown", (event) => {
-            const suggestions = this.suggestionsBox.children;
-            switch (event.key) {
-                case 'ArrowDown':
-                    event.preventDefault();
-                    this.navigateSuggestions('down', suggestions);
-                    break;
-                case 'ArrowUp':
-                    event.preventDefault();
-                    this.navigateSuggestions('up', suggestions);
-                    break;
-                case 'Enter':
-                    event.preventDefault();
-                    this.handleEnterKey(suggestions);
-                    break;
-                case 'Escape':
-                    this.hideSuggestions();
-                    break;
-            }
-        });
-
-        window.addEventListener('click', (event) => {
-            const target = event.target as HTMLElement;
-            if (!this.searchInput.contains(target) &&
-                !this.suggestionContainer.contains(target)) {
-                this.hideSuggestions();
-            }
-        }, true);
+        this.searchInput.addEventListener('input', this.handleInput);
+        this.searchInput.addEventListener('keydown', this.handleKeydown);
+        this.searchInput.addEventListener('blur', this.handleBlur);
+        window.addEventListener('click', this.handleWindowClick, true);
 
         const frameContainer = document.querySelector('.netClip_frame-container');
         if (frameContainer) {
@@ -89,14 +61,58 @@ export class WebSearch {
                 this.hideSuggestions();
             }, true);
         }
+    }
 
-        this.searchInput.addEventListener('blur', (event) => {
-            setTimeout(() => {
-                if (!this.suggestionContainer.contains(document.activeElement)) {
-                    this.hideSuggestions();
-                }
-            }, 200);
-        });
+    private onInput(): void {
+        const query = this.searchInput.value.trim();
+        if (query === '') {
+            this.hideSuggestions();
+        } else {
+            this.showSuggestions();
+            fetchSuggestions(
+                query,
+                this.suggestionContainer,
+                this.suggestionsBox,
+                this.selectSuggestion.bind(this)
+            );
+        }
+    }
+
+    private onKeydown(event: KeyboardEvent): void {
+        const suggestions = this.suggestionsBox.children;
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                this.navigateSuggestions('down', suggestions);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                this.navigateSuggestions('up', suggestions);
+                break;
+            case 'Enter':
+                event.preventDefault();
+                this.handleEnterKey(suggestions);
+                break;
+            case 'Escape':
+                this.hideSuggestions();
+                break;
+        }
+    }
+
+    private onBlur(event: FocusEvent): void {
+        setTimeout(() => {
+            if (!this.suggestionContainer.contains(document.activeElement)) {
+                this.hideSuggestions();
+            }
+        }, 200);
+    }
+
+    private onWindowClick(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        if (!this.searchInput.contains(target) &&
+            !this.suggestionContainer.contains(target)) {
+            this.hideSuggestions();
+        }
     }
 
     private isValidUrl(str: string): boolean {
@@ -186,5 +202,23 @@ export class WebSearch {
             this.suggestionsBox.removeChild(this.suggestionsBox.firstChild);
         }
         this.currentSuggestionIndex = -1;
+    }
+
+    public unload(): void {
+       
+        this.searchInput.removeEventListener('input', this.handleInput);
+        this.searchInput.removeEventListener('keydown', this.handleKeydown);
+        this.searchInput.removeEventListener('blur', this.handleBlur);
+        window.removeEventListener('click', this.handleWindowClick);
+
+        this.hideSuggestions();
+        
+      
+        if (this.suggestionContainer.parentNode) {
+            this.suggestionContainer.remove();
+        }
+        if (this.suggestionsBox.parentNode) {
+            this.suggestionsBox.remove();
+        }
     }
 }

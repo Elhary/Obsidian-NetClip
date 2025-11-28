@@ -1,10 +1,14 @@
 import { App, Modal, Setting, TFolder, setIcon } from 'obsidian';
 import NetClipPlugin from '../main';
+import { t } from '../translations';
 
 export class FolderSelectionModal extends Modal {
     private plugin: NetClipPlugin;
     private folderCallback: (folderPath: string) => void;
     private selectedFolderPath: string = '';
+    private searchInput: HTMLInputElement;
+    private folderList: HTMLElement;
+    private allFolders: TFolder[] = [];
 
     constructor(app: App, plugin: NetClipPlugin) {
         super(app);
@@ -21,8 +25,20 @@ export class FolderSelectionModal extends Modal {
         contentEl.empty();
         contentEl.addClass('netclip-folder-selection-modal');
 
-        contentEl.createEl('h2', { text: 'Select Parent Folder' });
-        contentEl.createEl('p', { text: 'Choose a parent folder for NetClip content. Leave empty to use vault root.' });
+        contentEl.createEl('h2', { text: t('select_parent_folder') });
+        contentEl.createEl('p', { text: t('select_parent_folder_desc') });
+
+    
+        const searchContainer = contentEl.createDiv('netclip-folder-search');
+        this.searchInput = searchContainer.createEl('input', {
+            type: 'text',
+            placeholder: 'Search folders...',
+            cls: 'netclip-folder-search-input'
+        });
+
+        this.searchInput.addEventListener('input', () => {
+            this.filterFolders(this.searchInput.value);
+        });
 
         const rootSetting = new Setting(contentEl);
         
@@ -33,56 +49,31 @@ export class FolderSelectionModal extends Modal {
         setIcon(rootIconContainer, 'vault');
         rootNameContainer.appendChild(rootIconContainer);
         const rootTextSpan = document.createElement('span');
-        rootTextSpan.textContent = 'Vault Root';
+        rootTextSpan.textContent = t('vault_root');
         rootNameContainer.appendChild(rootTextSpan);
         
         rootSetting.nameEl.empty();
         rootSetting.nameEl.appendChild(rootNameContainer);
-        rootSetting.setDesc('Store NetClip content directly in the vault root');
+        rootSetting.setDesc(t('store_in_root_desc'));
         
         rootSetting.addButton(button => button
-            .setButtonText('Select')
+            .setButtonText(t('select'))
             .onClick(() => {
                 this.selectedFolderPath = '';
                 this.close();
                 this.folderCallback('');
             }));
 
-        const folders = this.getAllFolders();
+        this.allFolders = this.getAllFolders();
         
-        contentEl.createEl('h3', { text: 'Available Folders' });
-        const folderList = contentEl.createEl('div', { cls: 'netclip-folder-list' });
-
-        folders.forEach(folder => {
-            const folderPath = folder.path;
-            const folderSetting = new Setting(folderList);
-            
-            const nameContainer = document.createElement('span');
-            nameContainer.className = 'netclip-folder-name-container';
-            const iconContainer = document.createElement('span');
-            iconContainer.className = 'netclip-folder-icon';
-            setIcon(iconContainer, 'folder');
-            
-            nameContainer.appendChild(iconContainer);
-            const textSpan = document.createElement('span');
-            textSpan.textContent = folderPath;
-            nameContainer.appendChild(textSpan);
-            
-            folderSetting.nameEl.empty();
-            folderSetting.nameEl.appendChild(nameContainer);
-            
-            folderSetting.addButton(button => button
-                .setButtonText('Select')
-                .onClick(() => {
-                    this.selectedFolderPath = folderPath;
-                    this.close();
-                    this.folderCallback(folderPath);
-                }));
-        });
+        contentEl.createEl('h3', { text: t('available_folders') });
+        this.folderList = contentEl.createEl('div', { cls: 'netclip-folder-list' });
+        
+        this.displayFolders(this.allFolders);
 
         new Setting(contentEl)
             .addButton(button => button
-                .setButtonText('Cancel')
+                .setButtonText(t('cancel'))
                 .onClick(() => {
                     this.close();
                 }));
@@ -114,4 +105,43 @@ export class FolderSelectionModal extends Modal {
         
         return folders.sort((a, b) => a.path.localeCompare(b.path));
     }
-} 
+
+    private displayFolders(folders: TFolder[]) {
+        this.folderList.empty();
+        
+        folders.forEach(folder => {
+            const folderPath = folder.path;
+            const folderSetting = new Setting(this.folderList);
+            
+            const nameContainer = document.createElement('span');
+            nameContainer.className = 'netclip-folder-name-container';
+            const iconContainer = document.createElement('span');
+            iconContainer.className = 'netclip-folder-icon';
+            setIcon(iconContainer, 'folder');
+            
+            nameContainer.appendChild(iconContainer);
+            const textSpan = document.createElement('span');
+            textSpan.textContent = folderPath;
+            nameContainer.appendChild(textSpan);
+            
+            folderSetting.nameEl.empty();
+            folderSetting.nameEl.appendChild(nameContainer);
+            
+            folderSetting.addButton(button => button
+                .setButtonText(t('select'))
+                .onClick(() => {
+                    this.selectedFolderPath = folderPath;
+                    this.close();
+                    this.folderCallback(folderPath);
+                }));
+        });
+    }
+
+    private filterFolders(searchTerm: string) {
+        const normalizedSearch = searchTerm.toLowerCase();
+        const filteredFolders = this.allFolders.filter(folder => 
+            folder.path.toLowerCase().includes(normalizedSearch)
+        );
+        this.displayFolders(filteredFolders);
+    }
+}

@@ -1,3 +1,18 @@
+:root {
+  --netclip-primary:#ffffff;
+  --netclip-secondry:#f6f6f6;
+  
+  /* RGB values for glass effect */
+  --background-secondary-rgb: 238, 238, 238;
+  --background-modifier-border-rgb: 200, 200, 200;
+}
+
+/* Dark theme RGB values */
+.theme-dark {
+  --background-secondary-rgb: 41, 41, 41;
+  --background-modifier-border-rgb: 64, 64, 64;
+}
+
 .net_clipper_container {
   display: flex;
   flex-direction: column;
@@ -50,11 +65,7 @@ button.net-clip-button{
 }
 
 
-.netclip-category-content{
-  display: flex;
-  gap: 9px;
-  align-items: center;
-}
+
 
 .netclip_category_tabs{
   display: flex;
@@ -100,6 +111,10 @@ button.netclip_sort_button{
   padding: 20px 12px;
 }
 
+.netclip_sort_button svg{
+  color: #9a9a9a;
+}
+
 /* SEARCH BAR STYLING */
 
 .netclip_search_box{
@@ -125,63 +140,91 @@ button.netclip_sort_button{
 }
 
 .netClip_card {
-  position: relative;
+  background-color: var(--background-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 200px;
   display: flex;
-  max-width: 270px;
   flex-direction: column;
-  height: 100%;
-  min-height: 260px;
-  padding: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .netClip_card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .netClip_card img {
   width: 100%;
-  aspect-ratio: 13/9;
+  height: 140px;
   object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+}
+
+.netclip_card_content {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .netClip_card h6 {
-  font-size: 0.9em;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
   line-height: 1.4;
-  margin: 0 0 0.5rem;
-  flex-grow: 1;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   color: var(--text-normal);
   cursor: pointer;
 }
 
+.netClip_card h6:hover {
+  color: var(--text-accent);
+}
+
+.netclip_card_description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.netclip_card_meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.netclip_card_author {
+  color: var(--text-accent);
+}
+
+.netclip_card_date {
+  color: var(--text-muted);
+}
+
 .netclip_card_bottom {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
   margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: 0.9rem;
-  color: var(--text-accent);
+  border-top: 1px solid var(--background-modifier-border);
 }
 
-.domain {
+.netclip_card_bottom .domain {
+  font-size: 0.75rem;
+  color: var(--text-muted);
   text-decoration: none;
-  color: var(--text-accent);
-  font-weight: normal;
 }
 
-.domain:hover {
+.netclip_card_bottom .domain:hover {
+  color: var(--text-accent);
   text-decoration: underline;
 }
 
@@ -354,12 +397,6 @@ button.netclip_warning{
   stroke: var(--text-muted);
 
 }
-
-.clickable-icon {
-
-}
-
-
 
 .netClip_web_controls .netClip_nav_left {
   display: flex;
@@ -634,7 +671,86 @@ button.netclip_warning{
   }
 }
 
+/* --- WebView Mobile Fixes --- */
+@media (max-width: 750px) {
+  .netClip_webview_container,
+  .netClip_frame-container,
+  .webview {
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--background-secondary, #fff);
+    z-index: 1000;
+  }
+  .netClip_webview_error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    color: var(--text-error);
+    font-size: 1.2em;
+    font-weight: 500;
+    text-align: center;
+    z-index: 1001;
+    position: fixed;
+    top: 0; left: 0;
+    padding: 0 24px;
+    gap: 18px;
+    border-radius: 0;
+    box-shadow: 0 2px 24px 0 rgba(0,0,0,0.08);
+    letter-spacing: 0.01em;
+  }
+  .netClip_webview_error > div:first-child {
+    font-size: 2.5em;
+    margin-bottom: 0.2em;
+    line-height: 1;
+    animation: error-bounce 1.2s infinite alternate;
+  }
+  @keyframes error-bounce {
+    0% { transform: scale(1) translateY(0); }
+    100% { transform: scale(1.15) translateY(-8px); }
+  }
+  .netClip_webview_error > div:last-child {
+    font-size: 1em;
+    color: var(--text-error);
+    background: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-top: 0.2em;
+  }
+}
+
 /* Folder selection modal styles */
+
+.netclip-folder-search {
+  margin: 8px 0;
+  padding: 0 12px;
+}
+
+.netclip-folder-search-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.netclip-folder-search-input:focus {
+  box-shadow: 0 0 0 2px var(--background-modifier-border);
+  outline: none;
+}
+
 .netclip-folder-selection-modal .netclip-folder-name-container {
   display: flex;
   align-items: center;
@@ -669,3 +785,1258 @@ button.netclip_warning{
   margin-left: 8px;
 }
 
+
+.netclip-support-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+.netclip-support-button {
+  display: inline-flex;
+  align-items: center;
+}
+.netclip-support-button img {
+  border-radius: 5px;
+  transition: transform 0.2s ease;
+  height: 40px;
+  object-fit: contain;
+}
+.netclip-support-button img:hover {
+  transform: scale(1.05);
+}
+.netclip-support-buttons {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* AI Processing Animation Styles */
+.netclip_ai_processing_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  gap: 20px;
+}
+
+.netclip_ai_animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.netclip_ai_status {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-normal);
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.netclip_ai_status.error {
+  color: var(--text-error);
+}
+
+/* Typing animation */
+.netclip_typing_animation {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+}
+
+.netclip_typing_dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--text-accent);
+  animation: typing-animation 1.5s infinite ease-in-out;
+}
+
+.netclip_typing_dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.netclip_typing_dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.netclip_typing_dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-animation {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* AI Steps */
+.netclip_ai_steps {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.netclip_ai_step {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.netclip_ai_step::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: var(--background-modifier-border);
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.netclip_ai_step.active {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  opacity: 1;
+  font-weight: 500;
+}
+
+.netclip_ai_step.active::before {
+  background-color: var(--text-accent);
+  box-shadow: 0 0 8px var(--text-accent-hover);
+  animation: pulse 1.5s infinite;
+}
+
+.netclip_ai_step.completed {
+  background-color: var(--background-primary-alt);
+  color: var(--text-normal);
+  opacity: 0.8;
+}
+
+.netclip_ai_step.completed::before {
+  background-color: var(--interactive-success);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--text-accent-rgb), 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(var(--text-accent-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--text-accent-rgb), 0);
+  }
+}
+
+.netclip_error_close {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.netclip_error_close:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+/* AI Processing Modal Styles */
+.netclip_ai_processing_modal {
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 8px;
+}
+
+.netclip_ai_processing_content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.netclip_ai_processing_content h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--text-normal);
+}
+
+/* Prompt Progress Styles */
+.netclip_prompt_progress {
+  width: 100%;
+  margin-top: 15px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 15px;
+}
+
+.netclip_prompt_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  transition: all 0.3s ease;
+}
+
+.netclip_prompt_name {
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.netclip_prompt_status {
+  font-size: 0.85em;
+  padding: 3px 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.netclip_prompt_status.processing {
+  background-color: var(--text-accent);
+  color: var(--text-on-accent);
+  animation: pulse 1.5s infinite;
+}
+
+.netclip_prompt_status.completed {
+  background-color: var(--interactive-success);
+  color: var(--text-on-accent);
+}
+
+/* Info Message Styles */
+.netclip_info_message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background-color: var(--background-modifier-form-field);
+  border-left: 4px solid var(--text-accent);
+  width: 100%;
+  max-width: 450px;
+}
+
+.netclip_info_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+.netclip_info_icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.netclip_info_text {
+  font-size: 0.9em;
+  color: var(--text-normal);
+  line-height: 1.4;
+}
+
+/* NetClip Settings Tab Styling */
+.netclip-setting-header {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 0.5rem;
+  background-color: var(--background-secondary);
+  padding: 12px;
+  border-radius: 15px;
+  max-width: 700px;
+  border: none;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.netclip-setting-tab-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.netclip-navigation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  text-wrap: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.netclip-navigation-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.netclip-navigation-item-selected {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.netclip-navigation-item-selected:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.netclip-setting-content {
+  padding: 0.5rem;
+}
+
+/* Category settings styling */
+.netclip-category-setting {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--background-secondary);
+}
+
+.netclip-category-setting .setting-item {
+  border-top: none;
+  padding-top: 0.5rem;
+}
+
+.netclip-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.netclip-category-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.netclip-category-content{
+  display: flex;
+  gap: 14px;
+  align-items: end;
+}
+
+
+.netclip-category-content .category-icon{
+  height: 18px;
+  width: 17px;
+}
+.netclip-category-content .category-icon svg{
+  height: 100%;
+  width: 100%;
+}
+
+.netclip_prompt_modal{
+  max-width: 800px;
+  width: 100%;
+}
+
+.netclip_prompt_modal textarea{
+  width: 100%;
+}
+
+.prompt-section{
+  max-width: 274px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  margin-bottom: 1em;
+  border-radius: 10px;
+}
+
+.netclip_clip_modal{
+  max-width: 900px;
+  max-height: 700px;
+  width: 100%;
+  height: auto;
+}
+
+.netclip_prompt_container{
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  flex-wrap: wrap;
+  max-height: 300px;
+  overflow: hidden;
+  overflow-y: scroll;
+  
+}
+
+.netclip_clip_modal .netclip_clip_modal_content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4em;
+  width: 100%;
+}
+
+
+.netclip-info-box {
+  background-color: var(--background-primary);
+  border-radius: 4px;
+  padding: 16px;
+  margin: 10px 0;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.netclip-info-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-normal);
+}
+
+.netclip-info-icon {
+  color: var(--interactive-accent);
+  display: flex;
+  align-items: center;
+}
+
+.netclip-details-link {
+  margin-left: auto;
+  color: var(--interactive-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.netclip-details-link:hover {
+  text-decoration: underline;
+}
+
+
+/* Home Tab Styles */
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"] {
+  position: relative;
+  overflow: hidden; /* Prevent blur edges from showing */
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--background-blur, 0));
+  transform: scale(1.1); /* Prevent blur edges from showing */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"] .view-header {
+  z-index: 2;
+  position: relative;
+}
+
+.netclip-home-tab-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+}
+.workspace-leaf-content[data-type="netclip-home-tab-view"] .view-content{
+  z-index: 10;
+  background-color: transparent;
+}
+
+.netclip-home-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.netclip-home-tab-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.netclip-home-tab-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.netclip-home-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--interactive-accent) ;
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.netclip-home-tab-button:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-home-tab-search {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+.netclip-search-icon {
+  position: absolute;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.netclip-home-tab-search input{
+  padding: 12px;
+  height: 50px;
+
+}
+
+.netclip-search-input {
+  flex: 1;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: 4px;
+}
+
+
+
+.netclip-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.netclip-search-button:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.netclip-home-tab-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow-y: auto;
+  
+  flex: 1;
+}
+
+.netclip-home-tab-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.netclip-home-tab-section h3 {
+  font-size: 18px;
+  padding-bottom: 2px;
+}
+
+.netclip-section-title{
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 12px;
+}
+
+.netclip-section-icon svg{
+  height: 22px;
+  width: 22px;
+  stroke-width: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.netclip-recent-files,
+.netclip-saved-articles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.netclip-recent-files{
+  overflow: hidden;
+  overflow-y: auto;
+  height: 188px;
+}
+
+.netclip-file-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-secondary);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.netclip-file-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.netclip-file-icon {
+  color: var(--text-muted);
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.netclip-file-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.netclip-file-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 10px;
+}
+
+.netclip-view-all-btn {
+  margin: 20px auto 10px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: block;
+}
+
+.netclip-view-all-btn:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+@media (max-width: 768px) {
+  .netclip-home-tab-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+  }
+  
+  .netclip-home-tab-buttons {
+      width: 100%;
+  }
+  
+  .netclip-home-tab-button {
+      flex: 1;
+      justify-content: center;
+  }
+}
+
+
+.netclip-home-tab-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.netclip-home-tab-section {
+  margin-bottom: 40px;
+}
+
+.netclip-home-tab-section h3 {
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+
+.netclip-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(210px, auto); 
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.netclip-article-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+}
+
+.netClip_card{
+  border: 1px solid var(--background-modifier-border);
+}
+.netclip_card_top{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.netclip_card_top .netclip_card_meta{
+  display: flex;
+  margin-top: 1em;
+  width: 100%;
+  justify-content: space-between;
+  bottom: 0;
+}
+.netclip_card_date{
+  color: var(--text-faint);
+}
+
+.netclip-article-card:nth-child(1),
+.netclip-article-card:nth-child(6),
+.netclip-article-card:nth-child(7) {
+  grid-column: span 2;
+}
+
+
+
+.netclip-article-card:hover {
+  transform: translateY(-2px);
+}
+
+.netclip-article-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; 
+  overflow: hidden;
+}
+
+.netclip-article-card:nth-child(6) .netclip-article-image-container {
+  padding-top: 35%; 
+}
+
+.netclip-article-card:nth-child(1) .netclip-article-image-container {
+  padding-top: 35%; 
+}
+
+.netclip-article-card:nth-child(7) .netclip-article-image-container {
+  padding-top: 35%;
+}
+
+.netclip-article-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.netclip-article-content {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  flex-grow: 1;
+  background-color: #fff;
+}
+
+.theme-dark .netclip-article-content {
+  background-color: var(--background-secondary);
+}
+
+.netclip-article-title {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  color: var(--text-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.netclip-article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.netclip-article-source {
+  display: flex;
+  align-items: center;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.8;
+}
+
+.netclip-article-date {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.netclip-article-hide {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.netclip-article-hide:hover {
+  opacity: 1;
+}
+
+.netclip-hide-icon {
+  color: var(--text-muted);
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .netclip-articles-grid {
+      grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .netclip-article-card:nth-child(4) {
+      grid-column: 1 / span 2;
+      grid-row: auto;
+  }
+  
+  .netclip-article-card:nth-child(5) {
+      grid-column: auto;
+      grid-row: auto;
+  }
+  
+  .netclip-article-title {
+      font-size: 0.85rem;
+  }
+  
+  .netclip-article-meta {
+      font-size: 0.75rem;
+  }
+}
+
+/* Shortcuts styling */
+.netclip-shortcuts-section {
+  margin-bottom: 25px;
+}
+
+.netclip-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 25px;
+  margin-top: 15px;
+}
+
+.netclip-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+
+.netclip-shortcut-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background-color:var(--background-secondary);
+  padding: 12px;
+  display: flex;
+  border: 1px solid var(--background-modifier-border);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.netclip-shortcut-icon img{
+  border-radius: 5px;
+}
+
+.netclip-shortcut-favicon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.netclip-shortcut-name {
+  font-size: 12px;
+  color: var(--text-normal);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.netclip-shortcut-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.netclip-shortcut-add:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.netclip-shortcut-add-icon {
+  width: 41px;
+  height: 41px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.netclip-shortcut-add-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.netclip-shortcut-add-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Modal styling */
+.netclip-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.netclip-modal-button-cancel {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.netclip-modal-button-submit {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.netclip-favicon-preview-container {
+  display: flex;
+  align-items: center;
+}
+
+.netclip-favicon-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+  background-color: var(--background-secondary);
+  padding: 4px;
+}
+
+input.is-invalid {
+  border-color: var(--background-modifier-error) !important;
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+@keyframes shake {
+  0% { margin-left: 0; }
+  25% { margin-left: 5px; }
+  75% { margin-left: -5px; }
+  100% { margin-left: 0; }
+}
+/* Clock Styling */
+.netclip-clock-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+}
+
+.netclip-time {
+  font-size: 5rem; 
+  font-weight: 500; 
+  letter-spacing: 0.05em; 
+}
+
+.theme-light .netclip-time {
+  color: var(--text-muted);
+}
+.theme-dark .netclip-time {
+  color: #fff;
+}
+
+.netclip-date {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Wallpaper Styling */
+.netclip-home-tab-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.netclip-wallpaper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.netclip-wallpaper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+/* Blur effect - applied via inline style with blur amount from settings */
+
+/* Ensure text is readable on wallpaper */
+.netclip-home-tab-container .netclip-clock-section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass morphism styles when background is present */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-card,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-icon,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-home-tab-button {
+    background-color: rgba(var(--background-secondary-rgb), 0.3) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(var(--background-modifier-border-rgb), 0.2) !important;
+}
+
+/* Add hover effects for glass items */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-card:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-icon:hover,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-home-tab-button:hover {
+    background-color: rgba(var(--background-secondary-rgb), 0.4) !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+
+/* Adjust text colors for better visibility */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-title,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-name {
+    color: var(--text-normal);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust section titles */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-title {
+    border-bottom-color: rgba(var(--background-modifier-border-rgb), 0.3);
+}
+
+
+
+/* Clock styling with background */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-clock-section {    -webkit-backdrop-filter: blur(8px);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-time {
+    color: var(--text-normal);
+    text-shadow: 0 2px 4px rgba(52, 10, 10, 0.2);
+}
+
+/* Search input styling */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input {
+    background-color: rgba(var(--background-secondary-rgb), 0.3);
+    border: 1px solid rgba(var(--background-modifier-border-rgb), 0.2);
+    color: var(--text-normal);
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Article card content area */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-content {
+    background-color: transparent !important;
+}
+
+/* Ensure all icons are visible */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-icon svg {
+    color: var(--text-normal);
+    opacity: 0.8;
+}
+
+/* Text color styles when background is present */
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] {
+    --text-color-with-brightness: color-mix(in srgb, var(--custom-text-color), transparent calc(100% - var(--text-brightness)));
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-item,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-title,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-shortcut-name,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-time,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-date,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-title h3,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input {
+    color: var(--text-color-with-brightness) !important;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .view-content svg{
+  color: var(--text-color-with-brightness) !important;
+}
+
+
+/* .workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-section-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-icon svg,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-icon {
+    color: var(--text-color-with-brightness) !important;
+    opacity: calc(var(--text-brightness) / 100);
+} */
+
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-search-input::placeholder {
+    color: var(--text-color-with-brightness);
+    opacity: 0.7;
+}
+
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-article-meta,
+.workspace-leaf-content[data-type="netclip-home-tab-view"][style*="--background-image"] .netclip-file-date {
+    color: var(--text-color-with-brightness);
+    opacity: 0.8;
+}
+
+
+.netClip_webview_container{
+  align-items: center;
+  justify-content: center;
+}
+
+/* NetClip Mobile WebView Message Styling */
+.netclip_mobile_message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  color:var(--text-faint);
+  font-size: 1.2em;
+  font-weight: 500;
+  text-align: center;
+  z-index: 1001;
+  position: fixed;
+  top: 0; left: 0;
+  padding: 0 24px;
+  gap: 18px;
+  border-radius: 0;
+  letter-spacing: 0.01em;
+}
+.netclip_mobile_message .netclip_mobile_icon {
+  font-size: 2.5em;
+  margin-bottom: 0.2em;
+  line-height: 1;
+  animation: error-bounce 1.2s infinite alternate;
+}
+@keyframes error-bounce {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.15) translateY(-8px); }
+}

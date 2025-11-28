@@ -1,18 +1,22 @@
-import { Notice, Plugin, requestUrl, WorkspaceLeaf } from 'obsidian';
-import { CLIPPER_VIEW, clipperHomeView } from './view/ClipperView';
+import { Notice, Plugin, requestUrl, WorkspaceLeaf, TFile, TAbstractFile } from 'obsidian';
+import { CLIPPER_VIEW, ClipperHomeView } from './view/ClipperView';
 import { sanitizePath, getDomain, normalizeUrl } from './utils';
 import { ContentExtractors } from './Extractors/extractor';
 import { VIEW_TYPE_WORKSPACE_WEBVIEW, WorkspaceLeafWebView } from './view/EditorWebView';
 import { WebViewModal } from './view/ModalWebView';
 import { ClipModal } from './modal/clipModal';
+import { DEFAULT_SETTINGS, NetClipSettings, AIPrompt } from './settings';
+import { GeminiService } from './services/gemini';
 import NetClipSettingTab from './settingTabs';
-import { DEFAULT_SETTINGS, NetClipSettings } from './settings';
+import { Menu, Editor, MarkdownView } from 'obsidian';
+import { HOME_TAB_VIEW, HomeTabView } from './view/HomeTab';
 
 export default class NetClipPlugin extends Plugin {
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
   contentExtractors: ContentExtractors;
   seenItems: Set<string> = new Set();
   settings: NetClipSettings;
+  public geminiService: GeminiService | null = null;
 
   isNewContent(content: string): boolean {
     if (this.seenItems.has(content)) {
@@ -38,52 +42,144 @@ export default class NetClipPlugin extends Plugin {
     }
   }
 
-  private async FoldersExist() {
-    // Construct the full path to the main folder
+  public async FoldersExist() {
     const mainFolderPath = this.settings.parentFolderPath 
       ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
       : this.settings.defaultFolderName;
     
-    const mainFolder = this.app.vault.getFolderByPath(mainFolderPath);
-    if (!mainFolder) {
-      // Create parent folder if it doesn't exist and is specified
+    try {
       if (this.settings.parentFolderPath && !this.app.vault.getFolderByPath(this.settings.parentFolderPath)) {
-        await this.app.vault.createFolder(this.settings.parentFolderPath);
-      }
-      
-      // Create main folder
-      await this.app.vault.createFolder(mainFolderPath);
-      
-      // Create category folders
-      for (const category of this.DEMO_CATEGORIES) {
-        const categoryPath = `${mainFolderPath}/${category}`;
-        await this.app.vault.createFolder(categoryPath);
-        if (!this.settings.categories.includes(category)) {
-          this.settings.categories.push(category);
+        try {
+          await this.app.vault.createFolder(this.settings.parentFolderPath);
+        } catch (error) {
+          if (!error.message.includes('already exists')) {
+            throw error;
+          }
         }
       }
-      await this.saveSettings();
-      new Notice(`Created folders in ${mainFolderPath}`);
-    }
-
-    // Create any missing category folders
-    for (const category of this.settings.categories) {
-      const categoryPath = `${mainFolderPath}/${category}`;
-      const categoryFolder = this.app.vault.getFolderByPath(categoryPath);
-      if (!categoryFolder) {
-        await this.app.vault.createFolder(categoryPath);
+      
+      if (!this.app.vault.getFolderByPath(mainFolderPath)) {
+        try {
+          await this.app.vault.createFolder(mainFolderPath);
+          
+          for (const category of this.DEMO_CATEGORIES) {
+            const categoryPath = `${mainFolderPath}/${category}`;
+            if (!this.app.vault.getFolderByPath(categoryPath)) {
+              try {
+                await this.app.vault.createFolder(categoryPath);
+                if (!this.settings.categories.includes(category)) {
+                  this.settings.categories.push(category);
+                }
+              } catch (error) {
+                if (!error.message.includes('already exists')) {
+                  throw error;
+                }
+              }
+            }
+          }
+          await this.saveSettings();
+          new Notice(`Created folders in ${mainFolderPath}`);
+        } catch (error) {
+          if (!error.message.includes('already exists')) {
+            throw error;
+          }
+        }
       }
+
+      for (const category of this.settings.categories) {
+        const categoryPath = `${mainFolderPath}/${category}`;
+        if (!this.app.vault.getFolderByPath(categoryPath)) {
+          try {
+            await this.app.vault.createFolder(categoryPath);
+          } catch (error) {
+            if (!error.message.includes('already exists')) {
+              throw error;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error creating folders:', error);
+      throw error;
     }
   }
 
   async onload() {
     await this.loadSettings();
+    await this.FoldersExist();
+
+    if (this.settings.geminiApiKey) {
+      this.geminiService = new GeminiService(this.settings.geminiApiKey, this.settings);
+    }
+
+    this.registerEvent(
+      this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        
+      
+        const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+        
+        let match;
+        let url: string | null = null;
+        
+
+        while ((match = mdLinkRegex.exec(line)) !== null) {
+          const linkStart = match.index;
+          const linkEnd = linkStart + match[0].length;
+          if (cursor.ch >= linkStart && cursor.ch <= linkEnd) {
+            url = match[2];
+            break;
+          }
+        }
+        
+        if (!url) {
+          while ((match = urlRegex.exec(line)) !== null) {
+            const linkStart = match.index;
+            const linkEnd = linkStart + match[0].length;
+            if (cursor.ch >= linkStart && cursor.ch <= linkEnd) {
+              url = match[0];
+              break;
+            }
+          }
+        }
+
+        if (url) {
+          menu.addItem((item) => {
+            item
+              .setTitle("Open in WebView")
+              .setIcon("globe")
+              .onClick(async () => {
+                const leaf = this.app.workspace.getLeaf(true);
+                await leaf.setViewState({
+                  type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                  state: { url: url }
+                });
+                this.app.workspace.revealLeaf(leaf);
+              });
+          });
+
+          menu.addItem((item) => {
+            item
+              .setTitle("Open in Modal WebView")
+              .setIcon("picture-in-picture-2")
+              .onClick(() => {
+                if (url) {
+                  new WebViewModal(this.app, url, this).open();
+                } else {
+                  new Notice('No valid URL found to open in WebView.');
+                }
+              });
+          });
+        }
+      })
+    );
+
     this.app.workspace.onLayoutReady(() => this.initWebViewLeaf());
     this.contentExtractors = new ContentExtractors(this);
 
-
     this.addRibbonIcon('newspaper', 'NetClip', async () => this.activateView());
-
 
     this.addCommand({
       id: 'open-clipper',
@@ -116,9 +212,47 @@ export default class NetClipPlugin extends Plugin {
       }
     });
 
+    this.addCommand({
+      id: 'open-link-in-webview',
+      name: 'Open link under cursor in WebView',
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        const url = this.getLinkUnderCursor(line, cursor.ch);
+        
+        if (url) {
+          const leaf = this.app.workspace.getLeaf(true);
+          leaf.setViewState({
+            type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+            state: { url: url }
+          });
+          this.app.workspace.revealLeaf(leaf);
+        } else {
+          new Notice('No link found under cursor');
+        }
+      },
+      hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'z' }]
+    });
+
+    this.addCommand({
+      id: 'open-link-in-modal-webview',
+      name: 'Open link under cursor in Modal WebView',
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        const url = this.getLinkUnderCursor(line, cursor.ch);
+        
+        if (url) {
+          new WebViewModal(this.app, url, this).open();
+        } else {
+          new Notice('No link found under cursor');
+        }
+      },
+      hotkeys: [{ modifiers: ['Ctrl', 'Alt'], key: 'z' }]
+    });
 
     this.registerView(CLIPPER_VIEW, (leaf) => 
-      new clipperHomeView(leaf, this)
+      new ClipperHomeView(leaf, this)
     );
 
     this.registerView(VIEW_TYPE_WORKSPACE_WEBVIEW, (leaf) => 
@@ -126,10 +260,55 @@ export default class NetClipPlugin extends Plugin {
     );
 
     this.addSettingTab(new NetClipSettingTab(this.app, this));
+
+    this.registerView(HOME_TAB_VIEW, (leaf) => new HomeTabView(leaf, this))
+
+    this.registerEvent(this.app.workspace.on('layout-change', () => {
+      if (this.settings.replaceTabHome) {
+        this.replaceTabHome();
+      }
+    }));
+
+    this.addCommand({
+      id: 'open-home-tab',
+      name: 'Open Home Tab',
+      callback: () => this.activateHomeTab()
+    });
   }
+
+
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    
+    if (this.settings.shortcuts && this.settings.shortcuts.length === 0) {
+      const githubShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://github.com/Elhary/Obsidian-NetClip',
+        favicon: `https://www.google.com/s2/favicons?domain=github.com&sz=128`
+      };
+      const youtubeShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://youtube.com',
+        favicon: `https://www.google.com/s2/favicons?domain=youtube.com&sz=128`
+      };
+      const redditShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://www.reddit.com/r/ObsidianMD/',
+        favicon: `https://www.google.com/s2/favicons?domain=reddit.com&sz=128`
+      };
+      const obsidianShortcut = {
+        id: Date.now().toString(),
+        name: '',
+        url: 'https://forum.obsidian.md/',
+        favicon: `https://www.google.com/s2/favicons?domain=obsidian.md&sz=128`
+      };
+      this.settings.shortcuts.push(githubShortcut, youtubeShortcut, redditShortcut, obsidianShortcut );
+      this.saveSettings();
+    }
   }
 
   async saveSettings() {
@@ -155,81 +334,116 @@ export default class NetClipPlugin extends Plugin {
     }
   }
 
-  async clipWebpage(url: string, category: string = '') {
-    if (!this.contentExtractors) return;
+  async clipWebpage(
+    url: string, 
+    category: string = '', 
+    selectedPrompt: AIPrompt | AIPrompt[] | null = null, 
+    selectedVariables: Record<string, Record<string, string>> | Record<string, string> = {},
+    keepOriginalContent: boolean = true
+  ): Promise<string> {
+    if (!this.contentExtractors) {
+      throw new Error("Content extractors not initialized");
+    }
 
-    try {
-      await this.FoldersExist();
-      new Notice("Clipping...");
+    await this.FoldersExist();
+    new Notice("Clipping...");
 
-      const normalizedUrl = normalizeUrl(url);
-      if (!normalizedUrl || !normalizedUrl.startsWith('http')) {
-        throw new Error("Invalid URL provided");
+    const normalizedUrl = normalizeUrl(url);
+    if (!normalizedUrl || !normalizedUrl.startsWith('http')) {
+      throw new Error("Invalid URL provided");
+    }
+
+    const urlDomain = getDomain(normalizedUrl).toLowerCase();
+    let effectiveCategory = category;
+    let customSaveLocation = '';
+
+    if (!category) {
+      const domainMapping = this.settings.defaultSaveLocations.domainMappings[urlDomain];
+      if (domainMapping) {
+        customSaveLocation = domainMapping;
+      } else if (this.settings.defaultSaveLocations.defaultLocation) {
+        customSaveLocation = this.settings.defaultSaveLocations.defaultLocation;
       }
+    }
 
+    const response = await requestUrl({
+      url: normalizedUrl
+    });
 
-      const useProxy = this.settings.enableCorsProxy;
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const targetUrl = useProxy ? `${proxyUrl}${normalizedUrl}` : normalizedUrl;
+    const html = response.text;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    let title = doc.querySelector('title')?.textContent || '';
+    if (!title) {
+      const headingElement = doc.querySelector('h1, .title');
+      title = headingElement?.textContent?.trim() || `Article from ${getDomain(url)}`;
+    }
+    title = title.replace(/[#"]/g, '').trim();
 
-      const response = await requestUrl({
-        url: targetUrl,
-        headers: useProxy ? {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'http://localhost'
-        } : {}
-      });
+    let content = this.contentExtractors.extractMainContent(doc, normalizedUrl);
+    const thumbnailUrl = this.contentExtractors.extractThumbnail(doc);
+    const author = this.contentExtractors.extractAuthor(doc);
+    const desc = this.contentExtractors.extractDescription(doc);
+    const publishTime = this.contentExtractors.extractPublishTime(doc);
+    const price = this.contentExtractors.extractPrice(doc);
+    const brand = this.contentExtractors.extractBrand(doc);
+    const rating = this.contentExtractors.extractRating(doc);
 
-      const html = response.text;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      let title = doc.querySelector('title')?.textContent || '';
-      if (!title) {
-        const headingElement = doc.querySelector('h1, .title');
-        title = headingElement?.textContent?.trim() || `Article from ${getDomain(url)}`;
-      }
-      title = title.replace(/[#"]/g, '').trim();
-
-
-      const content = this.contentExtractors.extractMainContent(doc, normalizedUrl);
-      const thumbnailUrl = this.contentExtractors.extractThumbnail(doc);
-      const author = this.contentExtractors.extractAuthor(doc);
-      const desc = this.contentExtractors.extractDescription(doc);
-      const publishTime = this.contentExtractors.extractPublishTime(doc);
-      const price = this.contentExtractors.extractPrice(doc);
-      const brand = this.contentExtractors.extractBrand(doc);
-      const rating = this.contentExtractors.extractRating(doc);
-
-      // Construct the base folder path using parent folder if specified
+    let folderPath;
+    if (customSaveLocation) {
+      folderPath = customSaveLocation;
+    } else if (category) {
       const baseFolderPath = this.settings.parentFolderPath 
         ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
         : this.settings.defaultFolderName;
-      
-      // Determine the final folder path based on category
-      const folderPath = category 
-        ? `${baseFolderPath}/${category}`
-        : baseFolderPath;
-
-      if (!this.app.vault.getFolderByPath(folderPath)) {
-        await this.app.vault.createFolder(folderPath);
-      }
-
-      const wordCount = content.split(/\s+/).length;
-      const readingTime = this.calculateReadingTime(wordCount);
-      const fileName = sanitizePath(`${title}.md`);
-      const filePath = `${folderPath}/${fileName}`;
-
-      await this.app.vault.create(filePath, this.generateFrontmatter(
-        title, url, publishTime, author, desc, readingTime, price, brand, rating, thumbnailUrl
-      ) + content);
-
-      await this.updateHomeView();
-      new Notice(`Successfully clipped ${title}`);
-
-    } catch (error) {
-      new Notice(`Clipping failed: ${error.message}`);
-      throw error;
+      folderPath = `${baseFolderPath}/${effectiveCategory}`;
+    } else {
+      folderPath = this.settings.parentFolderPath 
+        ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+        : this.settings.defaultFolderName;
     }
+
+    if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
+      await this.app.vault.createFolder(folderPath);
+    }
+
+    const wordCount = content.split(/\s+/).length;
+    const readingTime = this.calculateReadingTime(wordCount);
+
+    const frontmatter = this.generateFrontmatter(
+      title, url, publishTime, author, desc, readingTime, price, brand, rating, thumbnailUrl
+    );
+
+    const formattedContent = content.trim()
+      .split('\n')
+      .map(line => line.trim())
+      .join('\n');
+
+    const completeNote = `${frontmatter}\n${formattedContent}\n`;
+
+    let processedContent = completeNote;
+    if (this.geminiService && selectedPrompt) {
+      processedContent = await this.geminiService.processContent(
+        completeNote, 
+        selectedPrompt, 
+        selectedVariables,
+        keepOriginalContent
+      );
+      
+      const titleMatch = processedContent.match(/^---[\s\S]*?\ntitle: "([^"]+)"[\s\S]*?\n---/);
+      if (titleMatch && titleMatch[1]) {
+        title = titleMatch[1];
+      }
+    }
+
+    const fileName = sanitizePath(`${title}.md`);
+    const filePath = folderPath ? `${folderPath}/${fileName}` : fileName;
+
+    await this.app.vault.create(filePath, processedContent);
+    await this.updateHomeView();
+    new Notice(`Successfully clipped ${title}`);
+
+    return filePath;
   }
 
   private calculateReadingTime(wordCount: number): string {
@@ -247,7 +461,7 @@ export default class NetClipPlugin extends Plugin {
     return `---\n` +
       `title: "${title}"\n` +
       `source: "${url}"\n` +
-      (publishTime ? `published: ${publishTime}\n` : '') +
+      (publishTime ? `published: ${new Date(publishTime).toISOString().split('T')[0]}\n` : '') +
       (author ? `author: "${author}"\n` : '') +
       (desc ? `desc: "${desc}"\n` : '') +
       `readingTime: "${readingTime}min"\n` +
@@ -255,14 +469,14 @@ export default class NetClipPlugin extends Plugin {
       (brand ? `brand: "${brand}"\n` : '') +
       (rating ? `rating: "${rating}"\n` : '') +
       `---\n\n` +
-      (thumbnailUrl ? `![Thumbnail](${thumbnailUrl}?crossorigin=anonymous)\n\n` : '');
+      (thumbnailUrl ? `![Thumbnail](${thumbnailUrl})\n\n` : '');
   }
 
   public async updateHomeView() {
     const leaves = this.app.workspace.getLeavesOfType(CLIPPER_VIEW);
     for (const leaf of leaves) {
       const view = leaf.view;
-      if (view instanceof clipperHomeView) {
+      if (view instanceof ClipperHomeView) {
         const tabsContainer = view.containerEl.querySelector(".netclip_category_tabs");
         if (tabsContainer instanceof HTMLElement) {
           view.renderCategoryTabs(tabsContainer);
@@ -273,5 +487,88 @@ export default class NetClipPlugin extends Plugin {
         }
       }
     }
+  }
+
+  async processExistingNote(filePath: string, prompt: AIPrompt, variables: Record<string, string>): Promise<void> {
+    if (!this.geminiService) {
+      throw new Error("AI service not initialized");
+    }
+
+    const file = this.app.vault.getAbstractFileByPath(filePath);
+    if (!file || !(file instanceof TFile)) {
+      throw new Error("File not found");
+    }
+
+    const currentContent = await this.app.vault.read(file);
+    const processedContent = await this.geminiService.processContent(
+      currentContent,
+      prompt,
+      variables
+    );
+
+    await this.app.vault.modify(file, processedContent);
+    new Notice(`Successfully processed with ${prompt.name}`);
+  }
+
+
+  private getLinkUnderCursor(line: string, cursorPos: number): string | null {
+    const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+    
+    let match;
+
+    while ((match = mdLinkRegex.exec(line)) !== null) {
+        const linkStart = match.index;
+        const linkEnd = linkStart + match[0].length;
+        if (cursorPos >= linkStart && cursorPos <= linkEnd) {
+            return match[2];
+        }
+    }
+
+    while ((match = urlRegex.exec(line)) !== null) {
+        const linkStart = match.index;
+        const linkEnd = linkStart + match[0].length;
+        if (cursorPos >= linkStart && cursorPos <= linkEnd) {
+            return match[0];
+        }
+    }
+    
+    return null;
+  }
+
+
+  private replaceTabHome() {
+    const emptyLeaves = this.app.workspace.getLeavesOfType('empty');
+    if (emptyLeaves.length > 0) {
+      emptyLeaves.forEach(leaf => {
+        leaf.setViewState({
+          type: HOME_TAB_VIEW
+        });
+      });
+    }
+  }
+
+  
+  public activateHomeTab() {
+    const leaf = this.app.workspace.getLeaf('tab');
+    if (leaf) {
+      leaf.setViewState({
+        type: HOME_TAB_VIEW
+      });
+      this.app.workspace.revealLeaf(leaf);
+    }
+  }
+
+  public refreshHomeViews(): void {
+    this.app.workspace.getLeavesOfType(HOME_TAB_VIEW).forEach((leaf) => {
+        if (leaf.view instanceof HomeTabView) {
+            leaf.detach();
+            const newLeaf = this.app.workspace.getLeaf();
+            newLeaf.setViewState({
+                type: HOME_TAB_VIEW,
+                active: true
+            });
+        }
+    });
   }
 }
