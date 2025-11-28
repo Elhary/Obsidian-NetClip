@@ -17,6 +17,7 @@ export default class NetClipPlugin extends Plugin {
   seenItems: Set<string> = new Set();
   settings: NetClipSettings;
   public geminiService: GeminiService | null = null;
+  private originalWindowOpen?: typeof window.open;
 
   isNewContent(content: string): boolean {
     if (this.seenItems.has(content)) {
@@ -274,6 +275,45 @@ export default class NetClipPlugin extends Plugin {
       name: 'Open Home Tab',
       callback: () => this.activateHomeTab()
     });
+
+    this.registerGlobalLinkHandler();
+  }
+
+  onunload() {
+    if (this.originalWindowOpen) {
+      window.open = this.originalWindowOpen;
+      this.originalWindowOpen = undefined;
+    }
+  }
+
+  private registerGlobalLinkHandler() {
+    if (this.originalWindowOpen) {
+      return;
+    }
+
+    this.originalWindowOpen = window.open;
+
+    window.open = (url?: string | URL, target?: string, features?: string): WindowProxy | null => {
+      let urlString = '';
+
+      if (typeof url === 'string') {
+        urlString = url;
+      } else if (url instanceof URL) {
+        urlString = url.toString();
+      }
+
+      const isHttpLink = urlString.startsWith('http://') || urlString.startsWith('https://');
+      const shouldFallback = !urlString || (urlString === 'about:blank' && !!features) || !isHttpLink;
+
+      if (shouldFallback) {
+        return this.originalWindowOpen
+          ? this.originalWindowOpen.call(window, url as any, target, features)
+          : null;
+      }
+
+      new WebViewModal(this.app, urlString, this).open();
+      return null;
+    };
   }
 
 
