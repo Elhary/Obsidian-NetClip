@@ -61,6 +61,8 @@ export const TRANSLATIONS: Translations = {
         'enable_ad_blocking_desc': 'Block ads in web view',
         'private_mode': 'Private mode',
         'private_mode_desc': 'Block cookies, localStorage, and other tracking mechanisms (prevents saving browsing data)',
+        'enable_webview': 'Disable WebView',
+        'enable_webview_desc': 'Disable the WebView and related commands. Any open WebView windows will be closed.',
         'clipper': 'Clipper',
         'ai_prompts_tab': 'AI prompts',
         'view_position': 'View position',
@@ -81,6 +83,9 @@ export const TRANSLATIONS: Translations = {
         'category_exists': 'Category "{0}" already exists',
         'category_created': 'Category "{0}" created successfully',
         'category_deleted': 'Category "{0}" deleted successfully',
+        'moved_to_category': 'Moved to "{0}"',
+        'move_failed': 'Failed to move: {0}',
+        'already_in_category': 'Article is already in that category',
         'enter_icon_name': 'Enter icon name',
         'folder_not_found': 'Folder "{0}" not found.',
         'folder_exists': 'Folder "{0}" already exists.',
@@ -98,6 +103,9 @@ export const TRANSLATIONS: Translations = {
         'open_web': 'Open web view',
         'open_settings': 'Open settings',
         'add_clip': 'Add new clip',
+
+        'webview_disabled_notice': 'Web view is disabled in settings.',
+        'no_link_found': 'No link found under cursor',
 
         'current_icon': 'Current icon: {0}',
 
@@ -196,6 +204,8 @@ export const TRANSLATIONS: Translations = {
         'enable_ad_blocking_desc': 'ウェブビューで広告をブロック',
         'private_mode': 'プライベートモード',
         'private_mode_desc': 'Cookie、localStorage、その他の追跡メカニズムをブロック（閲覧データの保存を防止）',
+        'enable_webview': 'ウェブビューを無効にする',
+        'enable_webview_desc': 'WebView UI と関連するコマンドを無効にします。開いているウェブビューは閉じられます。',
         'clipper': 'クリッパー',
         'ai_prompts_tab': 'AI プロンプト',
         'view_position': 'ビュー位置',
@@ -216,6 +226,9 @@ export const TRANSLATIONS: Translations = {
         'category_exists': 'カテゴリ「{0}」はすでに存在します',
         'category_created': 'カテゴリ「{0}」が正常に作成されました',
         'category_deleted': 'カテゴリ「{0}」が正常に削除されました',
+        'moved_to_category': '「{0}」に移動しました',
+        'move_failed': '移動に失敗しました: {0}',
+        'already_in_category': '記事は既にそのカテゴリにあります',
         'enter_icon_name': 'アイコン名を入力',
         'folder_not_found': 'フォルダ「{0}」が見つかりません。',
         'folder_exists': 'フォルダ「{0}」はすでに存在します',
@@ -233,6 +246,9 @@ export const TRANSLATIONS: Translations = {
         'open_web': 'ウェブビューを開く',
         'open_settings': '設定を開く',
         'add_clip': '新規クリップを追加',
+
+        'webview_disabled_notice': '設定でウェブビューが無効になっています。',
+        'no_link_found': 'カーソル下にリンクが見つかりませんでした',
 
         'current_icon': '現在のアイコン: {0}',
 
