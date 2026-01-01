@@ -92,10 +92,20 @@ export class WebViewComponent {
             msg.appendChild(line1);
             return containerEl;
         }
-        const controlsEl = containerEl.createDiv('netClip_web_controls');
-        this.setupNavigationBtns(controlsEl);
-        this.setupSearchInput(controlsEl);
-        this.setupClipBtn(controlsEl);
+        if (this.plugin?.settings?.enableWebview !== false) {
+            const controlsEl = containerEl.createDiv('netClip_web_controls');
+            this.setupNavigationBtns(controlsEl);
+            this.setupSearchInput(controlsEl);
+            this.setupClipBtn(controlsEl);
+        } else {
+            const info = containerEl.createDiv('netclip-info-box');
+            const infoContent = info.createDiv('netclip-info-content');
+            const infoIcon = infoContent.createSpan('netclip-info-icon');
+            setIcon(infoIcon, 'eye-off');
+            const textSpan = infoContent.createSpan();
+            textSpan.setText('Web view controls are disabled in settings.');
+        }
+
         this.setupFrameContainer(containerEl);
         this.navigationHistory.push(this.url);
         this.currentHistoryIndex = 0;

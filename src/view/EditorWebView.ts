@@ -1,6 +1,8 @@
 import { ItemView, WorkspaceLeaf,  Notice, ViewStateResult } from 'obsidian';
 import WebClipperPlugin from '../main';
 import { WebViewComponent } from '../webViewComponent';
+import { t } from '../translations';
+import { CLIPPER_VIEW } from './ClipperView';
 
 export const VIEW_TYPE_WORKSPACE_WEBVIEW = 'netClip_workspace_webview';
 
@@ -40,6 +42,15 @@ export class WorkspaceLeafWebView extends ItemView {
         this.createWebViewComponent();
     }
 
+    private handleDisabledWebview(): void {
+        new Notice(t('webview_disabled_notice'));
+        try {
+            this.leaf.setViewState({ type: CLIPPER_VIEW });
+        } catch (e) {
+            try { this.leaf.detach(); } catch (err) {}
+        }
+    }
+
     async setState(state: any, result: ViewStateResult): Promise<void> {
         if (state?.url) {
             this.initialUrl = state.url;
@@ -49,6 +60,11 @@ export class WorkspaceLeafWebView extends ItemView {
     }
     
     private createWebViewComponent() {
+        if (!this.plugin.settings.enableWebview) {
+            this.handleDisabledWebview();
+            return;
+        }
+
         this.webViewComponent = new WebViewComponent(
             this.app, 
             this.initialUrl, 

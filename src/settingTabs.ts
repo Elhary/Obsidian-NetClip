@@ -437,6 +437,18 @@ export default class NetClipSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                   })
                );
+
+               new Setting(containerEl)
+                .setName(t('enable_webview'))
+                .setDesc(t('enable_webview_desc'))
+                .addToggle(toggle => toggle
+                   .setValue(this.plugin.settings.enableWebview)
+                   .onChange(async (value) => {
+                     await this.plugin.setWebviewEnabled(value);
+                     await this.plugin.refreshHomeViews();
+                     this.display();
+                   })
+                );
     }
 
 

@@ -10,6 +10,7 @@ import { GeminiService } from './services/gemini';
 import NetClipSettingTab from './settingTabs';
 import { Menu, Editor, MarkdownView } from 'obsidian';
 import { HOME_TAB_VIEW, HomeTabView } from './view/HomeTab';
+import { t } from './translations';
 
 export default class NetClipPlugin extends Plugin {
   private readonly DEMO_CATEGORIES = ['Articles', 'Research', 'Tech'];
@@ -147,37 +148,42 @@ export default class NetClipPlugin extends Plugin {
         }
 
         if (url) {
-          menu.addItem((item) => {
-            item
-              .setTitle("Open in WebView")
-              .setIcon("globe")
-              .onClick(async () => {
-                const leaf = this.app.workspace.getLeaf(true);
-                await leaf.setViewState({
-                  type: VIEW_TYPE_WORKSPACE_WEBVIEW,
-                  state: { url: url }
+          if (this.settings.enableWebview) {
+            menu.addItem((item) => {
+              item
+                .setTitle("Open in WebView")
+                .setIcon("globe")
+                .onClick(async () => {
+                  const leaf = this.app.workspace.getLeaf(true);
+                  await leaf.setViewState({
+                    type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                    state: { url: url }
+                  });
+                  this.app.workspace.revealLeaf(leaf);
                 });
-                this.app.workspace.revealLeaf(leaf);
-              });
-          });
+            });
 
-          menu.addItem((item) => {
-            item
-              .setTitle("Open in Modal WebView")
-              .setIcon("picture-in-picture-2")
-              .onClick(() => {
-                if (url) {
-                  new WebViewModal(this.app, url, this).open();
-                } else {
-                  new Notice('No valid URL found to open in WebView.');
-                }
-              });
-          });
+            menu.addItem((item) => {
+              item
+                .setTitle("Open in Modal WebView")
+                .setIcon("picture-in-picture-2")
+                .onClick(() => {
+                  if (url) {
+                    new WebViewModal(this.app, url, this).open();
+                  } else {
+                    new Notice('No valid URL found to open in WebView.');
+                  }
+                });
+            });
+          }
         }
       })
     );
 
-    this.app.workspace.onLayoutReady(() => this.initWebViewLeaf());
+    this.app.workspace.onLayoutReady(() => {
+      if (this.settings.enableWebview) this.initWebViewLeaf();
+    });
+
     this.contentExtractors = new ContentExtractors(this);
 
     this.addRibbonIcon('newspaper', 'NetClip', async () => this.activateView());
@@ -194,10 +200,15 @@ export default class NetClipPlugin extends Plugin {
       callback: () => new ClipModal(this.app, this).open()
     });
 
+    // Web-related commands are registered but they check the setting at runtime
     this.addCommand({
       id: 'open-web-editor',
       name: 'Open page on editor',
       callback: async () => {
+        if (!this.settings.enableWebview) {
+          new Notice(t('webview_disabled_notice'));
+          return;
+        }
         const leaf = this.app.workspace.getLeaf(true);
         await leaf.setViewState({ type: VIEW_TYPE_WORKSPACE_WEBVIEW, active: true });
         this.app.workspace.revealLeaf(leaf);
@@ -208,6 +219,10 @@ export default class NetClipPlugin extends Plugin {
       id: 'open-web-modal',
       name: 'Open page in modal',
       callback: () => {
+        if (!this.settings.enableWebview) {
+          new Notice(t('webview_disabled_notice'));
+          return;
+        }
         const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
         new WebViewModal(this.app, defaultUrl, this).open();
       }
@@ -217,6 +232,10 @@ export default class NetClipPlugin extends Plugin {
       id: 'open-link-in-webview',
       name: 'Open link under cursor in WebView',
       editorCallback: (editor: Editor) => {
+        if (!this.settings.enableWebview) {
+          new Notice(t('webview_disabled_notice'));
+          return;
+        }
         const cursor = editor.getCursor();
         const line = editor.getLine(cursor.line);
         const url = this.getLinkUnderCursor(line, cursor.ch);
@@ -229,7 +248,7 @@ export default class NetClipPlugin extends Plugin {
           });
           this.app.workspace.revealLeaf(leaf);
         } else {
-          new Notice('No link found under cursor');
+          new Notice(t('no_link_found'));
         }
       },
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'z' }]
@@ -239,6 +258,10 @@ export default class NetClipPlugin extends Plugin {
       id: 'open-link-in-modal-webview',
       name: 'Open link under cursor in Modal WebView',
       editorCallback: (editor: Editor) => {
+        if (!this.settings.enableWebview) {
+          new Notice(t('webview_disabled_notice'));
+          return;
+        }
         const cursor = editor.getCursor();
         const line = editor.getLine(cursor.line);
         const url = this.getLinkUnderCursor(line, cursor.ch);
@@ -246,11 +269,12 @@ export default class NetClipPlugin extends Plugin {
         if (url) {
           new WebViewModal(this.app, url, this).open();
         } else {
-          new Notice('No link found under cursor');
+          new Notice(t('no_link_found'));
         }
       },
       hotkeys: [{ modifiers: ['Ctrl', 'Alt'], key: 'z' }]
     });
+
 
     this.registerView(CLIPPER_VIEW, (leaf) => 
       new ClipperHomeView(leaf, this)
@@ -305,7 +329,8 @@ export default class NetClipPlugin extends Plugin {
       const isHttpLink = urlString.startsWith('http://') || urlString.startsWith('https://');
       const shouldFallback = !urlString || (urlString === 'about:blank' && !!features) || !isHttpLink;
 
-      if (shouldFallback) {
+      if (shouldFallback || !this.settings.enableWebview) {
+        // If webview is disabled, fallback to original window.open behavior
         return this.originalWindowOpen
           ? this.originalWindowOpen.call(window, url as any, target, features)
           : null;
@@ -611,4 +636,27 @@ export default class NetClipPlugin extends Plugin {
         }
     });
   }
+
+  // Toggle webview availability at runtime
+  public async setWebviewEnabled(enabled: boolean): Promise<void> {
+    this.settings.enableWebview = enabled;
+    await this.saveSettings();
+    if (!enabled) {
+      this.closeAllWebViewLeaves();
+    } else {
+      this.initWebViewLeaf();
+    }
+  }
+
+  public closeAllWebViewLeaves(): void {
+    const existingLeaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW);
+    for (const leaf of existingLeaves) {
+      try {
+        leaf.setViewState({ type: CLIPPER_VIEW, active: true });
+      } catch (e) {
+        try { leaf.detach(); } catch (err) {}
+      }
+    }
+  }
 }
+

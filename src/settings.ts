@@ -5,6 +5,7 @@ export interface NetClipSettings {
     defaultFolderName: string;
     parentFolderPath: string;
     defaultWebUrl: string;
+    enableWebview: boolean;
     searchEngine: 'google' | 'youtube' | 'bing' | 'perplexity' | 'duckduckgo' | 'genspark' | 'kagi';
     geminiModel: 'gemini-2.5-pro' | 'gemini-flash-latest' | 'gemini-flash-lite-latest' | 'gemini-2.5-flash-lite';
     categories: string[];
@@ -54,6 +55,7 @@ export const DEFAULT_SETTINGS: NetClipSettings = {
     defaultFolderName: 'NetClip',
     parentFolderPath: '',
     defaultWebUrl: 'https://google.com',
+    enableWebview: true,
     searchEngine: 'google',
     geminiModel: 'gemini-2.5-pro',
     categories: [],

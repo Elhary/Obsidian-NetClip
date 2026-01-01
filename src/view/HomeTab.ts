@@ -26,9 +26,11 @@ export class HomeTabView extends ItemView {
         this.shortcuts = this.plugin.settings.shortcuts || [];
         
 
-        this.addAction('globe', 'Open web view', (evt: MouseEvent) => {
-            this.openWebView();
-        })
+        if (this.plugin.settings.enableWebview) {
+            this.addAction('globe', 'Open web view', (evt: MouseEvent) => {
+                this.openWebView();
+            })
+        }
 
         this.addAction('newspaper', 'newspaper', (evt: MouseEvent) => {
             this.openCliperView();
@@ -84,7 +86,6 @@ export class HomeTabView extends ItemView {
         const container = this.containerEl.children[1];
         container.empty();
         
-        // Apply background image if set
         this.updateBackgroundImage();
 
         if(this.plugin.settings.showClock){
@@ -235,6 +236,14 @@ export class HomeTabView extends ItemView {
     }
 
     private openShortcut(shortcut: Shortcut) {
+        if (!this.plugin.settings.enableWebview) {
+            try {
+                window.open(shortcut.url);
+            } catch (e) {
+                new Notice(t('webview_disabled_notice'));
+            }
+            return;
+        }
         const leaf = this.app.workspace.getLeaf(true);
         leaf.setViewState({
             type: VIEW_TYPE_WORKSPACE_WEBVIEW,
@@ -482,6 +491,15 @@ export class HomeTabView extends ItemView {
                 searchUrl = `https://www.perplexity.ai/search?q=${encodeURIComponent(query)}`;
                 break;
         }
+
+        if (!this.plugin.settings.enableWebview) {
+            try {
+                window.open(searchUrl);
+            } catch (e) {
+                new Notice(t('webview_disabled_notice'));
+            }
+            return;
+        }
         
         const leaf = this.app.workspace.getLeaf(true);
         leaf.setViewState({
@@ -510,6 +528,15 @@ export class HomeTabView extends ItemView {
 
     private openWebView() {
         const defaultUrl = this.plugin.settings.defaultWebUrl || 'https://google.com';
+        if (!this.plugin.settings.enableWebview) {
+            try {
+                window.open(defaultUrl);
+            } catch (e) {
+                new Notice(t('webview_disabled_notice'));
+            }
+            return;
+        }
+
         const leaf = this.app.workspace.getLeaf(true);
         leaf.setViewState({
             type: VIEW_TYPE_WORKSPACE_WEBVIEW,

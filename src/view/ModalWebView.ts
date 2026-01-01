@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from 'obsidian';
 import { WebViewComponent } from '../webViewComponent';
 import WebClipperPlugin from '../main';
+import { t } from '../translations';
 
 
 export class WebViewModal extends Modal {
@@ -40,6 +41,11 @@ export class WebViewModal extends Modal {
     
     onOpen() {
         const { contentEl } = this;
+        if (!this.plugin.settings.enableWebview) {
+            new Notice(t('webview_disabled_notice'));
+            this.close();
+            return;
+        }
         const webViewContainer = this.webViewComponent.createContainer();
         contentEl.appendChild(webViewContainer);
     }
