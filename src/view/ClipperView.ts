@@ -16,6 +16,7 @@ export class ClipperHomeView extends ItemView {
     private plugin: NetClipPlugin;
     settings: any;
     private currentCategory: string = '';
+    private dragHelperInitialized: boolean = false;
     icon = 'newspaper';
 
     constructor(leaf: WorkspaceLeaf, plugin: NetClipPlugin) {
@@ -46,10 +47,39 @@ export class ClipperHomeView extends ItemView {
         const clipperHeader = clipperContainer.createEl('div', { cls: 'net_clipper_header' });
         const rightContainer = clipperHeader.createEl('div', { cls: 'net_clipper_header_right' });
 
-        const openWeb = rightContainer.createEl('span', { cls: 'netopen_Web', attr: { 'aria-label': t('open_web') } });
         const openSettings = rightContainer.createEl('span', { cls: 'netopen_settings', attr: { 'aria-label': t('open_settings') } });
-        setIcon(openWeb, 'globe')
         setIcon(openSettings, 'lucide-bolt');
+
+        if (this.settings.enableWebview) {
+            const openWeb = rightContainer.createEl('span', { cls: 'netopen_Web', attr: { 'aria-label': t('open_web') } });
+            setIcon(openWeb, 'globe');
+
+            openWeb.addEventListener('click', async () => {
+                if (!this.settings.enableWebview) {
+                    new Notice(t('webview_disabled_notice'));
+                    return;
+                }
+
+                const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
+                const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW)
+                    .find((leaf: any) => {
+                        const view = leaf.view as WorkspaceLeafWebView;
+                        return view.url === defaultUrl;
+                    });
+
+                if (existingLeaf) {
+                    this.app.workspace.setActiveLeaf(existingLeaf, { focus: true });
+                } else {
+                    const leaf = this.app.workspace.getLeaf(true);
+                    await leaf.setViewState({
+                        type: VIEW_TYPE_WORKSPACE_WEBVIEW,
+                        state: { url: defaultUrl }
+                    });
+
+                    this.app.workspace.setActiveLeaf(leaf, { focus: true });
+                }
+            });
+        }
 
         const searchBoxContainer = clipperContainer.createEl('div', { cls: 'netclip_search_box' });
         const searchIcon = searchBoxContainer.createEl('span', { cls: 'netclip_search_icon' });
@@ -165,27 +195,6 @@ export class ClipperHomeView extends ItemView {
 
         const SavedContentBox = clipperContainer.createEl("div", { cls: "netclip_saved_container" });
 
-        openWeb.addEventListener('click', async () => {
-            const defaultUrl = this.settings.defaultWebUrl || 'https://google.com';
-            const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKSPACE_WEBVIEW)
-                .find((leaf: any) => {
-                    const view = leaf.view as WorkspaceLeafWebView;
-                    return view.url === defaultUrl;
-                });
-
-            if (existingLeaf) {
-                this.app.workspace.setActiveLeaf(existingLeaf, { focus: true });
-            } else {
-                const leaf = this.app.workspace.getLeaf(true);
-                await leaf.setViewState({
-                    type: VIEW_TYPE_WORKSPACE_WEBVIEW,
-                    state: { url: defaultUrl }
-                });
-
-                this.app.workspace.setActiveLeaf(leaf, { focus: true });
-            }
-        });
-        
         openSettings.addEventListener('click', () => {
             (this.app as any).setting.open();
             (this.app as any).setting.openTabById(this.plugin.manifest.id);
@@ -218,7 +227,79 @@ export class ClipperHomeView extends ItemView {
         const allTabContent = allTab.createEl('div', { cls: 'netclip-category-content' });
         allTabContent.createEl('span', { text: t('all') });
 
+        allTab.dataset.category = '';
         allTab.addEventListener('click', () => this.switchCategory('', tabsContainer));
+        allTab.addEventListener('dragover', (e: DragEvent) => { e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'; allTab.classList.add('drag-over'); const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null; if (h) { const action = h.querySelector('.netclip-drag-action') as HTMLElement | null; if (action) action.textContent = `Move to "${t('all')}"`; } });
+        allTab.addEventListener('dragleave', () => { allTab.classList.remove('drag-over'); const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null; if (h) { const action = h.querySelector('.netclip-drag-action') as HTMLElement | null; if (action) action.textContent = 'Move'; } });
+        allTab.addEventListener('drop', async (e: DragEvent) => {
+            e.preventDefault();
+            allTab.classList.remove('drag-over');
+            const path = e.dataTransfer?.getData('text/plain');
+            if (!path) return;
+            const file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
+            if (!file || !(file as TFile).path) return;
+
+            const baseFolderPath = this.settings.parentFolderPath 
+                ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+                : this.settings.defaultFolderName;
+
+            const destFolder = `${baseFolderPath}`;
+            try {
+                if (!this.app.vault.getAbstractFileByPath(destFolder)) {
+                    await this.app.vault.createFolder(destFolder);
+                }
+                const newPath = `${destFolder}/${(file as TFile).name}`;
+                if (file.path === newPath) {
+                    new Notice(t('already_in_category'));
+                    return;
+                }
+                await this.app.fileManager.renameFile(file as any, newPath);
+                new Notice(t('moved_to_category').replace('{0}', t('all')));
+
+                const savedContainer = this.containerEl.querySelector('.netclip_saved_container') as HTMLElement;
+                await this.renderSavedContent(savedContainer);
+                this.renderCategoryTabs(tabsContainer);
+            } catch (error) {
+                new Notice(t('move_failed').replace('{0}', String(error)));
+            }
+        });
+
+        if (!this.dragHelperInitialized) {
+            this.dragHelperInitialized = true;
+            const dragHelper = document.createElement('div');
+            dragHelper.className = 'netclip-drag-helper';
+            dragHelper.style.display = 'none';
+            document.body.appendChild(dragHelper);
+
+            const onDocDragOver = (e: DragEvent) => {
+                try {
+                    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                } catch (err) {}
+                const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (h) {
+                    h.style.display = 'block';
+                    h.style.left = (e.clientX + 16) + 'px';
+                    h.style.top = (e.clientY + 16) + 'px';
+                }
+            };
+
+            const onDocDragEnd = () => {
+                const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (h) { h.style.display = 'none'; h.textContent = '' }
+                document.body.classList.remove('netclip-dragging');
+            };
+
+            document.addEventListener('dragover', onDocDragOver);
+            document.addEventListener('dragend', onDocDragEnd);
+            document.addEventListener('dragleave', (e) => {
+                // hide when leaving window
+                if ((e as any).relatedTarget == null) {
+                    const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                    if (h) { h.style.display = 'none'; h.textContent = '' }
+                    document.body.classList.remove('netclip-dragging');
+                }
+            });
+        }
 
         this.plugin.settings.categories.forEach(category => {
             const tab = tabsContainer.createEl('div', {
@@ -234,8 +315,99 @@ export class ClipperHomeView extends ItemView {
             
             tabContent.createEl('span', { text: category });
             
+
+            tab.dataset.category = category;
             tab.addEventListener('click', () => this.switchCategory(category, tabsContainer));
+            tab.addEventListener('dragover', (e: DragEvent) => { 
+                e.preventDefault(); 
+                try { if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'; } catch (err) {}
+                tab.classList.add('drag-over'); 
+                const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (h) {
+                    const action = h.querySelector('.netclip-drag-action') as HTMLElement | null;
+                    if (action) action.textContent = `Move to "${category}"`;
+                }
+            });
+            tab.addEventListener('dragleave', () => { 
+                tab.classList.remove('drag-over');
+                const h = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (h) {
+                    const action = h.querySelector('.netclip-drag-action') as HTMLElement | null;
+                    if (action) action.textContent = 'Move';
+                }
+            });
+            tab.addEventListener('drop', async (e: DragEvent) => {
+                e.preventDefault();
+                tab.classList.remove('drag-over');
+                const path = e.dataTransfer?.getData('text/plain');
+                if (!path) return;
+                const file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
+                if (!file || !(file as TFile).path) return;
+
+                const baseFolderPath = this.settings.parentFolderPath 
+                    ? `${this.settings.parentFolderPath}/${this.settings.defaultFolderName}`
+                    : this.settings.defaultFolderName;
+
+                const destFolder = `${baseFolderPath}/${category}`;
+                try {
+                    if (!this.app.vault.getAbstractFileByPath(destFolder)) {
+                        await this.app.vault.createFolder(destFolder);
+                    }
+                    const newPath = `${destFolder}/${(file as TFile).name}`;
+                    if (file.path === newPath) {
+                        new Notice(t('already_in_category'));
+                        return;
+                    }
+                    await this.app.fileManager.renameFile(file as any, newPath);
+                    new Notice(t('moved_to_category').replace('{0}', category));
+
+                    const savedContainer = this.containerEl.querySelector('.netclip_saved_container') as HTMLElement;
+                    await this.renderSavedContent(savedContainer);
+                    this.renderCategoryTabs(tabsContainer);
+                } catch (error) {
+                    new Notice(t('move_failed').replace('{0}', String(error)));
+                }
+            });
         })
+
+        // allow vertical wheel to scroll horizontally when hovering
+        tabsContainer.addEventListener('wheel', (e: WheelEvent) => {
+            if (Math.abs(e.deltaY) === 0) return;
+            e.preventDefault();
+            tabsContainer.scrollLeft += e.deltaY;
+        }, { passive: false });
+
+    
+        tabsContainer.tabIndex = 0;
+        tabsContainer.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight') tabsContainer.scrollLeft += 120;
+            if (e.key === 'ArrowLeft') tabsContainer.scrollLeft -= 120;
+        });
+
+        let isDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        tabsContainer.addEventListener('mousedown', (e: MouseEvent) => {
+            isDown = true;
+            tabsContainer.classList.add('dragging');
+            startX = e.pageX - tabsContainer.getBoundingClientRect().left;
+            scrollLeft = tabsContainer.scrollLeft;
+        });
+        tabsContainer.addEventListener('mouseleave', () => {
+            isDown = false;
+            tabsContainer.classList.remove('dragging');
+        });
+        tabsContainer.addEventListener('mouseup', () => {
+            isDown = false;
+            tabsContainer.classList.remove('dragging');
+        });
+        tabsContainer.addEventListener('mousemove', (e: MouseEvent) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - tabsContainer.getBoundingClientRect().left;
+            const walk = (x - startX) * 1.5;
+            tabsContainer.scrollLeft = scrollLeft - walk;
+        });
     }
 
     private async switchCategory(category: string, tabsContainer: HTMLElement) {
@@ -312,6 +484,40 @@ export class ClipperHomeView extends ItemView {
         for (const file of sortedFiles) {
             const content = await this.app.vault.cachedRead(file);
             const clippedEl = container.createEl('div', { cls: 'netClip_card' });
+            // make the card draggable to move between categories
+            clippedEl.setAttribute('draggable', 'true');
+            clippedEl.dataset.path = file.path;
+            clippedEl.addEventListener('dragstart', (e: DragEvent) => {
+                const dt = e.dataTransfer;
+                if (dt) {
+                    dt.setData('text/plain', file.path);
+                    dt.effectAllowed = 'move';
+                    try {
+                        const img = new Image();
+                        img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                        dt.setDragImage(img, 0, 0);
+                    } catch (err) {
+                       
+                    }
+                }
+
+                const helper = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (helper) {
+                    const thumb = clippedEl.dataset.thumbnail || '';
+                    const title = clippedEl.dataset.title || file.basename;
+                    helper.innerHTML = `<img class="netclip-drag-thumb" src="${thumb}" alt=""/><div class="netclip-drag-info"><div class="netclip-drag-title">${title}</div><div class="netclip-drag-action">Move</div></div>`;
+                    helper.style.display = 'block';
+                }
+
+                clippedEl.classList.add('dragging-card');
+                document.body.classList.add('netclip-dragging');
+            });
+            clippedEl.addEventListener('dragend', () => {
+                clippedEl.classList.remove('dragging-card');
+                document.body.classList.remove('netclip-dragging');
+                const helper = document.querySelector('.netclip-drag-helper') as HTMLElement | null;
+                if (helper) { helper.style.display = 'none'; helper.innerHTML = ''; }
+            });
 
             if (this.settings.cardDisplay.showThumbnail) {
                 const frontmatterMatch = content.match(/^---[\s\S]*?thumbnail: "([^"]+)"[\s\S]*?---/);
@@ -332,6 +538,9 @@ export class ClipperHomeView extends ItemView {
                         loading: "lazy"
                     } 
                 });
+
+                clippedEl.dataset.thumbnail = (thumbnailUrl || DEFAULT_IMAGE) as string;
+                clippedEl.dataset.title = file.basename; 
             }
 
             const contentContainer = clippedEl.createEl('div', { cls: 'netclip_card_content' });
